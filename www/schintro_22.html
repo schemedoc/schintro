@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.45
-     from schintro.txi on 23 January 1997 -->
+     from schintro.txi on 19 Febuary 1997 -->
 
 <TITLE>An Introduction to Scheme and its Implementation - and and or</TITLE>
 </HEAD>
@@ -72,6 +72,42 @@ If none of them returns anything but <CODE>#f</CODE>, it returns <CODE>#f</CODE>
 
 </P>
 
+
+<H4><A NAME="SEC23" HREF="schintro_toc.html#SEC23"><CODE>not</CODE> is just a procedure</A></H4>
+
+<P>
+<CODE>not</CODE> is a procedure that takes one argument, which may be
+any kind of Scheme value, and returns <CODE>#t</CODE> or <CODE>#f</CODE>.  If
+the argument value is #f (the unique false object), it returns
+<CODE>#t</CODE>, and otherwise returns <CODE>#f</CODE>.  That is, all values
+count as true except for the false object--just as in a conditional.
+For example, <CODE>(not 0)</CODE> returns <CODE>#f</CODE>.
+
+</P>
+<P>
+Given that <CODE>and</CODE> and <CODE>or</CODE> are special forms, you might
+think that the logical <CODE>not</CODE> operator is a special form
+as well.  It isn't.  It's just a procedure--in particular, a
+predicate.
+
+</P>
+<P>
+This makes sense because <CODE>not</CODE> always evaluates its (one) argument,
+and returns a value.  It doesn't treat any arguments specially--it's
+just a normal first-class procedure, whose argument is evaluated
+in the usual way before the procedure is actually called.
+
+</P>
+<P>
+In general, operations that can be procedures <EM>are</EM> procedures.
+Scheme only has special forms for things that are actually special,
+and need their arguments treated differently from arguments to
+procedure calls.  (Even Scheme's most powerful control construct,
+<CODE>call-with-current-continuation</CODE>, is just a first-class
+procedure.)
+
+</P>
+
 <PRE>
 ==================================================================
 This is the end of Hunk A.
@@ -85,7 +121,7 @@ Then return here and resume this chapter.
 </PRE>
 
 <P>
-(Go to Hunk B, which starts at section <A HREF="schintro_80.html#SEC85">An Interactive Programming Environment  (Hunk B)</A>.)
+(Go to Hunk B, which starts at section <A HREF="schintro_80.html#SEC86">An Interactive Programming Environment  (Hunk B)</A>.)
 
 </P>
 <HR>

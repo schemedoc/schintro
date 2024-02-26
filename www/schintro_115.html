@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.45
-     from schintro.txi on 23 January 1997 -->
+     from schintro.txi on 19 Febuary 1997 -->
 
 <TITLE>An Introduction to Scheme and its Implementation - The Reader</TITLE>
 </HEAD>
@@ -10,7 +10,7 @@ Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_114.html">previ
 <HR>
 
 
-<H3><A NAME="SEC134" HREF="schintro_toc.html#SEC134">The Reader</A></H3>
+<H3><A NAME="SEC135" HREF="schintro_toc.html#SEC135">The Reader</A></H3>
 
 <P>
 <A NAME="IDX124"></A>
@@ -61,7 +61,7 @@ of things.
 </P>
 
 
-<H4><A NAME="SEC135" HREF="schintro_toc.html#SEC135">Implementing <CODE>read</CODE></A></H4>
+<H4><A NAME="SEC136" HREF="schintro_toc.html#SEC136">Implementing <CODE>read</CODE></A></H4>
 
 <P>
 <CODE>read</CODE> uses recursion to construct nested data structures while
@@ -95,9 +95,29 @@ lists.)
 
 </P>
 <P>
+<A NAME="IDX126"></A>
+
+</P>
+<P>
+(Generally, s-expressions are tree-structured (acyclic)
+data structures consisting of things that Scheme knows how to
+read and write--symbols, numbers, string and character literals,
+booleans, and lists or vectors of s-expressions.  Sometimes
+the term is used even more broadly, to include almost any
+kind of Scheme data structure, but usually we use the term
+s-expression to refer to something that has a standard textual
+representation, which can be read to create a standard data
+structure.) 
+
+</P>
+<P>
 The traditional term <EM>s-expression</EM> is very unfortunate.
-Technically an <EM>expression</EM> is a piece of a program,
-independent of how it's represented.  An <EM>s-expression</EM>
+Technically an <EM>expression</EM> is a piece of a program, which
+can be evaluated to yield a Scheme value.
+
+</P>
+<P>
+An <EM>s-expression</EM>
 isn't really an expression at all--it's just a <EM>data
 structure</EM>, which we can <EM>choose</EM> to use as a representation
 of an expression in a program, or
@@ -112,9 +132,10 @@ to <CODE>eval</CODE> for evaluation.
 
 </P>
 <P>
-I'll show a slightly oversimplified version of <CODE>read</CODE>, called
+I'll show a slightly oversimplified version of <CODE>read</CODE>, which
+we'll call
 <CODE>micro-read</CODE>.  The main simplifications are that <CODE>micro-read</CODE>
-only handles a few basic types--symbols, positive integers, and
+only handles a few basic types--symbols, nonnegative integers, and
 lists--and we've left out most error-checking code.  We assume that
 what we're reading is a legal textual representation of a Scheme data
 structure.  We also haven't dealt with reading from files, instead of
@@ -122,8 +143,8 @@ the standard input, or what to do when reaching the end of a file.
 
 </P>
 <P>
-<A NAME="IDX126"></A>
 <A NAME="IDX127"></A>
+<A NAME="IDX128"></A>
 
 </P>
 <P>
@@ -136,7 +157,7 @@ may describe complex data structures.
 
 </P>
 <P>
-For example the following input character sequence
+For example, the following input character sequence
 
 <PRE>
   (foo 1 (a "bar"))
@@ -193,7 +214,7 @@ parenthesis character, and right parenthesis character, respectively.)
 
 </P>
 <P>
-<A NAME="IDX128"></A>
+<A NAME="IDX129"></A>
 
 </P>
 
@@ -202,21 +223,21 @@ parenthesis character, and right parenthesis character, respectively.)
 (define (read-token)
    (let ((first-char (read-char)))
       (cond ;; if first-char is a space or line break, just skip it
-            ;; by calling self recursively
-            ((whitespace? first-char)
-             (micro-read))
-            ;; else if it's a left paren, return the special
-            ;; object that represents left parenthesis tokens
+            ;; and loop to try again by calling self recursively
+            ((char-whitespace? first-char)
+             (read-token))
+            ;; else if it's a left paren char, return the special
+            ;; object that we use to represent left parenthesis tokens.
             ((eq? first-char #\( )
-             '*left-paren-token*)
+             left-paren-token)
             ;; likewise for right parens
             ((eq? first-char #\) )
-             '*right-paren-token*)
+             right-paren-token)
             ;; else if it's a letter, we assume it's the first char
-            ;; of a symbol and call read-symbol to read the rest of
-            ;; the chars in the symbol and return a symbol object
+            ;; of a symbol and call read-identifier to read the rest of
+            ;; of the chars in the identifier and return a symbol object
             ((char-alphabetic? first-char)
-             (read-symbol first-char))
+             (read-identifier first-char))
             ;; else if it's a digit, we assume it's the first digit
             ;; of a number and call read-number to read the rest of
             ;; the number and return a number object
@@ -230,7 +251,7 @@ parenthesis character, and right parenthesis character, respectively.)
 
 <P>
 <EM>[ see handout with discussion of lexical analysis, state
-        machines, etc. ]</EM>
+        machines, etc. ]</EM> 
 
 </P>
 <P>
@@ -244,49 +265,134 @@ sequences like <CODE>122</CODE> as the obvious Scheme number objects.
 
 </P>
 <P>
+<CODE>read-token</CODE> also uses some helper predicates
+that we define ourselves.  <CODE>char-whitespace?</CODE> checks
+whether a character is a whitespace character--either a
+space or a newline.  For this, we use the literal
+representation of the space character object and the
+newline character object, which are written <CODE>#\space</CODE>
+and <CODE>#\newline</CODE>.  Here's the code:
+
+</P>
+
+<PRE>
+;;; whitespace? checks whether char is either space or newline
+(define (char-whitespace? char)
+  (or (eq? char #\space)
+      (eq? char #\newline)))
+</PRE>
+
+<P>
+<CODE>read-token</CODE> uses several helper procedures, some
+of which are standard Scheme procedures.  <CODE>char-numeric?</CODE>
+is a predicate that tests a character object to see whether
+the character it represents is a digit.  <CODE>char-alphabetic?</CODE>
+likewise tests a character to see whether it represents a letter
+a through z or A through Z.
+ 
 We represent left and right parenthesis tokens specially, because
 there's not an obvious Scheme object to represent them.  (We could
 use the Scheme left and right parenthesis <EM>character</EM> objects,
 but that could cause trouble if we add the ability to read
-character literals.  For now, we'll just use the Scheme symbol
-objects <CODE>*left-parenthesis-token*</CODE> and
-<CODE>*right-parenthesis-token*</CODE>, which is tacky but good enough
-for this example code.
+character literals--we'd like to have unique objects that
+can't be confused with anything else that <CODE>read-token</CODE>
+might return.
 
 </P>
 <P>
+To create unique objects to represent these
+tokens, we'll use a special trick--we'll call <CODE>list</CODE> to create
+lists, which ensure's they'll be distinct from any other objects
+that might be returned by <CODE>read-token</CODE>.
+
+</P>
+<P>
+(define left-paren-token (list '*left-parenthesis-token*))
+(define right-paren-token (list '*right-parenthesis-token*))
+
+</P>
+<P>
+Now we can use these particular list objects as the special
+objects to represent left and right parentheses.  We can
+refer to them by the names <CODE>left-parenthesis-token</CODE> and
+<CODE>right-parenthesis-token</CODE>, because they're the values
+of those variables.
+
+</P>
+<P>
+We can check to see if an object is one of these tokens by comparing
+it against that object using <CODE>eq?</CODE>.  Notice that these values
+can't be confused with anything else that <CODE>read-token</CODE> might
+return, for two reasons.  The first is that read-token never
+returns a list.  Even if it could, though, they'd still be
+distinct values, because it'd never return these same lists. 
+
+</P>
+
+<PRE>
+(define (left-parenthesis-token? thing)
+   (eq? thing left-parenthesis-token))
+(define (right-parenthesis-token thing)
+   (eq? thing right-parenthesis-token))
+</PRE>
+
+<P>
+   
 <EM>[ see handout with complete code for the little lexer and
         reader ]</EM>
         
 So that you can use any number of whitespace characters between
 tokens, <CODE>read-token</CODE> skips any whitespace that occurs
-at the beginning of the input.   
-
-</P>
-<P>
-The helper routines for reading particular kinds of tokens
-are <EM>[see handout for actual code]</EM>:
+at the beginning of the input.
 
 </P>
 
 <UL>
-<LI><CODE>read-symbol</CODE>.
+<LI><CODE>read-identifier</CODE>.
 
 If the character we read is a letter, we're reading a symbol, so we call
-<CODE>read-symbol</CODE> to finish reading it.  (We pass it the character we
+<CODE>read-identifier</CODE> to finish reading it.  (We pass it the character we
 read, since it's the first character of the symbol's print name.)  
-<CODE>read-symbol</CODE> (not shown) just reads through more characters,
+<CODE>read-identifier</CODE> just reads through more characters,
 saving them until it hits a character that can't be part of an
 identifier, e.g., whitespace or a parenthesis.
 
 Once it has read the characters that make up the symbol printname,
-<CODE>read-symbol</CODE> must obtain a pointer to the unique symbol
+<CODE>read-identifier</CODE> must obtain a pointer to the unique symbol
 object with that name;  if there isn't one, it must be created.
 
-<EM>[put code here]</EM>
+Here's the code:
+
+
+<PRE>
+;;; read-identifier reads an identifier and returns a symbol
+;;; to represent it
+(define (read-identifier chr)
+
+  ;; read-identifier-helper reads in one character a time and puts it into
+  ;; a list. If it finds the character is a finishing character, then
+  ;; it reverses the list and returns.
+  
+  (define (read-identifier-helper list-so-far)
+    (let ((next-char (peek-char)))
+      ;; if next-char is a letter or a digit then call self recursively
+      (if (or (char-alphabetic? next-char)
+              (char-numeric? next-char))
+          (read-identifier-helper (cons (read-char) list-so-far))
+          ;; else return list we've read, reversing it into proper order
+          (reverse list-so-far))))
+          
+  ;; call read-identifier-helper to accumulate the characters in the
+  ;; identifier, then convert that to a string object and convert *that*
+  ;; to a symbol object.
+  ;; Note that string-&#62;symbol ensures that only one symbol with a given
+  ;; printname string is ever constructed, so there are no duplicates.
+  
+  (string-&#62;symbol (list-&#62;string (read-identifier-helper (list chr)))))
+</PRE>
 
 When it finishes reading the whole print name of the symbol, 
-<CODE>read-symbol</CODE> passes the list of characters to the built-in Scheme
+<CODE>read-identifier</CODE> passes the list of characters to the built-in Scheme
 procedure <CODE>list-&#62;string</CODE> to create a Scheme string object with that
 sequence of characters.  Then it passes that string object to the built-in
 Scheme procedure <CODE>string-&#62;symbol</CODE>.
@@ -297,11 +403,11 @@ already a symbol with that printname.  If so, it just returns a pointer to it.
 and always returns the same symbol for a string with the same sequence of
 characters.)  If a symbol with that printname doesn't exist, it constructs
 a symbol by that name, adds it to the table, and returns a pointer to that.
-(<CODE>string-&#62;symbol</CODE> ensures that there is only ever one symbol with a given
-printname.)
+(<CODE>string-&#62;symbol</CODE> ensures that there is only ever one symbol with a
+given printname.)
 
 Either way, the pointer to the unique symbol with that name is returned as
-the value from <CODE>read-symbol</CODE>.
+the value from <CODE>read-identifier</CODE>.
 
 <LI>
 
@@ -315,18 +421,34 @@ can't be part of a number.  (For our simple little subset, that's anything
 that's not a digit.)  
 
 Then it passes this list to the standard Scheme procedure <CODE>list-&#62;string</CODE>,
-which returns a Scheme string object with that sequence of characters.  That's
-passed in turn to <CODE>string-&#62;number</CODE>, which returns a Scheme number object
-that represents the corresponding number.
+which returns a Scheme string object with that sequence of characters.
+That's passed in turn to <CODE>string-&#62;number</CODE>, which returns a Scheme
+number object that represents the corresponding number.
 </UL>
 
-<P>
-<EM>[put actual code from micrread.scm here?]</EM>
 
-</P>
+<PRE>
+;;; read-number reads a sequence of digits and constructs a Scheme number
+;;; object to represent it.  Given the first character, it reads one
+;;; char at a t time and checks to see if it's a digit.  If so, it
+;;; conses it onto a list of numbers read so far.  Otherwise, it
+;;; reverses the list of digits, converts it to a string, and converts
+;;; that to a Scheme number object.                           
+(define (read-number chr)
+  (define (read-number-helper list-so-far)
+    (let ((next-char (peek-char)))
+      ;; if next-char is a digit then call self resursively
+      (if (char-numeric? next-char)
+          (read-number-helper (cons (read-char) list-so-far))
+          ;; else return the list we've read, reversing into proper order
+          (reverse list-so-far))))
+  ;; read the string of digits, convert to string, convert to number
+  (string-&#62;number (list-&#62;string (read-number-helper (list chr)))))
+</PRE>
 
 
-<H4><A NAME="SEC136" HREF="schintro_toc.html#SEC136">Implementing the <CODE>read</CODE> procedure</A></H4>
+
+<H4><A NAME="SEC137" HREF="schintro_toc.html#SEC137">Implementing the <CODE>read</CODE> procedure</A></H4>
 
 <P>
 Given <CODE>read-token</CODE>, it's easy to implement <CODE>read</CODE>.
@@ -349,36 +471,22 @@ we'll call our simplified version <CODE>micro-read</CODE>.
 ;;; Simplified version of read for subset of Scheme s-expression syntax
 (define (micro-read)
    (let ((next-token (read-token))
-      (cond ((eq? next-token '*left-parenthesis-token*)
+      (cond ((token-leftpar? next-token)
              (read-list '()))
             (else
              next-token))))
 </PRE>
 
-<P>
-           
-Here's a slightly oversimplified version of <CODE>read-list</CODE>,
-(The main oversimplification is that we don't check for illegal
-syntax, like extra closing parentheses.)
-
-</P>
-<P>
-<EM>The following code is off the top of my head.  Zhu Qing has
-a nice working version... get it.</EM>
-
-</P>
 
 <PRE>
 (define (read-list list-so-far)
-   (let ((next-item (read-token)))
-      (cond ;; if we hit a right parenthesis, return the list we've read,
-            ;; reversing it into proper order
-            ((eq? next-token '*right-parenthesis-token*)                 
+   (let ((token (micro-read-token)))        
+      (cond ((token-rightpar? token)
              (reverse list-so-far))
-            ;; otherwise, read next item and call self recursively
-            ;; to read rest of list
-            (else                                                  
-             (read-list (cons next-token list-so-far))))))
+            ((token-leftpar? token)
+             (read-list (cons (read-list '()) list-so-far)))
+            (else
+             (read-list (cons token list-so-far))))))
 </PRE>
 
 <P>
@@ -396,11 +504,10 @@ we pass the empty list, because we've read zero elements so far.)
 
 </P>
 <P>
-This constructs a list that's
-backwards, because we push later elements onto the <EM>front</EM> of the
-list.   When we hit a right parenthesis and end a recursive call, we
-reverse the backwards list we've accumulated, to put it in the proper
-order, and return that. 
+This constructs a list that's backwards, because we push later elements
+onto the <EM>front</EM> of the list.   When we hit a right parenthesis
+and end a recursive call, we reverse the backwards list we've accumulated, 
+to put it in the proper order, and return that. 
 
 </P>
 <P>
@@ -412,12 +519,19 @@ recursion between <CODE>micro-read</CODE> and <CODE>read-list</CODE> is the
 key to the structure of the reader.
 
 </P>
+<P>
+This recursion is the interesting recursion--the mutual recursion
+between <CODE>micro-read</CODE> and <CODE>read-list</CODE> is what
+makes it possible for <CODE>micro-read</CODE> to read arbitrary
+data structures.
+
+</P>
 
 
-<H4><A NAME="SEC137" HREF="schintro_toc.html#SEC137">Comments on the Reader</A></H4>
+<H4><A NAME="SEC138" HREF="schintro_toc.html#SEC138">Comments on the Reader</A></H4>
 
 <P>
-<A NAME="IDX129"></A>
+<A NAME="IDX130"></A>
 
 </P>
 <P>
@@ -436,25 +550,26 @@ a matching right parenthesis.)<A NAME="FOOT7" HREF="schintro_foot.html#FOOT7">(7
 </P>
 <P>
 The reader converts a linear sequence of characters into a simple
-<EM>parse tree</EM>.  
+<EM>parse tree</EM>.  A parse tree represents the syntactic structure
+(phrase groupings) of a sequence of characters.
 
 </P>
 <P>
 (If you're familiar with standard compiler terminology, you should
 recognize that <CODE>read-token</CODE> performs <EM>lexical analysis</EM>
 (a.k.a. scanning or tokenization) using <CODE>read-string</CODE>,
-<CODE>read-symbol</CODE>, and <CODE>read-number</CODE>.  <CODE>read</CODE> performs simple
-<EM>predictive</EM> recursive-descent ("top down") parsing via the
+<CODE>read-identifier</CODE>, and <CODE>read-number</CODE>.  <CODE>read</CODE> performs
+simple <EM>predictive</EM> recursive-descent ("top down") parsing via the
 mutual recursion of <CODE>read</CODE> and <CODE>read-list</CODE>.)
 
 </P>
 <P>
 Unlike most parsers, the data structure <CODE>read</CODE> generates is a data
-structure in the Scheme language, rather than a data structure internal
-to a compiler or interpreter.  This is one of the nice things about
-Scheme--there's a simple but flexible parser you can use in your own
-programs.  You can use it for parsing normal data as well as to
-help parse programs.
+structure in the Scheme language--an s-expression--rather than a data
+structure internal to a compiler or interpreter.  This is one of the
+nice things about Scheme;  there's a simple but flexible parser you can
+use in your own programs.  You can use it for parsing normal data as well
+as to help parse programs.
 
 </P>
 <P>
@@ -465,9 +580,8 @@ interpretation or compilation, in a very straightforward way.  The reader
 only recognizes nesting of expressions, and basic syntactic distinctions
 between tokens, e.g., whether they are parentheses, identifiers, or
 numeric literals.  Later parsing must detect what kind of Scheme
-expressions the s-expressions represent, e.g., that a particular list
-represents a procedure call or a special form, and if it's a special
-form, which kind of special form.
+expressions the s-expressions represent, e.g., whether a particular list
+represents a procedure call or a special form, or just a literal list.
 
 </P>
 <P>

@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.45
-     from schintro.txi on 23 January 1997 -->
+     from schintro.txi on 19 Febuary 1997 -->
 
 <TITLE>An Introduction to Scheme and its Implementation - Using and Writing Higher-Order Procedures</TITLE>
 </HEAD>
@@ -10,7 +10,7 @@ Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_98.html">previo
 <HR>
 
 
-<H3><A NAME="SEC105" HREF="schintro_toc.html#SEC105">Using and Writing Higher-Order Procedures</A></H3>
+<H3><A NAME="SEC106" HREF="schintro_toc.html#SEC106">Using and Writing Higher-Order Procedures</A></H3>
 
 <P>
 A <EM>higher-order</EM> procedure is one that can take procedures as arguments
@@ -101,23 +101,16 @@ Now try it out:
 
 <PRE>
 Scheme&#62;(list-display '(1 2 3))
-123#void
+123#f
 </PRE>
 
 <P>
 What happened here is that it displayed each item in the list as it
-was evaluated, and then Scheme printed out the return value.
+was evaluated, and then Scheme printed out the return value,
+<CODE>#f</CODE>.
 
 </P>
-<P>
-(We hadn't specified a return value--the procedure stops when it
-gets to an the end of the list, and doesn't take the first branch
-of the one-branch <CODE>cond</CODE> The return value is whatever your Scheme
-system uses as the result of a one branch <CODE>cond</CODE> when the branch
-is not taken.  It may suppress the printing of an unspecified
-value, so you may not see it at all.)
 
-</P>
 <P>
 This works, but the procedure is not very general.  Iterating over
 lists is very common, so it would be nice to have a more general
@@ -167,7 +160,7 @@ to tell it to <CODE>display</CODE> each thing in the list.
 
 <PRE>
 Scheme&#62;(list-each display '(1 2 3))
-123#void
+123#f
 </PRE>
 
 <P>
@@ -219,7 +212,7 @@ read Hunk M before returning here and continuing this tutorial.
 </PRE>
 
 <P>
-(Go BACK to read Hunk M, which starts at section <A HREF="schintro_64.html#SEC70"><CODE>lambda</CODE> and Lexical Scope (Hunk M)</A>.)
+(Go BACK to read Hunk M, which starts at section <A HREF="schintro_64.html#SEC71"><CODE>lambda</CODE> and Lexical Scope (Hunk M)</A>.)
 
 </P>
 

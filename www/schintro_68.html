@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.45
-     from schintro.txi on 23 January 1997 -->
+     from schintro.txi on 19 Febuary 1997 -->
 
 <TITLE>An Introduction to Scheme and its Implementation - Variable Arity</TITLE>
 </HEAD>
@@ -10,7 +10,7 @@ Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_67.html">previo
 <HR>
 
 
-<H3><A NAME="SEC74" HREF="schintro_toc.html#SEC74">Variable Arity: Procedures that Take a Variable Number of Arguments</A></H3>
+<H3><A NAME="SEC75" HREF="schintro_toc.html#SEC75">Variable Arity: Procedures that Take a Variable Number of Arguments</A></H3>
 
 <P>
 <A NAME="IDX77"></A>
@@ -43,7 +43,7 @@ procedure.
 </P>
 
 <PRE>
-(define (display-all args)
+(define (display-all . args)
    (display args)) 
 </PRE>
 
@@ -53,15 +53,16 @@ and we use display to display this list.  Now if we call the
 procedure like this
 
 <PRE>
-(display-all 'foo 3 'bar)
+Scheme&#62;(display-all 'foo 3 'bar)
+(foo 3 bar)
 </PRE>
 
 <P>
 the argument variable <CODE>args</CODE> will be bound and initialized with
 a list <CODE>(foo 3 bar)</CODE>, which will be passed as the sole argument
 to <CODE>display</CODE>.  Once inside the procedure, there's nothing
-special about this argument variable--it just happens to hold the
-list of arguments that were passed.
+special about this argument variable <CODE>args</CODE>---it just happens to
+hold the list of arguments that were passed.
 
 </P>
 <P>
@@ -77,6 +78,18 @@ whose initial value is the result of an explicit lambda expression:
            (display args)))
 </PRE>
 
+<P>
+(Notice that for this (plain <CODE>lambda</CODE>) version, we just
+used <CODE>args</CODE> as the argument specification, not <CODE>(args)</CODE>.
+If we just use an identifer, rather than a parenthesized sequence
+of identifiers, Scheme packages up all of the actual arguments
+to the procedure as a list and hands that to <CODE>display-all</CODE>
+as one argument variable.  This looks a little different from
+the <CODE>define</CODE> version, but it's the same idea--we're using
+the variable <CODE>args</CODE> to "stand for" a sequence of argument
+values, which scheme represents as a list.)
+
+</P>
 <P>
 Often, you write procedures that take a certain
 number of normal (required) arguments, but can take more.
@@ -117,10 +130,10 @@ arguments.\footnote{Consider an improper list <CODE>(a b . c)</CODE>.
   (the <CODE>cddr</CODE>) is just <CODE>c</CODE>.  If we write the argument
   declarations of a procedure in this way, e.g.,
   <CODE>(lambda (a b . c) ...)</CODE>, we think of the formal parameter
-  <CODE>a</CODE> as "standing for" the first actual argument value, the formal
-  parameter <CODE>b</CODE> as standing for the second actual argument
-  value, and the formal parameter <CODE>c</CODE> as standing for the
-  rest of the actual argument values.}
+  <CODE>a</CODE> as "standing for" the first actual argument value, the
+  formal   parameter <CODE>b</CODE> as standing for the second actual
+  argument value, and the formal parameter <CODE>c</CODE> as standing
+  for the rest of the actual argument values.}
   
 One common application of variable arity is to allow optional
 arguments with default values.  For example we can define

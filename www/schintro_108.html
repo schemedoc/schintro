@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.45
-     from schintro.txi on 23 January 1997 -->
+     from schintro.txi on 19 Febuary 1997 -->
 
 <TITLE>An Introduction to Scheme and its Implementation - Procedure Specialization</TITLE>
 </HEAD>
@@ -10,7 +10,7 @@ Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_107.html">previ
 <HR>
 
 
-<H3><A NAME="SEC126" HREF="schintro_toc.html#SEC126">Procedure Specialization</A></H3>
+<H3><A NAME="SEC127" HREF="schintro_toc.html#SEC127">Procedure Specialization</A></H3>
 
 <P>
 <A NAME="IDX118"></A>
@@ -86,6 +86,16 @@ in mind.
 
 </P>
 <P>
+Consider <CODE>assoc</CODE>, which has variants <CODE>assq</CODE> and <CODE>assv</CODE>;
+the only difference between them is what comparison operator they
+use.
+
+</P>
+<P>
+Likewise, <CODE>member</CODE> has variants <CODE>memq</CODE> and <CODE>memv</CODE>.
+
+</P>
+<P>
 Consider the similarities between <CODE>member</CODE>, <CODE>memv</CODE>, and
 <CODE>memq</CODE>.  All of them do almost the same thing, with the
 difference being which equality test they use during a search.
@@ -94,10 +104,10 @@ difference being which equality test they use during a search.
 <P>
 We can define a general procedure, <CODE>mem</CODE>, which expresses
 the similarities between these procedures, and then specialize
-that procedure.
-
-</P>
-<P>
+that procedure.  That is, in writing <CODE>mem</CODE>, we'll leave a
+"hole" for the comparison operator.  That hole is just an
+argument.
+  
 Our general procedure will look like <CODE>member</CODE>, except that
 it will take an argument saying which test to use.  In Scheme,
 this is easy--we can simply hand it a first-class procedure
@@ -121,8 +131,8 @@ write <CODE>(mem equal? some-key some-list)</CODE>.
 
 </P>
 <P>
-Note that here we're not calling <CODE>equal?</CODE>, we're just passing
-the value of the variable <CODE>equal?</CODE> (i.e., the procedure
+Note that here we're not calling <CODE>equal?</CODE> directly--we're just
+passing the value of the variable <CODE>equal?</CODE> (i.e., the procedure
 first-class procedure object <CODE>equal?</CODE>) to <CODE>mem</CODE>.
 <CODE>mem</CODE> receives this value when the argument variable
 <CODE>test-proc</CODE> is bound, and can call it by that name.
@@ -138,8 +148,8 @@ then called as procedures.)
 </P>
 <P>
 If Scheme didn't provide <CODE>member</CODE>, we could easily define it by
-specializing <CODE>mem</CODE>---we simply define <CODE>member</CODE> to call <CODE>mem</CODE>,
-but always pass <CODE>equal?</CODE> as the first argument:
+specializing <CODE>mem</CODE>---we simply define <CODE>member</CODE> to call
+<CODE>mem</CODE>, but always pass <CODE>equal?</CODE> as the first argument:
 
 </P>
 

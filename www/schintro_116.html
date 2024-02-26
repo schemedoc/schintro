@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.45
-     from schintro.txi on 23 January 1997 -->
+     from schintro.txi on 19 Febuary 1997 -->
 
 <TITLE>An Introduction to Scheme and its Implementation - Recursive Evaluation</TITLE>
 </HEAD>
@@ -10,16 +10,19 @@ Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_115.html">previ
 <HR>
 
 
-<H3><A NAME="SEC138" HREF="schintro_toc.html#SEC138">Recursive Evaluation</A></H3>
+<H3><A NAME="SEC139" HREF="schintro_toc.html#SEC139">Recursive Evaluation</A></H3>
 
 <P>
-<A NAME="IDX130"></A>
 <A NAME="IDX131"></A>
+<A NAME="IDX132"></A>
 
 </P>
 <P>
 The evaluator is the core of the interpreter--it's what does all of
-the interesting work to evaluate complicated expressions.
+the interesting work to evaluate complicated expressions.  The
+reader translates textual expressions into a convenient data structure,
+and the evaluator actually <EM>interprets</EM> it, i.e., figures out
+the "meaning" of the expression.
 
 </P>
 <P>
@@ -39,9 +42,9 @@ the read-eval-print-loop above:
 Scheme&#62;(repl math-eval)  ; start up read-eval-print loop w/arithmetic eval
 repl&#62;1
 1
-repl&#62;(+ 1 2)
+repl&#62;(plus 1 2)
 3
-repl&#62;(* (+ 1 3) (- 4 2))
+repl&#62;(times (plus 1 3) (minus 4 2))
 8
 </PRE>
 
@@ -63,16 +66,13 @@ trivially or calls <CODE>math-eval-combo</CODE> to help:
         ((number? expr)
          expr)
         ;; compound expression? (we only handle two-arg combinations)
-        ((and (list? expr)
-              (eq? (length expr) 3))
-         (math-eval-combo expr))
         (else
-         (error "invalid expression" expr))))
+         (math-eval-combo expr))))
 </PRE>
 
 <P>
  
-<A NAME="IDX132"></A>
+<A NAME="IDX133"></A>
 
 </P>
 <P>
@@ -84,7 +84,7 @@ simple that it can evaluate straightforwardly, without recursion.
 The only simple expressions in our language are numeric literals,
 so <CODE>math-eval</CODE> just uses the predicate <CODE>number?</CODE> to test
 whether the expression is a number.  If so, it just returns that value.
-(Voila!  We've implemented self-evaluating expressions.)
+(Voila!  We've implemented self-evaluating literals.)
 
 </P>
 <P>
@@ -98,33 +98,185 @@ this interpreter can handle.)  In this case, <CODE>math-eval</CODE> calls
 
 <PRE>
 (define (math-eval-combo expr)
-  (let ((arg1 (math-eval (cadr expr)))
+  (let ((operator-name (car expr))
+        (arg1 (math-eval (cadr expr)))
         (arg2 (math-eval (caddr expr))))
-     (cond ((eq? (car expr) '+)
+     (cond ((eq? operator-name 'plus)
             (+ arg1 arg2))
-           ((eq? (car expr) '-)
+           ((eq? operator-name 'minus)
             (- arg1 arg2))
-           ((eq? (car expr) '*)
+           ((eq? operator-name 'times)
             (* arg1 arg2))
-           ((eq? (car expr) '/)
+           ((eq? operator-name 'quotient)
             (/ arg1 arg2))
            (else
             (error "Invalid operation in expr:" expr)))))
 </PRE>
 
 <P>
-<CODE>math-eval-combo</CODE> handles a combination (math operation) by calling
-<CODE>math-eval</CODE> recursively to evaluate the arguments, 
+<CODE>math-eval-combo</CODE> handles a combination (math operation) by
+calling <CODE>math-eval</CODE> recursively to evaluate the arguments, 
 checking which operator is used in the expression, and calling
 the appropriate Scheme procedure to perform the actual operation.
 
 </P>
 
 
-<H3><A NAME="SEC139" HREF="schintro_toc.html#SEC139">A Note on Snarfing and Bootstrapping</A></H3>
+<H4><A NAME="SEC140" HREF="schintro_toc.html#SEC140">Comments on the Arithmetic Evaluator</A></H4>
 
 <P>
-<A NAME="IDX133"></A>
+<A NAME="IDX134"></A>
+<A NAME="IDX135"></A>
+
+</P>
+<P>
+The 4-function arithmetic evaluator is very simple, but it demonstrates
+several important principles of Scheme programming and programming
+language implementation.
+
+</P>
+<P>
+<A NAME="IDX136"></A>
+
+<UL>
+<LI><EM>Recursive style and Nested Lists.</EM>
+
+Notice that an arithemetic expression is represented as an
+s-expression that may be a 3-element list.  If it's a three-element
+list, that list is made up of three objects (pairs), but we
+essentially treat it as a single conceptual object--a node in
+a parse tree of arithemetic expressions.  The overall recursive
+structure of the evaluator is based on this conceptual tree, not
+on the details of the lists' internal structure.   We <EM>don't</EM>
+need recursion to traverse the lists, because the lists are of
+fixed length and we can extract the relevant fields using 
+<CODE>car</CODE>, <CODE>cadr</CODE>, and <CODE>caddr</CODE>.   We are essentially
+treating the lists as three-element structures.
+
+This kind of recursion is extremely common in Scheme--nested lists
+are far more common than "pair trees."
+
+As in the earlier examples of recursion over lists and pair trees,
+the main recursive procedure can accept pointers to either
+interior nodes (lists representing compound expressions), <EM>or</EM>
+leaves of the tree.  Either counts as an expression.  Dynamic typing
+lets us implement this straightforwardly, so that our recursion doesn't
+have to "bottom out" until we actually hit a leaf.   Things would
+be more complicated in C or Pascal, which don't allow a procedure
+to accept an argument that may be either a list <EM>or</EM> a
+number.\footnote{In C or Pascal, we could represent all of the
+  nodes in the expression tree as variant records (in C, "unions")
+  containing an integer <EM>or</EM> a list.  We don't need to do that
+  in  Scheme, because in Scheme <EM>every</EM> variable's type is really
+  a kind of variant record--it can hold a (pointer to a) number <EM>or</EM>
+  a (pointer to a) pair <EM>or</EM> a (pointer to) anything else.
+  
+  C is particularly problematic for this style of programming,
+  because even if we bite the bullet and always define a variant
+  record type, the variant records are <EM>untagged</EM>.  C doesn't
+  automatically keep track of which variant a particular record
+  represents--e.g., a leaf or nonleaf--and you must code this
+  yourself by adding a tag field, and setting and checking it
+  appropriately.  In effect, you must implement dynamic typing
+  yourself, every time.}
+ 
+It <EM>is</EM> possible to do Scheme-style recursion straightforwardly
+in some statically-typed languages, notably ML and Haskell.  These
+<EM>polymorphic</EM> languages allow you to declare <EM>disjoint union</EM>
+types.  A disjoint union is an "any of these" type--you can say that an
+argument will be of some type <EM>or</EM> some other type.
+ 
+In Scheme, the language only supports one very general kind of
+disjoint union type:  pointer to anything.  However, we usually
+think of data structure definitions as disjoint unions.
+
+As usual, we can characterize what an <EM>arithmetic expression</EM>
+recursively.  It is either a numeric literal (the base case)
+<EM>or</EM> a three-element "node" whose first "field" is
+an operator symbol and whose second and third "fields" are
+<EM>arithmetic expressions</EM>.  Also as usual, this recursive
+characterization is what dictates the recursive structure of
+the solution---<EM>not</EM> the details of how nodes are implemented.
+(The overall structure of recursion over trees would be the same
+if the interior nodes were arrays or records, rather than linear
+lists.)
+
+The conceptual "disjoint union" of leaves and interior nodes
+is what tells us we need a two-branch conditional in <CODE>math-eval</CODE>.
+
+It is important to realize that in Scheme, we usually discriminate
+between cases at <EM>edges</EM> in the graph, i.e., the pointers,
+rather than focusing on the <EM>nodes</EM>.  Conceptually, the type
+of the <CODE>expr</CODE> argument is <EM>an edge in the expression graph</EM>,
+which may point to either a leaf node or an interior node.  We
+apply <CODE>math-eval</CODE> to each edge, uniformly, and it discriminates
+between the cases.  We don't examine the object it points to and
+decide <EM>whether</EM> to make the recursive call--we always do
+the recursive call, and sort out the cases in the callee.
+
+<LI><EM>Primitive expressions and operations.</EM>
+
+In looking at any interpreter, it's important to notice which
+operations are <EM>primitive</EM>, and which are <EM>compound</EM>.
+Primitive operations are "built into" the interpreter, but
+the interpreter allows you to construct more complicated
+operations in terms of those.
+
+In <CODE>math-eval</CODE>, the primitive operations are addition,
+subtraction, multiplication, and division.  We "snarf"
+these operations from the underlying Scheme system, in which
+we're implementing our little four-function calculator.
+We don't implement addition, but we do dispatch to this
+built-in addition operation.
+
+On the other hand, compound expressions are not built-in.
+The interpreter doesn't have a special case for each
+particular kind of expression--e.g., there's no code
+to add 4 to 5.  We allow users to combine expressions
+by arbitrarily nesting them, and support an effectively infinite
+number of possible expressions.
+
+Later, I'll show more advanced interpreters that support
+more kinds of primitive expressions--not just numeric literals
+and more kinds of primitive operations--not just four
+arithmetic functions.   I'll also show how a more advanced
+interpreter can support more different ways of combining
+the primitive expressions.
+
+<LI><EM>Flexibility</EM>
+
+You may be wondering why we'd bother to write <CODE>math-eval</CODE>,
+since it essentially implements a small subset of Scheme,
+and we've already got Scheme.
+
+One reason for implementing your own interpreter is
+<EM>flexibility</EM>.  You can change the features of the
+language by making minor changes to the interpreter.
+
+For example, it is trivial to modify <CODE>math-eval</CODE>
+to evaluate infix expressions rather than postfix
+expressions.  (That is, with the operator in the middle,
+e.g., <CODE>(10 plus (3 times 2))</CODE>.  All we have to do
+is change the two lines where the operator and the
+first operand are extracted from a compound expression.
+We just swap the <CODE>car</CODE> and <CODE>cadr</CODE>, so that
+we treat the second element of the list as the operand
+and the first element as the operator.
+
+ 
+
+<LI><EM></EM>
+
+</UL>
+
+<P>
+ 
+
+
+<H3><A NAME="SEC141" HREF="schintro_toc.html#SEC141">A Note on Snarfing and Bootstrapping</A></H3>
+
+<P>
+<A NAME="IDX137"></A>
 
 </P>
 <P>
@@ -137,7 +289,7 @@ by using the system to extend itself.
 </P>
 
 
-<H4><A NAME="SEC140" HREF="schintro_toc.html#SEC140">Snarfing</A></H4>
+<H4><A NAME="SEC142" HREF="schintro_toc.html#SEC142">Snarfing</A></H4>
 
 <P>
 Our example interpreter implements Scheme in Scheme, but we could have
@@ -164,8 +316,9 @@ individual arithmetic operations, but we don't simply <EM>snarf</EM> them:
 the interpreter recognizes arithmetic operations in its input language,
 and maps them onto procedure calls in the underlying language.  We
 can change our language by changing those mappings: for example,
-we could use the symbols <CODE>sum</CODE>, <CODE>difference</CODE>, <CODE>product</CODE>,
-and <CODE>quotient</CODE> instead of <CODE>+</CODE>, <CODE>-</CODE>, <CODE>*</CODE>, and <CODE>/</CODE>.
+we could use the symbols <CODE>+</CODE>, <CODE>-</CODE>, <CODE>*</CODE>, and <CODE>/</CODE>
+to represent those operations, as Scheme does, or whatever we choose
+for the language we're interpreting.
 Or we could use the same names, but implement the operations differently.
 (For example, we might have our own arithmetic routines that allow
 a representation of infinity, and do something reasonable for division
@@ -185,8 +338,8 @@ interpreter uses Scheme's activation "stack" to implement it's own
 stack--each recursive call to <CODE>eval</CODE> implements a recursive call
 in our input language.  We didn't have to do this.  We could have
 implemented our own stack as a data structure, and written our interpreter
-as a simple non-recursive loop.  That would be tedious, however, so we
-don't bother. 
+as a simple non-recursive loop.  That would be a little tedious, however,
+so we don't bother. 
 
 </P>
 <P>
@@ -199,11 +352,11 @@ with the interpretation of operator names.
 </P>
 
 
-<H4><A NAME="SEC141" HREF="schintro_toc.html#SEC141">Bootstrapping and Cross-compiling</A></H4>
+<H4><A NAME="SEC143" HREF="schintro_toc.html#SEC143">Bootstrapping and Cross-compiling</A></H4>
 
 <P>
-<A NAME="IDX134"></A>
-<A NAME="IDX135"></A>
+<A NAME="IDX138"></A>
+<A NAME="IDX139"></A>
 
 </P>
 <P>

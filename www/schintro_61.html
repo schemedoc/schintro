@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.45
-     from schintro.txi on 23 January 1997 -->
+     from schintro.txi on 19 Febuary 1997 -->
 
 <TITLE>An Introduction to Scheme and its Implementation - First Class Procedures</TITLE>
 </HEAD>
@@ -10,7 +10,7 @@ Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_60.html">previo
 <HR>
 
 
-<H3><A NAME="SEC67" HREF="schintro_toc.html#SEC67">Procedures are First Class</A></H3>
+<H3><A NAME="SEC68" HREF="schintro_toc.html#SEC68">Procedures are First Class</A></H3>
 
 <P>
 <A NAME="IDX64"></A>
@@ -51,7 +51,18 @@ from a variable.
 
 </P>
 <P>
-When you define a procedure as we did above for the <CODE>min</CODE> example,
+Recall the definition of <CODE>min</CODE>:
+ 
+
+<PRE>
+(define (min a b)
+   (if (&#60; a b)
+       a
+       b))
+</PRE>
+
+<P>
+When you define a procedure like this,
 you're really doing three things: creating a procedure, creating a 
 normal variable (named <CODE>min</CODE>), and initializing the variable with a
 pointer to the procedure.
@@ -76,13 +87,14 @@ to a variable, and then use it to name the new procedure.
 For example, if you've defined <CODE>min</CODE> as above, you can change the
 value in the binding of <CODE>min</CODE> by saying <CODE>(set! min +)</CODE>.
 That assignment expression will look up the value of the variable <CODE>+</CODE>,
-which is the addition procedure, and assign that into the variable <CODE>min</CODE>.
+which is the addition procedure, and assign that into the variable
+<CODE>min</CODE>.
 
 </P>
 <P>
-Then when you call <CODE>min</CODE> as before, it will do addition instead, because 
-it will call the same procedure as <CODE>+</CODE>.  For example <CODE>(min 5 10)</CODE>
-will return <CODE>15</CODE>, not <CODE>5</CODE>.
+Then when you call <CODE>min</CODE> as before, it will do addition instead,
+because it will call the same procedure as <CODE>+</CODE>.  For example
+<CODE>(min 5 10)</CODE> will return <CODE>15</CODE>, not <CODE>5</CODE>.
 
 </P>
 <P>
@@ -118,8 +130,8 @@ arguments.
 <P>
 The first subexpression of the combination is evaluated in
 just the same way as the others, although the result is used differently.
-The first subexpression is just a subexpression that should return a procedure
-value, and the others give the arguments to pass to it.
+The first subexpression is just a subexpression that should return a
+procedure value, and the others give the arguments to pass to it.
 
 </P>
 <P>

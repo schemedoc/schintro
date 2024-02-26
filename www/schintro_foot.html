@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.45
-     from schintro.txi on 23 January 1997 -->
+     from schintro.txi on 19 Febuary 1997 -->
 
 <TITLE>An Introduction to Scheme and its Implementation - Footnotes</TITLE>
 </HEAD>
@@ -77,17 +77,24 @@
   data structures.  There is a "deeper" syntax that is recognized by
   the interpreter or compiler, which analyzes s-expressions to see what
   kinds of Scheme program expressions they represent, in the process of
-  evaluating or compiling them.
-
-</P>
-<P>
-  As we'll see when we get to macros, Scheme syntax is even more
-  sophisticated than this, despite its simplicity.  Technically, Scheme
-  has a <EM>transformational</EM> grammar that is not "context-free," but
-  is easy to parse.  (If you don't know what that means, don't worry about
-  it.  Scheme is easy to understand without knowing the fancy technical
-  terms.)
-<H3><A NAME="FOOT10" HREF="schintro_129.html#FOOT10">(10)</A></H3>
+  evaluating or compiling them.  As we'll see when we get to macros,
+  Scheme syntax is even more sophisticated than this, despite its
+  simplicity.  Technically, Scheme has a <EM>transformational</EM> grammar
+  that is not "context-free," but is easy to parse.  (If you don't know
+  what that means, don't worry about it.  Scheme is easy to understand
+  without knowing the fancy technical terms.)
+<H3><A NAME="FOOT10" HREF="schintro_122.html#FOOT10">(10)</A></H3>
+<P>The
+  compiler can generally avoid the overhead
+  of closures where it's not actually useful--if you write C-like or
+  Pascal-like programs, the compiler can generate very similar code.
+  And if you really use closures in their full generality, it's not
+  particularly slow--a few extra instructions per procedure call.
+  Creating closures can be surprisingly fast, because Scheme systems
+  typically have allocators several times faster than most C allocators.
+  <EM>[should discuss efficiency issues in more detail in a later
+  chapter...]</EM> 
+<H3><A NAME="FOOT11" HREF="schintro_129.html#FOOT11">(11)</A></H3>
 <P>This is
    something of an oversimplification.  The quoted expression is generally
    converted to a list at <CODE>read</CODE> time, and the value of the <CODE>quote</CODE>
@@ -97,7 +104,7 @@
    not its identity.  A compiler or interpreter is allowed to return the
    same list for different <CODE>quote</CODE>d data structures with the same
    structure.
-<H3><A NAME="FOOT11" HREF="schintro_133.html#FOOT11">(11)</A></H3>
+<H3><A NAME="FOOT12" HREF="schintro_133.html#FOOT12">(12)</A></H3>
 <P>Superclasses
     can be used to specify a class as a set of differences
     from an existing class, rather than describing everything
@@ -105,17 +112,17 @@
     <CODE>&#60;point&#62;</CODE> class is just like any other class of objects,
     and does the normal things classes do, but nothing special
     except what we specify explictily in the class definition.
-<H3><A NAME="FOOT12" HREF="schintro_133.html#FOOT12">(12)</A></H3>
+<H3><A NAME="FOOT13" HREF="schintro_133.html#FOOT13">(13)</A></H3>
 <P>The
          object <CODE>&#60;class&#62;</CODE> is actually the class object <EM>of class
          objects</EM>---classes are instances of the class <CODE>&#60;class&#62;</CODE>.
          This will be explained in detail later.
-<H3><A NAME="FOOT13" HREF="schintro_133.html#FOOT13">(13)</A></H3>
+<H3><A NAME="FOOT14" HREF="schintro_133.html#FOOT14">(14)</A></H3>
 <P>Evaluating
          the quasiquote expression <CODE>`(,&#60;object&#62;)</CODE> will create a
          list containing the actual class object that is the value of
          the variable <CODE>&#60;object&#62;</CODE>.
-<H3><A NAME="FOOT14" HREF="schintro_133.html#FOOT14">(14)</A></H3>
+<H3><A NAME="FOOT15" HREF="schintro_133.html#FOOT15">(15)</A></H3>
 <P>This
    is important
    to understand in being able to read clever macros: a quoted expression

@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.45
-     from schintro.txi on 23 January 1997 -->
+     from schintro.txi on 19 Febuary 1997 -->
 
 <TITLE>An Introduction to Scheme and its Implementation - Recursion in Scheme</TITLE>
 </HEAD>
@@ -10,13 +10,16 @@ Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_126.html">previ
 <HR>
 
 
-<H1><A NAME="SEC167" HREF="schintro_toc.html#SEC167">Recursion in Scheme</A></H1>
+<H1><A NAME="SEC169" HREF="schintro_toc.html#SEC169">Recursion in Scheme</A></H1>
 
 <P>
 In this chapter, I'll discuss procedure calling and recursion in more
 depth.  [ blah blah blah ]  Scheme's procedure-calling mechanism
 supports efficient tail-recursive programming, where recursion is used
-instead of iteration.
+instead of iteration.  In conventional programming languages, you
+can't generally use recursion to get the effect of iteration,
+because you may get activation stack overflows if the recursion is too
+deep.
 
 </P>
 <P>
@@ -33,7 +36,7 @@ you implement novel control structures like backtracking and coroutines.)
 </P>
 
 
-<H2><A NAME="SEC168" HREF="schintro_toc.html#SEC168">Subproblems and Reductions (non-tail and tail calls)</A></H2>
+<H2><A NAME="SEC170" HREF="schintro_toc.html#SEC170">Subproblems and Reductions (non-tail and tail calls)</A></H2>
 
 <P>
 In most implementations of most programming languages, an activation
@@ -59,7 +62,7 @@ needn't be saved before calling the callee.
 </P>
 <P>
 More generally, whether a procedure is recursive or not, the calls it
-makes can be classified as <EM>subproblems</EM> or <CODE>reductions</CODE>
+makes can be classified as <EM>subproblems</EM> or <EM>reductions</EM>
 If the last thing a procedure does is to call another procedure, that's
 known as a reduction--the work being done by the caller is complete,
 because it "reduces to" the work being done by the callee.
@@ -84,17 +87,19 @@ For example, consider the following procedures:
 </PRE>
 
 <P>
-Notice that when <CODE>foo</CODE> is called, it does two things: it calls <CODE>bar</CODE>
-and then calls <CODE>baz</CODE>.  After the call to <CODE>bar</CODE>, control must return
-to <CODE>foo</CODE>, so that it can continue and call <CODE>baz</CODE>.  The call to
-<CODE>bar</CODE> is therefore a subproblem--a step in the overall plan of
-executing <CODE>foo</CODE>.  When <CODE>foo</CODE> calls <CODE>baz</CODE>, however, that's
-<EM>all</EM> it needs to do--all of its other work is done.
+Notice that when <CODE>foo</CODE> is called, it does two things: it calls
+<CODE>bar</CODE> and then calls <CODE>baz</CODE>.  After the call to <CODE>bar</CODE>,
+control must return to <CODE>foo</CODE>, so that it can continue and call
+<CODE>baz</CODE>.  The call to <CODE>bar</CODE> is therefore a subproblem--a step
+in the overall plan of executing <CODE>foo</CODE>.  When <CODE>foo</CODE> calls
+<CODE>baz</CODE>, however, that's <EM>all</EM> it needs to do--all of its other
+work is done.   The result of the call to <CODE>foo</CODE> is just the
+result of <CODE>foo</CODE>'s call to <CODE>baz</CODE>.
 
 </P>
 <P>
-In a normal programming language implementation, <CODE>foo</CODE>'s state would
-be saved before the call to <CODE>baz</CODE>, as well as before the call to
+In a conventional programming language implementation, <CODE>foo</CODE>'s state
+would be saved before the call to <CODE>baz</CODE>, as well as before the call to
 <CODE>bar</CODE>.  Each call would return control to <CODE>foo</CODE>.  In the case
 of the call to <CODE>baz</CODE>, all <CODE>foo</CODE> will do is return the result
 of the call to <EM>its</EM> caller.  That is, all <CODE>foo</CODE> does after the
@@ -112,8 +117,9 @@ return value along to <EM>its</EM> caller.
 
 </P>
 <P>
-In effect, this optimizes away the unnecessary state saving and returning
-at tail calls.
+This optimizes away the unnecessary state saving and returning
+at tail calls.  You don't have to do anything special to get this
+optimization--Scheme implementations always do it for tail calls.
 
 </P>
 <P>
@@ -123,7 +129,7 @@ call each other, without saving their state on the stack, producing an
 infinite mutual recursion.  Will the stack overflow?  No.  Each will save
 its state before calling <CODE>bar</CODE>, but the return from <CODE>bar</CODE> will
 pop that information off of the stack.  The infinite tail-calling
-beetween <CODE>foo</CODE> and <CODE>baz</CODE> will not increase the stack height
+between <CODE>foo</CODE> and <CODE>baz</CODE> will not increase the stack height
 at all.
 
 </P>
@@ -145,29 +151,31 @@ recursive structure, and recursion is the easiest way to solve them.
 </P>
 <P>
 Notice that this tail call optimization is a feature of the language,
-not just some implementations--any implementation of standard Scheme is
+not just some implementations.  Any implementation of standard Scheme is
 required to support it, so that you can count on it and write portable
-programs that rely on it.
+programs that rely on it.  (In fact, the definition of the Scheme language
+itself depends on this, because the special forms for iteration are
+defined in terms of equivalent tail-calling--a loop is really a
+kind of procedure, that procedure tail-calls itself ot iterate the loop.)
 
 </P>
 <P>
 Also notice that the interpreter we presented earlier is tail-recursive.
-The recursive calls to <CODE>eval</CODE> are tail calls, and since it's implemented
-in Scheme, the interpreter relies on the underlying Scheme's tail-call
-optimization.  The evaluator thus snarfs the tail-call optimization from
-the underlying Scheme system.  If you implement a Scheme interpreter in
-another language, you have to be more careful, and implement the tail
-call optimization yourself.  This is not actually difficult, as I'll
-show in the next section.
+The recursive calls to <CODE>eval</CODE> are tail calls, and since it's
+implemented in Scheme, the interpreter relies on the underlying Scheme's
+tail-call optimization.  The evaluator thus snarfs the tail-call
+optimization from the underlying Scheme system.  If you implement a Scheme
+interpreter in another language, you have to be more careful, and implement
+the tail call optimization yourself.
 
 </P>
 <P>
 It's something of a misnomer to call Scheme's procedure calling
 mechanism an "optimization." What's really going on is that Scheme
 simply distinguishes between two things that most languages lump
-together--saving the caller's state, and actually calling the callee.
-Scheme notices that these things are distinct, and doesn't bother to
-do the former when only the latter is necessary.
+together--saving the caller's state, and actually transferring
+control to the callee.  Scheme notices that these things are distinct,
+and doesn't bother to do the former when only the latter is necessary.
 
 </P>
 <P>
@@ -182,12 +190,11 @@ it had done a whole bunch of returns to get there.)
 
 
 
-<H2><A NAME="SEC169" HREF="schintro_toc.html#SEC169">The Continuation Chain</A></H2>
+<H2><A NAME="SEC171" HREF="schintro_toc.html#SEC171">The Continuation Chain</A></H2>
 
 <P>
 In this section, I'll describe a straightforward implementation of
-Scheme's state-saving for procedure calling.  Readers uninterested
-in implementation issues may want to skip it.  It may clarify things
+Scheme's state-saving for procedure calling.  It may clarify things
 that are discussed later, however, such as
 <CODE>call-</CODE><CODE>with-</CODE><CODE>current-</CODE><CODE>continuation</CODE>
 and our example compiler's code generation strategy.
@@ -200,8 +207,8 @@ that holds the return address for the call <EM>and</EM> the variable bindings
 for the procedure being called.  The stack is a contiguous area of memory,
 and pushing an activation record onto the stack is done by incrementing a
 pointer into this contiguous area by the size of the stack frame.  Removing
-a stack frame is done by decrementing the pointer by the size
-of the stack frame.
+a stack frame is done by decrementing the pointer by the size of the stack
+frame.
 
 </P>
 <P>
@@ -223,7 +230,7 @@ strategies here.)
 
 </P>
 <P>
-Scheme implementations also differ from conventional language
+Most Scheme implementations also differ from conventional language
 implementations in how they represent the saved state of
 callers.  (In a conventional language implementation, the callers'
 state is in two places: the variable bindings are in the callers'
@@ -232,7 +239,7 @@ stack frame.)
 
 </P>
 <P>
-In a Scheme implementation, the caller's state is saved in a record
+In most Scheme implementations, the caller's state is saved in a record
 on the garbage-collected heap, called a <EM>partial continuation</EM>.  It's
 called a continuation because it says how to resume the caller when
 we return into it--i.e., how to continue the computation when control
@@ -247,7 +254,13 @@ the computation is complete.  This chain is therefore called a
 <EM>full continuation</EM>.
 
 </P>
+<P>
+(Notice that the relationship between the partial continuations in a
+full continuation chain is similar to the relationship between an
+environment frame and an environment chain.  The former represents
+control information while the latter represents scope information.)
 
+</P>
 <P>
 In most Scheme implementations, a special register called the
 <EM>continuation register</EM> is used to hold the pointer to the partial
@@ -282,9 +295,10 @@ CPU, or it may just be a particular memory location that our
 implementation uses for this purpose.  The point is just that
 when we're executing a procedure, we always know where to find
 a pointer to the partial continuation that lets us resume its
-caller.  We will sometimes abbreviate this register's name as
-<CODE>CONT</CODE>.  A typical implementation of Scheme using a compiler
-has several important registers that encode the state of the
+caller (or whichever procedure last did a non-tail call).  We will
+sometimes abbreviate this register's name as <CODE>CONT</CODE>.  A typical
+implementation of Scheme using a compiler has several important
+registers that encode the state of the
 currently-executing procedure:
 
 <UL>
@@ -316,10 +330,10 @@ want to resume the current procedure after the callee returns.
 Since the important state of the currently-executing procedure
 is in the registers listed above, we will create a record that
 has fields to hold them, and push that on the continuation chain.
-We will save the value of the CONT, ENVT, and PC registers
-in the partial continuation, then put a pointer to this new
-partial continuation in the continuation registers.  We also
-need to save any other state that the caller will need when
+We will save the value of the <CODE>CONT</CODE>, <CODE>ENVT</CODE>, and
+<CODE>PC</CODE> registers in the partial continuation, then put a pointer
+to this new partial continuation in the continuation registers.
+We also need to save any other state that the caller will need when
 it resumes, as suggested by the ellipsis below.  (We'll discuss
 what else goes in a partial continuation when we talk about
 compilers in detail.)
@@ -374,7 +388,7 @@ any values it will need when it resumes.
 <P>
 To do a procedure return, it is only necessary to copy the
 register values out of the continuation that's pointed to
-by the <CODE>cont</CODE> register.  This will restore the caller's environment
+by the <CODE>CONT</CODE> register.  This will restore the caller's environment
 and its pointer to its caller's continuation, and setting the
 <CODE>PC</CODE> register will branch to the code in the caller where execution
 should resume.  We often call this "popping" a continuation,
@@ -437,12 +451,13 @@ cont |   +---+-------&#62;+=========+    /
 Notice that when we say we save the "state" of the caller,
 we mean the values in our important registers, but we don't
 directly save particular variable values--when we save the
-environment pointer, we don't save the values in the
-bindings in the environment.  If other code then executes in
-that same environment and changes those values, the new values
-will be seen by this procedure when it returns and restores
-the environment pointer.  This policy has two important
-consequences:
+environment pointer, we don't make copies of the values in the
+bindings in the environment.  In effect, saving the environment
+pointer records which names refer to which <EM>pieces of storage</EM>.
+If other code then executes in that same environment and changes
+those values, the new values will be seen by this procedure when it
+returns and restores the environment pointer.  This policy has two
+important consequences:
 
 </P>
 
@@ -519,7 +534,7 @@ be in the registers, including a pointer to the continuation for
 </P>
 
 <PRE>
-               cont for a's caller
+               cont. for a's caller
                     /
                   /
           cont. for a
@@ -535,7 +550,7 @@ be in the registers, including a pointer to the continuation for
 </P>
 
 <PRE>
-               cont for a's caller
+               cont. for a's caller
                     /
                   /
           cont. for a
@@ -550,10 +565,10 @@ be in the registers, including a pointer to the continuation for
 </PRE>
 
 <P>
-When <CODE>c</CODE> returns, it will restore <CODE>b</CODE>'s state by popping the partial
-continuation's values into registers.  At this point, the <CODE>CONT</CODE>
-register will point past the continuation for <CODE>b</CODE> to the continuation
-for <CODE>a</CODE>.
+When <CODE>c</CODE> returns, it will restore <CODE>b</CODE>'s state by popping the
+partial continuation's values into registers.  At this point, the
+<CODE>CONT</CODE> register will point past the continuation for <CODE>b</CODE> to the
+continuation for <CODE>a</CODE>.
 
 </P>
 
@@ -698,7 +713,7 @@ Chapter XX.)
 </P>
 
 
-<H2><A NAME="SEC170" HREF="schintro_toc.html#SEC170">Exploiting Tail Recursion</A></H2>
+<H2><A NAME="SEC172" HREF="schintro_toc.html#SEC172">Exploiting Tail Recursion</A></H2>
 
 <P>
 In an earlier section, we presented example recursive implementations of
@@ -713,11 +728,11 @@ fact be coded this way.
 </P>
 
 
-<H3><A NAME="SEC171" HREF="schintro_toc.html#SEC171">Passing Intermediate Values as Arguments</A></H3>
+<H3><A NAME="SEC173" HREF="schintro_toc.html#SEC173">Passing Intermediate Values as Arguments</A></H3>
 
 
 
-<H4><A NAME="SEC172" HREF="schintro_toc.html#SEC172">Summing a List</A></H4>
+<H4><A NAME="SEC174" HREF="schintro_toc.html#SEC174">Summing a List</A></H4>
 
 <P>
 Suppose we want to sum a list of numbers.  The most obvious way
@@ -745,6 +760,12 @@ finished, to return the sum back from each call to its caller.)
 
 </P>
 <P>
+The problem here is that evaluation of the arguments to a combination
+isn't a tail call, even if the combination as a whole is.  Control must
+always return so that the actual call can be done.
+
+</P>
+<P>
 We can write a tail-recursive version of <CODE>list-sum</CODE> that adds
 things in front-to-back order instead.  The trick is to do the
 addition before the tail call, and to <EM>pass the sum so
@@ -765,9 +786,8 @@ the running sum, and tail-calls itself to add the rest of the
 elements to the running sum.  When it reaches the end of the list,
 it just returns the value.  (Scheme doesn't need to save a partial
 continuation before each call, since only the last call ever returns.)
-
-</P>
-<P>
+We'll call this procedure <CODE>loop</CODE>, because we're using tail
+recursion to implement looping.
 For convenience, we also wrap this procedure up in a friendlier procedure
 that will start off the recursion, by supplying an initial "running sum"
 of 0.
@@ -775,40 +795,45 @@ of 0.
 </P>
 
 <PRE>
-; a tail-recursive list summing procedure
-(define (lsum lis sum-so-far)
+;; a tail-recursive list summing procedure
+(define (loop lis sum-so-far)
    (cond ((null? lis)
           sum-so-far)
          (else
-          (lsum (cdr lis)
+          (loop (cdr lis)
                 (+ sum-so-far (car lis))))))
 
-; a friendly wrapper that supplies an initial running sum of 0
+;; a friendly wrapper that supplies an initial running sum of 0
 (define (list-sum lis)
-   (l-s-aux lis 0))
+   (loop lis 0))
 </PRE>
 
 <P>
-We can make this cleaner by encapsulating <CODE>lsum</CODE>, since
-it's only used by list-sum.  We make <CODE>lsum</CODE> a local procedure
+We can make this cleaner by encapsulating <CODE>loop</CODE>, since
+it's only used by list-sum.  We make <CODE>loop</CODE> a local procedure
 using <CODE>letrec</CODE> and <CODE>lambda</CODE>.
 
 </P>
 
 <PRE>
 (define (list-sum lis)
-   ; define a local, tail-recursive list summing procedure 
-   (letrec ((lsum (lambda (lis sum-so-far)
+   ;; define a local, tail-recursive list summing procedure 
+   (letrec ((loop (lambda (lis sum-so-far)
                      (cond ((null? lis)
                             sum-so-far)
                            (else
-                            (lsum (cdr lis)
+                            (loop (cdr lis)
                                   (+ sum-so-far (car lis))))))))
-      (lsum lis 0))) ;; start off recursive summing with a sum of 0
+      (loop lis 0))) ;; start off recursive summing with a sum of 0
 </PRE>
 
 <P>
-We can write this more clearly using named <CODE>let</CODE>:
+We can write this more clearly using named <CODE>let</CODE>.  Named let
+is one of Scheme's two special forms for looping (the other is <CODE>do</CODE>).
+A named <CODE>let</CODE> looks like a <CODE>let</CODE>, but it's really a shorthand
+for the kind of thing we did above--defining a local procedure
+that can tail-call itself to give the effect of iteration, and
+starting it off with the appropriate initial value.
 
 </P>
 
@@ -824,19 +849,45 @@ We can write this more clearly using named <CODE>let</CODE>:
 </PRE>
 
 <P>
-Notice that here we're using two loop variables, rebound at each
-iteration.  One keeps track of the remaining part of the original
-list, and the other the sum of the list items we've seen so far.
+Notice that here we're using two loop variables, <CODE>lis</CODE> and
+<CODE>sum-so-far</CODE>, rebound at each iteration.  One keeps track of the
+remaining part of the original list, and the other the sum of the list
+items we've seen so far.
 
 </P>
 <P>
-Also notice that the version using named <CODE>let</CODE> is exactly equivalent
-to the version using explicit tail-recursion.
+Be sure you understand that this version using named <CODE>let</CODE> is
+<EM>exactly</EM> equivalent to the version using <CODE>letrec</CODE> and
+<CODE>lambda</CODE>.   The named <CODE>let</CODE> binds the variable <CODE>loop</CODE>,
+and initializes it with a first-class procedure that takes two arguments,
+<CODE>list</CODE> and <CODE>sum-so-far</CODE>.  When we used the name <CODE>loop</CODE>
+for the named <CODE>let</CODE>, we're really giving the name of the procedure
+that implements the loop body.   Each time we iterate the loop,
+we're really calling this procedure--the call to <CODE>loop</CODE> looks
+like a procedure call because it <EM>is</EM> a procedure call.
+
+</P>
+<P>
+The argument expressions provide the new values for the next iteration
+of the loop, and the loop variables are <EM>rebound</EM> and initialized
+to those values at the next iteration of the loop.   As in the
+version with an explicit letrec and lambda, the loop is started
+off by evaluating the initial value expressions for the loop
+variables (which look like <CODE>let</CODE> variables) and calling the
+<CODE>loop</CODE> procedure.
+
+</P>
+<P>
+Since we re-bind the loop variables at each iteration of the loop,
+it generally doesn't make sense to side-effect loop variables.
+The old binding goes out of scope, and new bindings are created
+at each iteration, initialized with whatever values are passed
+to the looping procedure.
 
 </P>
 
 
-<H4><A NAME="SEC173" HREF="schintro_toc.html#SEC173">Implementing <CODE>length</CODE> tail-recursively</A></H4>
+<H4><A NAME="SEC175" HREF="schintro_toc.html#SEC175">Implementing <CODE>length</CODE> tail-recursively</A></H4>
 
 <P>
 Recall that in [ Chapter whatever ] we implemented <CODE>length</CODE> this
@@ -896,7 +947,7 @@ Or equivalently, using named <CODE>let</CODE>:
 
 
 
-<H3><A NAME="SEC174" HREF="schintro_toc.html#SEC174"><CODE>reduce</CODE></A></H3>
+<H3><A NAME="SEC176" HREF="schintro_toc.html#SEC176"><CODE>reduce</CODE></A></H3>
 
 <P>
 In this section, I'll give an extended example of the use of higher-order
@@ -1052,7 +1103,8 @@ version of <CODE>append</CODE>:
 
 <P>
    
-The reduction of a list using (lambda (x rest) (cons (* x 2) rest))
+The reduction of a list using <CODE>(lambda</CODE> <CODE>(x rest)</CODE>
+<CODE>(cons (* x 2) rest))</CODE>
 constructs a new list whose elements are twice the values of the
 corresponding elements in the original list. 
 
@@ -1066,6 +1118,10 @@ Scheme&#62;(reduce (lambda (x rest)
 (2 4 6 8)
 </PRE>
 
+<P>
+<EM>[ show tail-recursive version... that'd make a good exercise ]</EM>
+
+</P>
 <P>
 The <CODE>reduce</CODE> procedure above is handy, because you can use it for
 many different kinds of computations over different kinds of
@@ -1122,8 +1178,8 @@ Scheme&#62; ((make-reducer * 1) '(1 2 3 4))
    
 This is very much like calling our original <CODE>reduce</CODE> procedure,
 except that each time we're constructing a specialized procedure
-that's like <CODE>reduce</CODE> customized for particular values of its
-first two arguments;  then we call that new, specialized procedure
+(closure) that's like <CODE>reduce</CODE> customized for particular values
+of its first two arguments;  then we call that new, specialized procedure
 to do the work on a particular list.                        
 
 </P>
@@ -1144,6 +1200,10 @@ Here's a simple definition of <CODE>make-reducer</CODE> in terms of
          
 Notice that we <EM>are</EM> using procedure definition syntax here,
 so the <CODE>lambda</CODE> in the body will create and return a closure.
+
+</P>
+<P>
+<EM>[ can also do this with <CODE>curry</CODE>. ]</EM>
    
 But suppose we don't already have a reduce procedure, and we don't
 want to leave one lying around.  A cleaner solution is to define
@@ -1159,7 +1219,7 @@ different functions and base values.
                            base-value
                            (fn (car lis)
                                (reduce (cdr lis)))))))
-       reduce)) ; return new closure of local procedure
+       reduce)) ;; return new closure of local procedure
 </PRE>
 
 <P>
@@ -1168,11 +1228,11 @@ This procedure uses closure creation to create a customized version
 of <CODE>reduce</CODE>  When <CODE>make-reducer</CODE> is entered, its arguments
 are bound and initialized to the argument values--i.e., the function and
 base value we want the custom reducer to use.  In this environment,
-we create a closure of the standard reducer procedure using lambda.
-We wrap the lambda in a letrec so that the reducer can see its own
-name.  Notice that since reduce is a local procedure, it can see
-the arguments to <CODE>make-reducer</CODE>, and we don't have to pass it those
-arguments explicitly.
+we create a closure of the reducer procedure using <CODE>lambda</CODE>.
+We wrap the lambda in a letrec so that the reducer can refer to
+(and call) itself.  Notice that since <CODE>reduce</CODE> is a local procedure,
+it can see the arguments to <CODE>make-reducer</CODE>, and we don't have to
+pass it those arguments explicitly.
    
 By using local procedure definition syntax--which not all Schemes
 support--we can write this as:
@@ -1186,7 +1246,7 @@ support--we can write this as:
           base-value
           (fn (car lis)
               (reduce (cdr lis)))))
-   reduce))  ;return new closure of local procedure
+   reduce))  ;; return new closure of local procedure
 </PRE>
 
 <P>
@@ -1200,11 +1260,11 @@ to <CODE>make-reducer</CODE> are bound.
 </P>
 
 
-<H2><A NAME="SEC175" HREF="schintro_toc.html#SEC175">Iteration as Recursion</A></H2>
+<H2><A NAME="SEC177" HREF="schintro_toc.html#SEC177">Iteration as Recursion</A></H2>
 
 
 
-<H3><A NAME="SEC176" HREF="schintro_toc.html#SEC176">named <CODE>let</CODE></A></H3>
+<H3><A NAME="SEC178" HREF="schintro_toc.html#SEC178">named <CODE>let</CODE></A></H3>
 
 <P>
 [ move earlier discussion here? ]
@@ -1212,7 +1272,7 @@ to <CODE>make-reducer</CODE> are bound.
 </P>
 
 
-<H3><A NAME="SEC177" HREF="schintro_toc.html#SEC177"><CODE>do</CODE></A></H3>
+<H3><A NAME="SEC179" HREF="schintro_toc.html#SEC179"><CODE>do</CODE></A></H3>
 
 <HR>
 Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_126.html">previous</A>, <A HREF="schintro_128.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.

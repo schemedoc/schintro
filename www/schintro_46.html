@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.45
-     from schintro.txi on 23 January 1997 -->
+     from schintro.txi on 19 Febuary 1997 -->
 
 <TITLE>An Introduction to Scheme and its Implementation - Recursion Over Data Structures</TITLE>
 </HEAD>
@@ -10,7 +10,7 @@ Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_45.html">previo
 <HR>
 
 
-<H2><A NAME="SEC47" HREF="schintro_toc.html#SEC47">Recursion Over Lists and Other Data Structures</A></H2>
+<H2><A NAME="SEC48" HREF="schintro_toc.html#SEC48">Recursion Over Lists and Other Data Structures</A></H2>
 
 <P>
 <EM>[ This section is a little out of place--need to introduce
@@ -18,6 +18,9 @@ Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_45.html">previo
         presented in class, so this should be comprehensible anyway.
         Need to make this a separate hunk, and move it after
         the next hunk. ]</EM>
+        
+<EM>[ Also need to introduce tail recursion somewhere early,
+        and fwd ref the chapter on recursion. ] </EM>
         
 In this section I'll demonstrate the most common idioms
 for recursion over simple data structures--lists and trees.
@@ -49,7 +52,7 @@ or Pascal--and simpler.
        
 
 
-<H3><A NAME="SEC48" HREF="schintro_toc.html#SEC48"><CODE>length</CODE></A></H3>
+<H3><A NAME="SEC49" HREF="schintro_toc.html#SEC49"><CODE>length</CODE></A></H3>
 
 <P>
 <A NAME="IDX39"></A>
@@ -143,7 +146,7 @@ algorithm is similar.
 </P>
 
 
-<H3><A NAME="SEC49" HREF="schintro_toc.html#SEC49">Copying Lists</A></H3>
+<H3><A NAME="SEC50" HREF="schintro_toc.html#SEC50">Copying Lists</A></H3>
 
 <P>
 <A NAME="IDX40"></A>
@@ -324,7 +327,7 @@ for numbers.
 </P>
 
 
-<H3><A NAME="SEC50" HREF="schintro_toc.html#SEC50"><CODE>append</CODE> and <CODE>reverse</CODE></A></H3>
+<H3><A NAME="SEC51" HREF="schintro_toc.html#SEC51"><CODE>append</CODE> and <CODE>reverse</CODE></A></H3>
 
 <P>
 <A NAME="IDX44"></A>
@@ -350,7 +353,7 @@ its argument(s).
 </P>
 
 
-<H4><A NAME="SEC51" HREF="schintro_toc.html#SEC51"><CODE>append</CODE></A></H4>
+<H4><A NAME="SEC52" HREF="schintro_toc.html#SEC52"><CODE>append</CODE></A></H4>
 
 <P>
 Append works much like <CODE>list-copy</CODE> except that we have multiple
@@ -496,7 +499,7 @@ of long lists, and then <CODE>reverse</CODE> the result if necessary.)
 </P>
 
 
-<H4><A NAME="SEC52" HREF="schintro_toc.html#SEC52"><CODE>reverse</CODE></A></H4>
+<H4><A NAME="SEC53" HREF="schintro_toc.html#SEC53"><CODE>reverse</CODE></A></H4>
 
 <P>
 <CODE>reverse</CODE> returns a reversed copy of a list.
@@ -652,31 +655,26 @@ with a linear-time <CODE>reverse</CODE>, the overall process is still
 linear-time. 
 
 </P>
-<P>
+
+<PRE>
 ==================================================================
 
-</P>
-<P>
 This is the end of Hunk E.
 
-</P>
-<P>
 TIME TO TRY IT OUT
 
-</P>
-<P>
 At this point, you should go read Hunk F of the next chapter
 and work through the examples using a running Scheme system.
 Then return here and resume this chapter.
 
-</P>
-<P>
 ==================================================================
 </PRE>
 
-(Go to Hunk F, which starts at section <A HREF="schintro_93.html#SEC98">Lists (Hunk F)</A>.)
+<P>
+(Go to Hunk F, which starts at section <A HREF="schintro_93.html#SEC99">Lists (Hunk F)</A>.)
          
 
+</P>
 <HR>
 Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_45.html">previous</A>, <A HREF="schintro_47.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
 </BODY>

@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.45
-     from schintro.txi on 23 January 1997 -->
+     from schintro.txi on 19 Febuary 1997 -->
 
 <TITLE>An Introduction to Scheme and its Implementation - Understanding lambda</TITLE>
 </HEAD>
@@ -10,7 +10,7 @@ Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_121.html">previ
 <HR>
 
 
-<H3><A NAME="SEC149" HREF="schintro_toc.html#SEC149"><CODE>lambda</CODE></A></H3>
+<H3><A NAME="SEC151" HREF="schintro_toc.html#SEC151"><CODE>lambda</CODE></A></H3>
 
 <P>
 Recall that in Scheme, we can create anonymous (unnamed) procedures any
@@ -18,8 +18,8 @@ time we want, using the <CODE>lambda</CODE> special form.
 
 </P>
 <P>
-For example, suppose you want to write a piece of code that needs to
-double the values of the items in a list.  You could do what we did
+For example, suppose you want a procedure that
+doubles the values of the items in a list.  You could do what we did
 before, and define a named <CODE>double</CODE> procedure, but if you only
 need to use the procedue in one place, it's easier to use an anonymous
 procedure created with <CODE>lambda</CODE>.
@@ -53,7 +53,8 @@ You can simply define it where it's used, using <CODE>lambda</CODE>.
 
 <PRE>
    ...
-   (map (lambda (x) (+ x x)) mylist)
+   (map (lambda (x) (+ x x))
+        mylist)
    ...
 </PRE>
 
@@ -78,7 +79,7 @@ properties that make it more useful than it might seem right now. ]
 
 
 
-<H4><A NAME="SEC150" HREF="schintro_toc.html#SEC150">Procedures are Closures</A></H4>
+<H4><A NAME="SEC152" HREF="schintro_toc.html#SEC152">Procedures are Closures</A></H4>
 
 <P>
 Scheme procedure's aren't really just pieces of code you can execute;
@@ -86,9 +87,16 @@ they're <EM>closures</EM>.
 
 </P>
 <P>
-A closure is a procedure that records what environment it was created
-in.  When you call it, that environment is restored before the actual
-code is executed.  This ensures that when a procedure executes, it
+A closure records not only what code a procedure must run, but
+also what environment it was created in.  When you call it, that
+environment is restored before the actual 
+code is executed.  That is, the "current environment pointer" is
+set to point to that environment, and whenever the procedure references
+a variable, it will be looked up there.
+
+</P>
+<P>
+This ensures that when a procedure executes, it
 sees the exact same variable bindings that were visible when it
 was created--it doesn't just remember variable names in its code,
 it remembers what <EM>storage</EM> each name referred to when it was
@@ -105,6 +113,20 @@ exited the <CODE>let</CODE>.  As long as we have a pointer to the procedure
 (closure), the bindings it refers to are guaranteed to exist.  (The
 garbage collector will not reclaim the procedure's storage, or the 
 storage for the <CODE>let</CODE> bindings.)
+
+</P>
+<P>
+We say that a procedure is <EM>closed</EM> in the environment where
+it is created.  Technically, this is because a closure records
+the <EM>transitive closure</EM> of the "scoped in" relation;  that
+is, it can see bindings created by the enclosing binding construct,
+bindings created by the one enclosing that, and so on until reaching
+the top level.  Intuitively, you can also think of the set of bindings
+as <CODE>closed</CODE> when a procedure is created:  bindings that are
+not lexically visible when the procedure is created are <CODE>not</CODE>
+visible when it runs.  (Except for bindings created by the procedure
+itself when as it runs, that is--it can bind arguments, evaluate
+let expressions, etc.)
 
 </P>
 <P>
@@ -127,6 +149,12 @@ Scheme&#62; (let ((count 0))
 </PRE>
 
 <P>
+Notice that the <CODE>let</CODE> is not inside a procedure;  Scheme variables
+don't have to be local to a procedure.  In this case, <CODE>count</CODE>
+is just local to the <CODE>let</CODE> expression that binds it.
+
+</P>
+<P>
 [ need picture here ]
 
 </P>
@@ -135,18 +163,24 @@ Evaluating this <CODE>let</CODE> expression first creates a binding environment
 with a binding for count.  The initial value of this binding is 0.
 In this environment, the lambda expression creates a closure.  When
 executed, this procedure will increment the count, and then return its
-value.  (Note that the procedure is not executed yet, however--it's just 
-created.)  This procedure, returned by the lambda expression, is also
-returned as the value of the let expression, because a <CODE>let</CODE> returns
-the value of its last body expression.  The read-eval-print loop therefore
-prints a representation of the (anonymous) procedure.
+value.  (Note that the procedure is <CODE>not executed yet</CODE>, however--it's
+just created so that it can be called to operate on the binding of
+<CODE>count</CODE> later.)  This procedure, returned by the lambda expression,
+is also returned as the value of the <CODE>let</CODE> expression, because a
+<CODE>let</CODE> returns the value of its last body expression.  The
+read-eval-print loop therefore prints a representation of the (anonymous)
+procedure.
 
 </P>
 <P>
 Unfortunately, we didn't do anything with the value, like give it a
 name, so we can't refer to it anymore, and the garbage collector will
-just reclaim it.  (OOPS.)  Now suppose we want to do the same thing,
-but hold onto the closure so that we can do something with it.
+just reclaim it.  (OOPS!)  Now suppose we want to do the same thing,
+but hold onto the closure so that we can do something with it, like
+calling it.
+
+</P>
+<P>
 We'll bind a new variable <CODE>my-counter</CODE>, and use the above <CODE>let</CODE>
 expression to create a new environment and procedure, just like before.
 
@@ -162,17 +196,24 @@ Scheme&#62; (define my-counter
 </PRE>
 
 <P>
+(Notice that we're using plain variable definition syntax here--the
+only procedure we're creating is the value of the <CODE>lambda</CODE>
+expression, which we're storing in the binding of <CODE>my-counter</CODE>.
+
+</P>
+<P>
 Now we have a top-level binding of <CODE>my-counter</CODE>, whose value is
-the procedure we created.  
+the procedure we created.  It will remember the binding of <CODE>count</CODE>
+created by the <CODE>let</CODE> before evaluating the lambda expression.  
 
 </P>
 <P>
 (The crucial trick here relies on the fact
-that thet let expression not only creates the local variable
-binding for <CODE>count</CODE>, but returns the value returned by the lambda
-expression.  The pointer to the procedure created by lambda is passed
-along by the let to become the initial value for the binding of
-<CODE>my-counter</CODE>.) 
+that the let expression not only creates the local variable
+binding for <CODE>count</CODE>, but returns the value of the last
+expression in its body--i.e., the closure returned by the lambda
+expression.  The pointer to the closure is passed along by the let
+to become the initial value for the binding of <CODE>my-counter</CODE>.) 
 
 </P>
 <P>
@@ -208,7 +249,7 @@ the top-level environment, thus:
          |   +------------+--+--+            |
          |   |   [scope]  |  *  |            |
          |   +------------+-----+            |
-         |   |      count |  *--+--&#62;10       |
+         |   |      count |  *--+--&#62;0        |
          |   +------------+-----+           \|/
          |            /|\                [closure]
          |             |                +---------+
@@ -246,11 +287,14 @@ Scheme&#62;(my-counter)
 </PRE>
 
 <P>
-Notice that if we evaluate the let form again, we will get a <EM>new</EM>
-<CODE>let</CODE> environment, and a new procedure that will increment and return
-its <CODE>count</CODE> value--in effect, each procedure has its own little
-piece of state which only it can see (because only it was created
-in that particular environment).
+Notice that if we evaluate the whole <CODE>let</CODE> form again, we will get
+a <EM>new</EM> <CODE>let</CODE> environment, with a new binding of <CODE>count</CODE>,
+and a new procedure that will increment and return its <CODE>count</CODE>
+value--in effect, each procedure has its own little piece of state which
+only it can see (because only it was created in that particular
+environment).  Each one remembers which piece of storage <CODE>count</CODE>
+referred to when it was created, and operates on that particular
+piece of storage.
 
 </P>
 <P>
@@ -271,6 +315,8 @@ a counter procedure.
 
 <PRE>
 Scheme&#62; (define (make-counter)
+           ;; bind count and create a new procedure that will (when
+           ;; called) increment that binding and return its value
            (let ((count 0))
               (lambda ()
                  (set! count (+ count 1))
@@ -278,6 +324,10 @@ Scheme&#62; (define (make-counter)
 make-counter
 </PRE>
 
+<P>
+(Note that here we're using procedure-definition syntax.)
+
+</P>
 <P>
 Each of the resulting procedures will have its own captured count
 variable, and keep it independently of the other procedures.
@@ -293,6 +343,9 @@ syntax:
 
 <PRE>
 Scheme&#62; (define make-counter
+                ;; create a procedure that will bind count and
+                ;; return a new procedure that will increment that
+                ;; binding and return its value
                 (lambda ()
                    (let ((count 0))
                       (lambda ()
@@ -356,6 +409,20 @@ as the procedures do.
 
 </P>
 <P>
+This example shows that we can use closures to create <EM>private</EM>
+variable bindings.  Notice that once we've exited a <CODE>let</CODE>,
+the variables aren't visible anymore.  But if we call a closure
+that was created there, they become visible again---<EM>to that
+closure only</EM>.  The <CODE>only</CODE> way to operate on a variable binding
+after it has gone out of scope is to call a procedure that was
+created while it was in scope.  This means that once a binding
+construct has been exited, the set of procedures that can operate
+on the bindings it creates is fixed.  As I'll show later in this
+chapter, we can use this to structure programs and make sure
+that things don't interact when they're not supposed to. 
+
+</P>
+<P>
 If you're familiar with object-oriented programming, you may
 notice a resemblance between closures and "objects" in the
 object-oriented sense.   A closure associates data with a procedure,
@@ -376,9 +443,71 @@ create a closure for a specific context by capturing variable bindings,
 to customize the behavior of the procedure.
 
 </P>
+<P>
+Since argument variables are just local variables that get their
+initial values in a special way, we can use argument variables
+in much the same way as <CODE>let</CODE> variables.
+
+</P>
+<P>
+Here's a new version of <CODE>make-counter</CODE>, which takes an argument
+that gives the initial value for a counter--it doesn't have to
+start at zero.
+
+</P>
+
+<PRE>
+(define (make-counter count)
+   ;; return a new procedure to increment argument variable
+   ;; count and return its value
+   (lambda ()
+      (set! count (+ count 1))
+      count))
+</PRE>
+
+<P>
+Here we're using procedure-definition syntax, so we're creating
+a procedure of one argument <CODE>count</CODE>.
+
+</P>
+<P>
+Whenever the procedure is called, <CODE>count</CODE> will be bound (once)
+and initialized to whatever value we give as an argument to
+<CODE>make-counter</CODE>.  Then the <CODE>lambda</CODE> expression will
+be evaluted to create a new procedure that captures that binding
+of <CODE>count</CODE>.
+
+</P>
+<P>
+(The argument variable <CODE>count</CODE> is bound to a fresh piece of storage
+when the procedure is entered, and we can "capture" that
+binding by creating a closure in its scope.  As with a let
+variable, we get a different piece of storage each time we call
+<CODE>make-counter</CODE>.)
+
+</P>
+<P>
+For this kind of counter, we'd probably rather return the <EM>old</EM>
+value of the counter, rather than the new one, each time we
+increment it.  To do that, we can put a <CODE>let</CODE> inside the
+<CODE>lambda</CODE> expression, to hold onto the old value  
+
+</P>
+
+<PRE>
+(define (make-counter count)
+   ;; create a procedure that 
+   (lambda ()
+      (let ((value count))         ;; hang onto value of count
+         (set! count (+ count 1))  ;; increment count
+         value)))                  ;; return previous value
+</PRE>
+
+<P>
+                     
 
 
-<H2><A NAME="SEC151" HREF="schintro_toc.html#SEC151">Lambda is cheap, and Closures are Fast</A></H2>
+<H2><A NAME="SEC153" HREF="schintro_toc.html#SEC153">Lambda is cheap, and Closures are Fast</A></H2>
 
 <P>
 It may seem that <CODE>lambda</CODE> is an expensive operation--after all,
@@ -393,25 +522,32 @@ Notice that the procedure part of a <CODE>lambda</CODE> expression is known at
 compile time--each time the <CODE>lambda</CODE> is executed at run time, it
 will create a new closure, and may capture a new environment, but
 the expression closed in that environment is determined solely
-by the body of the lambda expression.  A compiler for scheme will
-therefore compile the <CODE>lambda</CODE> like any other procedure, when it
+by the body of the lambda expression.  A compiler for Scheme will
+therefore compile the code for all of the closures created by
+a particular <CODE>lambda</CODE> expression, when it
 compiles the enclosing procedure.  So, for example, when our
-example procedure make-counter is compiled, the compiler will
+example procedure <CODE>make-counter</CODE> is compiled, the compiler will
 also compile the code for the <CODE>lambda</CODE> body.  This code will be
 kept around for use by <CODE>make-counter</CODE>.
 
 </P>
 <P>
-The actual run-time code for <CODE>lambda</CODE> just consists of fetching
+The actual run-time code for <CODE>lambda</CODE> just fetches
 the address of the code, and the current environment pointer,
-and putting them in a closure object on the heap.  <CODE>lambda</CODE> is
-therefore about as fast as <CODE>cons</CODE>---all that's really happening
-is the creation of the closure object itself, not anything
-expensive like calling the compiler at run-time.
+and puts them in a creates a new closure object on the heap.
+<CODE>lambda</CODE> is therefore about as fast as <CODE>cons</CODE>---all that's
+really happening is the creation of the closure object itself, not
+anything expensive like calling the compiler at run-time.
 
 </P>
 <P>
-[ cost of lambda calling is a handful of instructions...]
+(At this point, some people who are <EM>really</EM> concerned with
+efficiency may be wondering if Scheme is slow because variable bindings
+are allocated on the heap rather than on a stack, or in registers.
+Don't worry much about this--a good Scheme compiler can actually
+avoid heap-allocating environments when no closures are created
+in their scope, and can register-allocate most variables, as
+other compilers do.<A NAME="FOOT10" HREF="schintro_foot.html#FOOT10">(10)</A>)
 
 </P>
 

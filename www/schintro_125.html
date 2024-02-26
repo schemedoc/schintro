@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.45
-     from schintro.txi on 23 January 1997 -->
+     from schintro.txi on 19 Febuary 1997 -->
 
 <TITLE>An Introduction to Scheme and its Implementation - Interpreting lambda</TITLE>
 </HEAD>
@@ -10,7 +10,7 @@ Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_124.html">previ
 <HR>
 
 
-<H3><A NAME="SEC157" HREF="schintro_toc.html#SEC157">Interpreting <CODE>lambda</CODE> and Procedure Calling</A></H3>
+<H3><A NAME="SEC159" HREF="schintro_toc.html#SEC159">Interpreting <CODE>lambda</CODE> and Procedure Calling</A></H3>
 
 <P>
 Our new interpreter will handle defining and calling new procedures.  This
@@ -95,7 +95,7 @@ is.
 <P>
 <CODE>eval-lambda</CODE> is the procedure called from <CODE>eval-list</CODE> to handle
 <CODE>lambda</CODE> expressions.  It will be stored in binding of <CODE>lambda</CODE>
-of the name <CODE>lambda</CODE> (with binding type <CODE>&#60;special-form&#62;</CODE>, and
+of the name <CODE>lambda</CODE> (with binding type <CODE>&#60;special-form&#62;</CODE>), and
 extracted and called to actually interpret <CODE>lambda</CODE>'s.
  
 
@@ -140,17 +140,17 @@ orders at different call sites.)
 
 </P>
 <P>
-<CODE>eval-combo</CODE> evaluates the argument expressions in the given environment
-to get the argument values, using <CODE>eval-multi</CODE>, and calls
-<CODE>eval-apply</CODE> to call the given closure with those values.
+<CODE>eval-combo</CODE> evaluates the argument expressions in the given
+environment to get the argument values, using <CODE>eval-multi</CODE>, and
+calls <CODE>eval-apply</CODE> to call the given closure with those values.
 
 </P>
 
 <PRE>
 (define (eval-combo proc arg-expr-list envt)
-   ; use our own kind of apply to run our own kind of closures
+   ;; use our own kind of apply to run our own kind of closures
    (eval-apply proc
-               ; evaluate the arguments, collecting the results into a list
+               ;; evaluate the arguments, collecting results into a list
                (eval-multi arg-expr-list
                           envt)))
 </PRE>
@@ -183,22 +183,22 @@ Likewise, <CODE>(apply list '(1 2 3 4))</CODE> returns the same thing as
 (define (eval-apply proc arg-list)
    (if (primitive-closure? proc)
     
-       ; it's a primitive, so extract the underlying language's
-       ; closure for the primitive, and do a real (underlying Scheme)
-       ; apply to call it
+       ;; it's a primitive, so extract the underlying language's
+       ;; closure for the primitive, and do a real (underlying Scheme)
+       ;; apply to call it
        (apply (closure-primitive proc) arg-list)
        
-       ; it's not a primitive closure, so it must be something
-       ; we created with make-closure
-       ;
-       ; first, bind the actuals into a new environment, which
-       ; is scoped inside the environment in which the closure
-       ; was closed
+       ;; it's not a primitive closure, so it must be something
+       ;; we created with make-closure
+       ;;
+       ;; first, bind the actuals into a new environment, which
+       ;; is scoped inside the environment in which the closure
+       ;; was closed
        (let ((new-envt (make-envt (closure-args proc) 
                                   arg-list
                                   (closure-envt proc))))
-          ; then, evaluate the body forms, returning the 
-          ; value of the last of them.
+          ;; then, evaluate the body forms, returning the 
+          ;; value of the last of them.
           (eval-sequence (closure-body proc)
                          new-envt))))
 </PRE>
@@ -215,7 +215,7 @@ the old one.
 <P>
 There's a big difference here, though.  The "old" environment that's
 used in creating the new one is <EM>not</EM> the environment that
-was passed to <EM>eval-combo</EM>.  (Notice that <EM>eval-combo</EM> did
+was passed to <CODE>eval-combo</CODE>.  (Notice that <CODE>eval-combo</CODE> did
 not even pass that environment to <CODE>eval-apply</CODE>.) 
 
 </P>
@@ -241,7 +241,7 @@ recursion of the program we're interpreting.)
 </P>
 
 
-<H4><A NAME="SEC158" HREF="schintro_toc.html#SEC158">Mutual Recursion Between Eval and Apply</A></H4>
+<H4><A NAME="SEC160" HREF="schintro_toc.html#SEC160">Mutual Recursion Between Eval and Eval-apply</A></H4>
 
 <P>
 It is important to understand the relationship between <CODE>eval</CODE> and
@@ -251,20 +251,19 @@ relationship between an interpreter and a compiler.
 
 </P>
 <P>
-<CODE>eval</CODE> calls <EM>itself</EM>
-to evaluate normal nested expressions.  It may do this indirectly,
-by using helper procedures that discriminate different kinds of
-expressions, but in general recursive calls to eval correspond to the
-nested structure of a procedure.
+<CODE>eval</CODE> calls <EM>itself</EM> to evaluate normal nested expressions.
+It may do this indirectly, by using helper procedures that handle
+different kinds of expressions, but in general recursive calls to
+<CODE>eval</CODE> correspond to the nested structure of a procedure.
 
 </P>
 <P>
-<CODE>eval-apply</CODE> is very different.  When the interpreter gets to a procedure
-call, it calls <CODE>eval-apply</CODE> to jump to a <EM>different</EM> procedure,
-not a nested expression of the same procedure.  (Note
-that the arguments to a procedure call are evaluated like any other nested
-expressions, by calling <CODE>eval</CODE>, but the call itself is done by
-<CODE>eval-apply</CODE>.)  
+<CODE>eval-apply</CODE> is very different.  When the interpreter gets to a
+procedure call, it calls <CODE>eval-apply</CODE> to jump to a <EM>different</EM>
+procedure, not a nested expression of the same procedure.  (Note
+that the arguments to a procedure call are evaluated like any other
+nested expressions, by calling <CODE>eval</CODE>, but the call itself is
+done by <CODE>eval-apply</CODE>.)  
 
 </P>
 <P>

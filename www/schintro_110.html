@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.45
-     from schintro.txi on 23 January 1997 -->
+     from schintro.txi on 19 Febuary 1997 -->
 
 <TITLE>An Introduction to Scheme and its Implementation - Currying</TITLE>
 </HEAD>
@@ -10,14 +10,121 @@ Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_109.html">previ
 <HR>
 
 
-<H3><A NAME="SEC128" HREF="schintro_toc.html#SEC128">Currying</A></H3>
+<H3><A NAME="SEC129" HREF="schintro_toc.html#SEC129">Currying</A></H3>
 
 <P>
+<EM>[ ugh... need to decide what's technically currying and what isn't...
+      and provide a precise definition.] </EM>
+
+</P>
+<P>
 <A NAME="IDX122"></A>
+
+</P>
+<P>
+Above I showed that we can "specialize" a procedure by having it
+take an argument that specifies an action to take.  It is often
+useful to have a procedure that can create procedures of some
+general type, producing a specialized procedure each time it's
+called.
+
+</P>
+<P>
+For example, rather than having to specialize <CODE>mem</CODE> by hand,
+we can provide a procedure that automates the process.  This
+procedure <CODE>make-mem-proc</CODE> will take a comparison routine
+as an argument, and return a specialized version of <CODE>mem</CODE> that
+uses that procedure.
+
+</P>
+
+<PRE>
+(define (make-mem-proc pred?)
+   (lambda (target lis)
+      (mem pred? target lis)))
+</PRE>
+
+<P>
+Each time this procedure is called, it will bind its argument variable
+<CODE>pred?</CODE>, and create a new procedure that will call <CODE>mem</CODE>.
+Each new procedure will "remember" the binding of pred? that was
+created for it, so each one can do something different.
+
+</P>
+<P>
+Now we can define <CODE>member</CODE>, <CODE>memv</CODE>, and <CODE>memq</CODE>, by
+using this procedure to create three new procedures, each with
+its own captured binding of <CODE>pred?</CODE>.
+
+</P>
+
+<PRE>
+(define member (make-mem-proc equal?))
+(define memq   (make-mem-proc eq?))
+(define memv   (make-mem-proc eqv?))
+</PRE>
+
+<P>
  
+(Notice that we're using plain variable definition syntax here.  We're
+just defining variables <CODE>member</CODE>, <CODE>memq</CODE>, and <CODE>memv</CODE>,
+and initializing them with procedures (closures) returned by
+<CODE>make-mem-proc</CODE>.)
+
+</P>
+<P>
+Of course, if we only use <CODE>mem</CODE> in this way, then we don't actually need
+separate <CODE>mem</CODE> and and <CODE>make-mem-proc</CODE> procedures.
+We can just write <CODE>make-mem-proc</CODE> using a lambda expression
+that's equivalent to <CODE>mem</CODE>:
+
+</P>
+
+<PRE>
+(define (make-mem-proc pred?)
+   (letrec ((mem-proc (lambda (thing lis)
+                         (if (null? lis)
+                             #f
+                             (if (pred? (car lis) thing)
+                                 lis
+                                 (mem-proc pred? thing (cdr lis)))))))
+      mem-proc))
+</PRE>
+
+<P>
+Here I've used a <CODE>letrec</CODE> so that the procedure will be able
+to call itself recursively.  Each time we call <CODE>make-mem-proc</CODE>,
+it will bind its argument <CODE>pred?</CODE>, initializing it with the
+procedure argument we pass.  Then it will bind <CODE>mem-proc</CODE>
+and create the specialized procedure using <CODE>lambda</CODE>.  Note
+that the bindings of both <CODE>pred?</CODE> and <CODE>mem-proc</CODE> will
+be remembered by the closure created by <CODE>lambda</CODE>.  This
+allows the new closure to see both the predicate it should use,
+and itself, so that it can call itself recursively.
+
+</P>
+<P>
+<EM>[ A picture would be nice here, showing what we get
+        when we define <CODE>mem</CODE>, <CODE>memq</CODE>, and <CODE>memv</CODE>
+        using <CODE>make-mem-proc</CODE>... three variable bindings,
+        holding three closures, each of which is closed in
+        an environment with its own binding of <CODE>mem-proc</CODE>
+        scoped inside its own binding of <CODE>pred?</CODE>. ]</EM>
+ 
+There are two advantages to coding <CODE>make-mem-proc</CODE> this way.
+One is that it avoids cluttering up our code with a definition
+of <CODE>mem</CODE> that's external to <CODE>make-mem-proc</CODE>. 
+<EM>[ another advantage is that a good compiler will be
+able to optimize the code better, because it can tell that the
+value of a bindings of <CODE>pred?</CODE> or <CODE>mem-proc</CODE> will
+never change once the binding is created.  It may use that
+information to generate better code... ] </EM>
+
+</P>
 
 
-<H2><A NAME="SEC129" HREF="schintro_toc.html#SEC129">Discussion and Review</A></H2>
+
+<H2><A NAME="SEC130" HREF="schintro_toc.html#SEC130">Discussion and Review</A></H2>
 <HR>
 Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_109.html">previous</A>, <A HREF="schintro_111.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
 </BODY>

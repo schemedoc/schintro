@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.45
-     from schintro.txi on 23 January 1997 -->
+     from schintro.txi on 19 Febuary 1997 -->
 
 <TITLE>An Introduction to Scheme and its Implementation - Special Forms</TITLE>
 </HEAD>
@@ -52,9 +52,10 @@ You've already seen two of the five or six important special forms,
 <P>
 Notice that <CODE>set!</CODE> isn't a procedure, because
 its first argument is not really an expression to be evaluated in the
-normal way, to get a value to pass as an argument.  It's the name of a place
-to <EM>put</EM> a value.  (e.g., if we say <CODE>(set! a b)</CODE>, we get the 
-value of <CODE>b</CODE>, and put it into the <EM>storage named by</EM> <CODE>a</CODE>.)
+normal way, to get a value to pass as an argument.  It's the name of a
+place to <EM>put</EM> a value.  (e.g., if we say <CODE>(set! a b)</CODE>, we
+get the value of <CODE>b</CODE>, and put it into the <EM>storage named by</EM>
+<CODE>a</CODE>.)
 
 </P>
 <P>
@@ -70,9 +71,14 @@ Other special forms we'll see include
 </P>
 
 <UL>
-<LI>control constructs, like <CODE>if</CODE> <CODE>do</CODE>
+<LI>control constructs: <CODE>if</CODE>, <CODE>cond</CODE>, and <CODE>case</CODE>
 
-<LI>forms for defining local variables, like <CODE>let</CODE>,
+      and the sort-circuiting logical operators <CODE>and</CODE> and
+      <CODE>or</CODE>;
+<LI>forms for defining local variables: <CODE>let</CODE> and
+
+      its variants <CODE>letrec</CODE> and <CODE>let*</CODE>;
+<LI>looping constructs: named <CODE>let</CODE> and <CODE>do</CODE>;
 
 <LI><CODE>quote</CODE> and <CODE>quasiquote</CODE>, which let you write complex
 
@@ -83,7 +89,7 @@ Other special forms we'll see include
 </UL>
 
 <P>
-There are also a few very special special forms, <CODE>define-syntax</CODE>, 
+There is also a few very special special forms, <CODE>define-syntax</CODE>, 
 which let you define your own special forms as "macros."
 
 </P>

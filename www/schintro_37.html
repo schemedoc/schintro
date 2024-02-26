@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.45
-     from schintro.txi on 23 January 1997 -->
+     from schintro.txi on 19 Febuary 1997 -->
 
 <TITLE>An Introduction to Scheme and its Implementation - cdr-linked lists</TITLE>
 </HEAD>
@@ -10,7 +10,7 @@ Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_36.html">previo
 <HR>
 
 
-<H3><A NAME="SEC38" HREF="schintro_toc.html#SEC38"><CODE>cdr-</CODE>linked lists</A></H3>
+<H3><A NAME="SEC39" HREF="schintro_toc.html#SEC39"><CODE>cdr-</CODE>linked lists</A></H3>
 
 <P>
 In Lisp and Scheme, you don't typically string objects
@@ -72,9 +72,11 @@ a Scheme programmer.
 </P>
 <P>
 I've also drawn pairs in a special way, with the <CODE>car</CODE> and <CODE>cdr</CODE>
-fields side-by-side.  I've drawn the integers outside the pairs,
-with pointers to them from the <CODE>car</CODE> fields, because that's the
-way things look at the language level.
+fields side-by-side.  Putting the fields side-by-side lets us draw
+the list left-to-right, with the <CODE>cdr</CODE> field in a convenient place
+for its normal use as a "next" pointer.  I've drawn the integers outside
+the pairs, with pointers to them from the <CODE>car</CODE> fields, because that's
+the way things look at the language level.
 
 </P>
 <P>
@@ -83,11 +85,18 @@ things from the items "in" the list.
 
 </P>
 <P>
-A major advantage of this is that you don't have to modify an object to
-put it on a list--an object can easily be in many lists at once, because
-a list is really just a spine of pairs that holds <EM>pointers to</EM> the
-items in the list.  This is much cleaner than the way people are typically
-taught to create simple lists in most beginning programming classes.
+We leave off the headers because they're a low-level detail anyway, because
+they're a hidden implementation detail that may vary from system
+to system, and because Scheme programmers immediately recognize this kind of
+two-box drawing of a pair.
+
+</P>
+<P>
+A major advantage of Scheme's list structure is that you don't have to modify
+an object to put it on a list--an object can easily be in many lists at
+once, because a list is really just a spine of pairs that holds <EM>pointers
+to</EM> the items in the list.  This is much cleaner than the way people are
+typically taught to create simple lists in most beginning programming classes.
 (It's also very natural in a language where all values are pointers---<EM>of
 course</EM> lists of objects are really just lists of pointers to objects.)
 
@@ -211,23 +220,6 @@ The more common way of drawing this data structure is
 <P>
 Again, this emphasizes the idea that everything's a pointer--conceptually,
 the pairs hold pointers to the integers.
-
-</P>
-<P>
-Generally, pairs are drawn as pairs of little boxes, and they're typically
-drawn with the boxes side by side--that's just handy because pairs are
-often used for linear lists, which you want to display horizontally--it's
-easy to draw the spine of the list horizontally if the <CODE>cdr</CODE> field
-(used as a "next" pointer) is on the right.  (Of course, when there's
-shared structure, as in the above picture, you can't draw all cdrs going
-directly to the right.)
-
-</P>
-<P>
-We leave off the headers because they're a low-level detail anyway, because
-they're a hidden implementation detail that may vary from system
-to system, and because Scheme programmers immediately recognize this kind of
-two-box drawing of a pair.
 
 </P>
 <P>

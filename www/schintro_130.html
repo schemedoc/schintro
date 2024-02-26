@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.45
-     from schintro.txi on 23 January 1997 -->
+     from schintro.txi on 19 Febuary 1997 -->
 
 <TITLE>An Introduction to Scheme and its Implementation - Defining New Special Forms</TITLE>
 </HEAD>
@@ -10,7 +10,7 @@ Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_129.html">previ
 <HR>
 
 
-<H2><A NAME="SEC181" HREF="schintro_toc.html#SEC181">Defining New Special Forms</A></H2>
+<H2><A NAME="SEC183" HREF="schintro_toc.html#SEC183">Defining New Special Forms</A></H2>
 
 <P>
 Sometimes we want to write stereotyped <EM>code</EM>, not just
@@ -82,7 +82,7 @@ which let your "roll your own" language with powerful new features.
 
 
 
-<H3><A NAME="SEC182" HREF="schintro_toc.html#SEC182">Macros vs. Procedures</A></H3>
+<H3><A NAME="SEC184" HREF="schintro_toc.html#SEC184">Macros vs. Procedures</A></H3>
 
 <P>
 Why do we want macros?  In Scheme, the main code abstraction mechanism
@@ -607,7 +607,7 @@ the expression around, we accidentally changed its meaning.
 
 
 
-<H2><A NAME="SEC183" HREF="schintro_toc.html#SEC183">Implementing More Scheme Special Forms</A></H2>
+<H2><A NAME="SEC185" HREF="schintro_toc.html#SEC185">Implementing More Scheme Special Forms</A></H2>
 
 <P>
 As examples of Scheme macros, I'll show how to implement several
@@ -628,7 +628,7 @@ one out? ].)
 </P>
 
 
-<H3><A NAME="SEC184" HREF="schintro_toc.html#SEC184"><CODE>let</CODE></A></H3>
+<H3><A NAME="SEC186" HREF="schintro_toc.html#SEC186"><CODE>let</CODE></A></H3>
 
 <P>
 Recall that in chapter [ whatever ], I explained how the semantics
@@ -789,7 +789,7 @@ around and bind it.
 </P>
 
 
-<H3><A NAME="SEC185" HREF="schintro_toc.html#SEC185"><CODE>let*</CODE></A></H3>
+<H3><A NAME="SEC187" HREF="schintro_toc.html#SEC187"><CODE>let*</CODE></A></H3>
 
 <P>
 Once we have <CODE>let</CODE>, we can implement <CODE>let*</CODE> in terms
@@ -836,11 +836,11 @@ the body expressions.
 </P>
 
 
-<H3><A NAME="SEC186" HREF="schintro_toc.html#SEC186"><CODE>cond</CODE></A></H3>
+<H3><A NAME="SEC188" HREF="schintro_toc.html#SEC188"><CODE>cond</CODE></A></H3>
 
 
 
-<H3><A NAME="SEC187" HREF="schintro_toc.html#SEC187">Discussion</A></H3>
+<H3><A NAME="SEC189" HREF="schintro_toc.html#SEC189">Discussion</A></H3>
 
 <P>
 Scheme macros also have several features I haven't demonstrated,
@@ -856,7 +856,7 @@ and <EM>does</EM> have problems with variable names.
 </P>
 
 
-<H2><A NAME="SEC188" HREF="schintro_toc.html#SEC188">Lisp-style Macros</A></H2>
+<H2><A NAME="SEC190" HREF="schintro_toc.html#SEC190">Lisp-style Macros</A></H2>
 
 <P>
 In this section, I'll discuss a simple kind of macro system that isn't
@@ -915,7 +915,7 @@ about Lisp. ]
 
 
 
-<H3><A NAME="SEC189" HREF="schintro_toc.html#SEC189">Ultra-simple Lispish Macros</A></H3>
+<H3><A NAME="SEC191" HREF="schintro_toc.html#SEC191">Ultra-simple Lispish Macros</A></H3>
 
 <P>
 The classic macro system is the Lisp macro system, which allows
@@ -1071,7 +1071,7 @@ to get at the components--in this case, subexpressions.)
 </P>
 
 
-<H4><A NAME="SEC190" HREF="schintro_toc.html#SEC190">Better Lisp-style Macros</A></H4>
+<H4><A NAME="SEC192" HREF="schintro_toc.html#SEC192">Better Lisp-style Macros</A></H4>
 
 <P>
 It would be nice if the macro facility allowed you to declare the
@@ -1189,7 +1189,7 @@ them with the interpreter.
 </P>
 
 
-<H4><A NAME="SEC191" HREF="schintro_toc.html#SEC191">Problems With Lisp-Style Macros</A></H4>
+<H4><A NAME="SEC193" HREF="schintro_toc.html#SEC193">Problems With Lisp-Style Macros</A></H4>
 
 <P>
 Earlier we alluded to a lurking bug in our <CODE>define-rewriter</CODE>
@@ -1254,7 +1254,7 @@ problem is to get a much smarter macro facility, like the new Scheme
 </P>
 
 
-<H4><A NAME="SEC192" HREF="schintro_toc.html#SEC192">Ugly Hacks Around Name Conflicts</A></H4>
+<H4><A NAME="SEC194" HREF="schintro_toc.html#SEC194">Ugly Hacks Around Name Conflicts</A></H4>
 
 <P>
 One way to avoid name conflicts is to pick names for variables used
@@ -1346,15 +1346,15 @@ and things like that.  Fun, maybe, but not for the faint of heart.
    
 
 
-<H2><A NAME="SEC193" HREF="schintro_toc.html#SEC193">Implementing Simple Macros and Quasiquote</A></H2>
+<H2><A NAME="SEC195" HREF="schintro_toc.html#SEC195">Implementing Simple Macros and Quasiquote</A></H2>
 
 
 
-<H3><A NAME="SEC194" HREF="schintro_toc.html#SEC194">Implementing Simple Macros</A></H3>
+<H3><A NAME="SEC196" HREF="schintro_toc.html#SEC196">Implementing Simple Macros</A></H3>
 
 
 
-<H3><A NAME="SEC195" HREF="schintro_toc.html#SEC195">Implementing <CODE>quasiquote</CODE> and <CODE>unquote</CODE></A></H3>
+<H3><A NAME="SEC197" HREF="schintro_toc.html#SEC197">Implementing <CODE>quasiquote</CODE> and <CODE>unquote</CODE></A></H3>
 
 <P>
 [ This section is particularly rough and needs to be reworked.  Sorry. ]
@@ -1369,7 +1369,7 @@ done by the compiler or interpreter.
 </P>
 
 
-<H4><A NAME="SEC196" HREF="schintro_toc.html#SEC196">Translating backquotes to <CODE>quasiquote</CODE></A></H4>
+<H4><A NAME="SEC198" HREF="schintro_toc.html#SEC198">Translating backquotes to <CODE>quasiquote</CODE></A></H4>
 
 <P>
 A backquote character is interpreted very specially by the Scheme (or
@@ -1387,7 +1387,7 @@ deal with.
 </P>
 
 
-<H4><A NAME="SEC197" HREF="schintro_toc.html#SEC197"><CODE>quasiquote</CODE></A></H4>
+<H4><A NAME="SEC199" HREF="schintro_toc.html#SEC199"><CODE>quasiquote</CODE></A></H4>
 
 <P>
 The <CODE>quasiquote</CODE> special form may be built into the
@@ -1514,7 +1514,7 @@ unquoted holes filled in.  Also, a full implementation should handle
 </P>
 
 
-<H4><A NAME="SEC198" HREF="schintro_toc.html#SEC198"><CODE>define-rewriter</CODE></A></H4>
+<H4><A NAME="SEC200" HREF="schintro_toc.html#SEC200"><CODE>define-rewriter</CODE></A></H4>
 
 <P>
 In Chapter [ whatever ], I showed the code for an interpretive
@@ -1583,7 +1583,7 @@ language, not the underlying Scheme ]
 </P>
 
 
-<H4><A NAME="SEC199" HREF="schintro_toc.html#SEC199"><CODE>define-macro</CODE></A></H4>
+<H4><A NAME="SEC201" HREF="schintro_toc.html#SEC201"><CODE>define-macro</CODE></A></H4>
 
 <P>
 Once we've added define-rewriter to our interpreter, we don't have to

@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.45
-     from schintro.txi on 23 January 1997 -->
+     from schintro.txi on 19 Febuary 1997 -->
 
 <TITLE>An Introduction to Scheme and its Implementation - Records and Object Orientation</TITLE>
 </HEAD>
@@ -10,7 +10,7 @@ Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_132.html">previ
 <HR>
 
 
-<H1><A NAME="SEC202" HREF="schintro_toc.html#SEC202">Records and Object Orientation</A></H1>
+<H1><A NAME="SEC204" HREF="schintro_toc.html#SEC204">Records and Object Orientation</A></H1>
 
 <P>
 Most programming languages have a standard facility for defining
@@ -41,11 +41,11 @@ Scheme, but are available in almost every Scheme implementation.)
 
 
 
-<H2><A NAME="SEC203" HREF="schintro_toc.html#SEC203">Records (Structures)</A></H2>
+<H2><A NAME="SEC205" HREF="schintro_toc.html#SEC205">Records (Structures)</A></H2>
 
 
 
-<H3><A NAME="SEC204" HREF="schintro_toc.html#SEC204">Using Procedural Abstraction to Implement Data Abstraction</A></H3>
+<H3><A NAME="SEC206" HREF="schintro_toc.html#SEC206">Using Procedural Abstraction to Implement Data Abstraction</A></H3>
 
 <P>
 Scheme's main abstraction mechanism is procedural abstraction.  We
@@ -175,7 +175,7 @@ them from the direction and distance.
 </P>
 
 
-<H3><A NAME="SEC205" HREF="schintro_toc.html#SEC205">Automating the Construction of Abstract Data Types with Macros</A></H3>
+<H3><A NAME="SEC207" HREF="schintro_toc.html#SEC207">Automating the Construction of Abstract Data Types with Macros</A></H3>
 
 <P>
 As I just showed, it's easy to define an abstract data type in Scheme,
@@ -305,7 +305,7 @@ two definitions onto the definitions for the rest of the slots:
 </P>
 
 
-<H2><A NAME="SEC206" HREF="schintro_toc.html#SEC206">Simple Uses of OOP Objects</A></H2>
+<H2><A NAME="SEC208" HREF="schintro_toc.html#SEC208">Simple Uses of OOP Objects</A></H2>
 
 <P>
 In this section, I'll discuss a simple object system and how it
@@ -324,7 +324,7 @@ Meroon, TinyCLOS, and STkLOS.
 </P>
 
 
-<H3><A NAME="SEC207" HREF="schintro_toc.html#SEC207">Late Binding</A></H3>
+<H3><A NAME="SEC209" HREF="schintro_toc.html#SEC209">Late Binding</A></H3>
 
 <P>
 One of the major features of object-based and object-oriented programming is
@@ -454,7 +454,7 @@ don't matter for what we're trying to do.)
 
 
 
-<H3><A NAME="SEC208" HREF="schintro_toc.html#SEC208">Class Definitions and Slot Specifications</A></H3>
+<H3><A NAME="SEC210" HREF="schintro_toc.html#SEC210">Class Definitions and Slot Specifications</A></H3>
 
 <P>
 A <EM>class</EM> is an object that describes a particular kind of object.
@@ -499,7 +499,7 @@ it's clear that they are class names, not names of normal objects.
 <P>
 The parenthesized expression after the class name <CODE>&#60;point&#62;</CODE> is
 a sequence of <EM>superclass</EM> names, which will be explained
-later.<A NAME="FOOT11" HREF="schintro_foot.html#FOOT11">(11)</A>
+later.<A NAME="FOOT12" HREF="schintro_foot.html#FOOT12">(12)</A>
 (When in doubt, it is a good idea to use <CODE>&#60;object&#62;</CODE> as
 the sole superclass, so use <CODE>(&#60;object&#62;)</CODE> after the class
 name in the class definition.)
@@ -637,7 +637,7 @@ are actually generic procedures, which will be explained later.)
 
 
 
-<H3><A NAME="SEC209" HREF="schintro_toc.html#SEC209">Generic Procedures and Methods</A></H3>
+<H3><A NAME="SEC211" HREF="schintro_toc.html#SEC211">Generic Procedures and Methods</A></H3>
 
 <P>
 A <EM>generic procedure</EM> is a procedure that does a certain
@@ -916,7 +916,7 @@ same operation (generic procedure) is implemented by different code
 </P>
 
 
-<H2><A NAME="SEC210" HREF="schintro_toc.html#SEC210">Generic Procedures and Classes are First-Class</A></H2>
+<H2><A NAME="SEC212" HREF="schintro_toc.html#SEC212">Generic Procedures and Classes are First-Class</A></H2>
 
 <P>
 A generic procedure is a procedure, like any other--it is a first-class
@@ -949,7 +949,7 @@ with a pointer to the class object.
 </P>
 
 
-<H2><A NAME="SEC211" HREF="schintro_toc.html#SEC211">Implementing the Simple Object System</A></H2>
+<H2><A NAME="SEC213" HREF="schintro_toc.html#SEC213">Implementing the Simple Object System</A></H2>
 
 <P>
 In this section, I'll present a simple implementation of the simple
@@ -1014,7 +1014,7 @@ procedures.
 </P>
 
 
-<H3><A NAME="SEC212" HREF="schintro_toc.html#SEC212">Implementing <CODE>define-class</CODE></A></H3>
+<H3><A NAME="SEC214" HREF="schintro_toc.html#SEC214">Implementing <CODE>define-class</CODE></A></H3>
 
 <P>
 <CODE>define-class</CODE> is a macro which accepts the users's description
@@ -1118,12 +1118,12 @@ In more detail, what this generated code does is:
 <LI>creates a vector that will be the class object.  Its 0th slot
 
       is initialized with a pointer to the special object <CODE>&#60;class&#62;</CODE>,
-      which identifies this object as a class object.<A NAME="FOOT12" HREF="schintro_foot.html#FOOT12">(12)</A>  The 1st slot holds
+      which identifies this object as a class object.<A NAME="FOOT13" HREF="schintro_foot.html#FOOT13">(13)</A>  The 1st slot holds
       a pointer to the name symbol that is this class's class name.
       (This is just for documentation purposes.)  The 2nd slot holds
       a list of pointers to this object's immediate superclasses.
       (Note that this is a list of pointers to actual class objects,
-      not name symbols.<A NAME="FOOT13" HREF="schintro_foot.html#FOOT13">(13)</A>
+      not name symbols.<A NAME="FOOT14" HREF="schintro_foot.html#FOOT14">(14)</A>
 <LI>creates a procedure that will allocate and initialize an
 
       instance, given the initial values of the slots.  A pointer
@@ -1247,7 +1247,7 @@ substituted inside the quote expression during macro processing.
 <P>
 For the <CODE>&#60;point&#62;</CODE> definition, the expression
 <CODE>(generate-slots-alist ',slot-decls 1)</CODE> will translate to
-<CODE>(generate-slots-alist '((x) (y)) 1)</CODE>.<A NAME="FOOT14" HREF="schintro_foot.html#FOOT14">(14)</A>
+<CODE>(generate-slots-alist '((x) (y)) 1)</CODE>.<A NAME="FOOT15" HREF="schintro_foot.html#FOOT15">(15)</A>
    
 Several other expressions in the macro work this way, as well:
 For the <CODE>&#60;point&#62;</CODE> example, <CODE>',class-name</CODE> will translate
@@ -1339,7 +1339,7 @@ offset.
 
 
 
-<H4><A NAME="SEC213" HREF="schintro_toc.html#SEC213">class <CODE>&#60;&#60;class&#62;&#62;</CODE></A></H4>
+<H4><A NAME="SEC215" HREF="schintro_toc.html#SEC215">class <CODE>&#60;&#60;class&#62;&#62;</CODE></A></H4>
 
 <P>
 Our simple object system implementation assumes that every instance
@@ -1455,7 +1455,7 @@ but we'll ignore that for now.)
 
 
 
-<H3><A NAME="SEC214" HREF="schintro_toc.html#SEC214">Implementing <CODE>define-generic</CODE></A></H3>
+<H3><A NAME="SEC216" HREF="schintro_toc.html#SEC216">Implementing <CODE>define-generic</CODE></A></H3>
 
 <P>
 Each generic procedure maintains a table of methods that are defined
@@ -1644,7 +1644,7 @@ the actual generic procedure
  
 
 
-<H3><A NAME="SEC215" HREF="schintro_toc.html#SEC215">Implementing <CODE>define-method</CODE></A></H3>
+<H3><A NAME="SEC217" HREF="schintro_toc.html#SEC217">Implementing <CODE>define-method</CODE></A></H3>
 
 <P>
 Now that each generic procedure is associated with a method-adding
@@ -1720,7 +1720,7 @@ us the first argument's name and the name and its class.
 
 
 
-<H4><A NAME="SEC216" HREF="schintro_toc.html#SEC216">Installing Accessor Methods</A></H4>
+<H4><A NAME="SEC218" HREF="schintro_toc.html#SEC218">Installing Accessor Methods</A></H4>
 
 <P>
 Given the code we've seen so far, we've almost got a working object system,
@@ -1762,11 +1762,11 @@ name is automatically constructed using the accessor naming conventions.
 </P>
 
 
-<H4><A NAME="SEC217" HREF="schintro_toc.html#SEC217">Keyword options</A></H4>
+<H4><A NAME="SEC219" HREF="schintro_toc.html#SEC219">Keyword options</A></H4>
 
 
 
-<H3><A NAME="SEC218" HREF="schintro_toc.html#SEC218">Inheritance</A></H3>
+<H3><A NAME="SEC220" HREF="schintro_toc.html#SEC220">Inheritance</A></H3>
 
 <P>
 So far we've described a simple object-based programming system and
@@ -1835,7 +1835,7 @@ and methods of <CODE>&#60;point&#62;</CODE>.
 
 
 
-<H3><A NAME="SEC219" HREF="schintro_toc.html#SEC219">Overriding and Refining Inherited Methods</A></H3>
+<H3><A NAME="SEC221" HREF="schintro_toc.html#SEC221">Overriding and Refining Inherited Methods</A></H3>
 
 <P>
 By default, a class inherits all of the methods defined for
@@ -1908,19 +1908,19 @@ in turn be the <EM>next</EM> most specific method, and so on.)
                                   
 
 
-<H3><A NAME="SEC220" HREF="schintro_toc.html#SEC220">Late Binding and Inheritance</A></H3>
+<H3><A NAME="SEC222" HREF="schintro_toc.html#SEC222">Late Binding and Inheritance</A></H3>
 
 
 
-<H3><A NAME="SEC221" HREF="schintro_toc.html#SEC221">Implementing an Object System with Inheritance</A></H3>
+<H3><A NAME="SEC223" HREF="schintro_toc.html#SEC223">Implementing an Object System with Inheritance</A></H3>
 
 
 
-<H3><A NAME="SEC222" HREF="schintro_toc.html#SEC222">Interfaces and Inheritance</A></H3>
+<H3><A NAME="SEC224" HREF="schintro_toc.html#SEC224">Interfaces and Inheritance</A></H3>
 
 
 
-<H2><A NAME="SEC223" HREF="schintro_toc.html#SEC223">A More Advanced Object System and Implementation</A></H2>
+<H2><A NAME="SEC225" HREF="schintro_toc.html#SEC225">A More Advanced Object System and Implementation</A></H2>
 
 <P>
 The simple object system
@@ -1928,36 +1928,36 @@ The simple object system
 </P>
 
 
-<H3><A NAME="SEC224" HREF="schintro_toc.html#SEC224">Language Features</A></H3>
+<H3><A NAME="SEC226" HREF="schintro_toc.html#SEC226">Language Features</A></H3>
 
 
 
-<H4><A NAME="SEC225" HREF="schintro_toc.html#SEC225">Purity</A></H4>
+<H4><A NAME="SEC227" HREF="schintro_toc.html#SEC227">Purity</A></H4>
 
 
 
-<H4><A NAME="SEC226" HREF="schintro_toc.html#SEC226">Encapsulation</A></H4>
+<H4><A NAME="SEC228" HREF="schintro_toc.html#SEC228">Encapsulation</A></H4>
 <P>
     
 
 
-<H4><A NAME="SEC227" HREF="schintro_toc.html#SEC227">Multiple Dispatching</A></H4>
+<H4><A NAME="SEC229" HREF="schintro_toc.html#SEC229">Multiple Dispatching</A></H4>
 
 
 
-<H4><A NAME="SEC228" HREF="schintro_toc.html#SEC228">Multiple Inheritance</A></H4>
+<H4><A NAME="SEC230" HREF="schintro_toc.html#SEC230">Multiple Inheritance</A></H4>
 
 
 
-<H4><A NAME="SEC229" HREF="schintro_toc.html#SEC229">Explictit Subtyping</A></H4>
+<H4><A NAME="SEC231" HREF="schintro_toc.html#SEC231">Explictit Subtyping</A></H4>
 
 
 
-<H4><A NAME="SEC230" HREF="schintro_toc.html#SEC230">Control Over Compilation</A></H4>
+<H4><A NAME="SEC232" HREF="schintro_toc.html#SEC232">Control Over Compilation</A></H4>
 
 
 
-<H4><A NAME="SEC231" HREF="schintro_toc.html#SEC231">A Metaobject Protocol</A></H4>
+<H4><A NAME="SEC233" HREF="schintro_toc.html#SEC233">A Metaobject Protocol</A></H4>
 
 <P>
  
@@ -1965,55 +1965,55 @@ The simple object system
 </P>
 
 
-<H3><A NAME="SEC232" HREF="schintro_toc.html#SEC232">Implementation Improvements</A></H3>
+<H3><A NAME="SEC234" HREF="schintro_toc.html#SEC234">Implementation Improvements</A></H3>
 
 
 
-<H4><A NAME="SEC233" HREF="schintro_toc.html#SEC233">Factoring out Work at Compile Time</A></H4>
+<H4><A NAME="SEC235" HREF="schintro_toc.html#SEC235">Factoring out Work at Compile Time</A></H4>
 
 
 
-<H4><A NAME="SEC234" HREF="schintro_toc.html#SEC234">Supporting Runtime Changes</A></H4>
+<H4><A NAME="SEC236" HREF="schintro_toc.html#SEC236">Supporting Runtime Changes</A></H4>
 
 
 
-<H4><A NAME="SEC235" HREF="schintro_toc.html#SEC235">Faster Dynamic Dispatching</A></H4>
+<H4><A NAME="SEC237" HREF="schintro_toc.html#SEC237">Faster Dynamic Dispatching</A></H4>
 
 
 
-<H4><A NAME="SEC236" HREF="schintro_toc.html#SEC236">Compiling Slot Accessors And Methdos Inline</A></H4>
+<H4><A NAME="SEC238" HREF="schintro_toc.html#SEC238">Compiling Slot Accessors And Methdos Inline</A></H4>
 
 
 
-<H4><A NAME="SEC237" HREF="schintro_toc.html#SEC237">Exploiting Type Information</A></H4>
+<H4><A NAME="SEC239" HREF="schintro_toc.html#SEC239">Exploiting Type Information</A></H4>
 
 
 
-<H4><A NAME="SEC238" HREF="schintro_toc.html#SEC238">Advanced Compilation Techniques</A></H4>
+<H4><A NAME="SEC240" HREF="schintro_toc.html#SEC240">Advanced Compilation Techniques</A></H4>
 
 
 
-<H2><A NAME="SEC239" HREF="schintro_toc.html#SEC239">Some Shortcomings of Standard Scheme for Object System Implementation</A></H2>
+<H2><A NAME="SEC241" HREF="schintro_toc.html#SEC241">Some Shortcomings of Standard Scheme for Object System Implementation</A></H2>
 
 
 
-<H3><A NAME="SEC240" HREF="schintro_toc.html#SEC240">Inability to Define Disjoint Types</A></H3>
+<H3><A NAME="SEC242" HREF="schintro_toc.html#SEC242">Inability to Define Disjoint Types</A></H3>
 
 
 
-<H3><A NAME="SEC241" HREF="schintro_toc.html#SEC241">Lack of Type Objects for Predefined Types</A></H3>
+<H3><A NAME="SEC243" HREF="schintro_toc.html#SEC243">Lack of Type Objects for Predefined Types</A></H3>
 
 
 
-<H3><A NAME="SEC242" HREF="schintro_toc.html#SEC242">Lack of Weak Tables and Extensible Closure Types.</A></H3>
+<H3><A NAME="SEC244" HREF="schintro_toc.html#SEC244">Lack of Weak Tables and Extensible Closure Types.</A></H3>
 
 
 
-<H3><A NAME="SEC243" HREF="schintro_toc.html#SEC243">Standard Macros are Limited</A></H3>
+<H3><A NAME="SEC245" HREF="schintro_toc.html#SEC245">Standard Macros are Limited</A></H3>
 
 
 
-<H3><A NAME="SEC244" HREF="schintro_toc.html#SEC244">Unspecified Time of Macro Processing</A></H3>
+<H3><A NAME="SEC246" HREF="schintro_toc.html#SEC246">Unspecified Time of Macro Processing</A></H3>
 
 <P>
 (And no <CODE>bound?</CODE> either, so it's hard to ensure things like generation
@@ -2023,7 +2023,7 @@ of generic procedures for accessors exactly once.)
 </P>
 
 
-<H3><A NAME="SEC245" HREF="schintro_toc.html#SEC245">Lack of Type Declarations</A></H3>
+<H3><A NAME="SEC247" HREF="schintro_toc.html#SEC247">Lack of Type Declarations</A></H3>
 
 <P>
 (Check-me-on-this declarations vs. trust-me declarations.)
@@ -2032,7 +2032,7 @@ of generic procedures for accessors exactly once.)
 
 
 
-<H3><A NAME="SEC246" HREF="schintro_toc.html#SEC246">Lack of a Standard <CODE>bound?</CODE> procedure</A></H3>
+<H3><A NAME="SEC248" HREF="schintro_toc.html#SEC248">Lack of a Standard <CODE>bound?</CODE> procedure</A></H3>
 
 <HR>
 Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_132.html">previous</A>, <A HREF="schintro_134.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.

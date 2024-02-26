@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.45
-     from schintro.txi on 23 January 1997 -->
+     from schintro.txi on 19 Febuary 1997 -->
 
 <TITLE>An Introduction to Scheme and its Implementation - Compiling Scheme</TITLE>
 </HEAD>
@@ -10,7 +10,7 @@ Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_141.html">previ
 <HR>
 
 
-<H1><A NAME="SEC269" HREF="schintro_toc.html#SEC269">A Simple Scheme Compiler</A></H1>
+<H1><A NAME="SEC271" HREF="schintro_toc.html#SEC271">A Simple Scheme Compiler</A></H1>
 
 <P>
 [ The example compiler in compiler.scm is the skeleton of a simple
@@ -35,7 +35,7 @@ compile subexpressions, just as the interpretive evaluator may call
 </P>
 
 
-<H2><A NAME="SEC270" HREF="schintro_toc.html#SEC270">What is a Compiler?</A></H2>
+<H2><A NAME="SEC272" HREF="schintro_toc.html#SEC272">What is a Compiler?</A></H2>
 
 <P>
 [ This is somewhat redundant with earlier stuff, but more concrete.
@@ -49,7 +49,7 @@ interpreters.
 </P>
 
 
-<H3><A NAME="SEC271" HREF="schintro_toc.html#SEC271">What is an Interpreter?</A></H3>
+<H3><A NAME="SEC273" HREF="schintro_toc.html#SEC273">What is an Interpreter?</A></H3>
 
 <P>
 An interpreter really does two things:
@@ -96,7 +96,7 @@ up the values of those variables.
 </P>
 
 
-<H3><A NAME="SEC272" HREF="schintro_toc.html#SEC272">OK, so what's a compiler?</A></H3>
+<H3><A NAME="SEC274" HREF="schintro_toc.html#SEC274">OK, so what's a compiler?</A></H3>
 
 <P>
 We would rather factor out most of this redundant work, and examine
@@ -296,7 +296,7 @@ representation.
 </P>
 
 
-<H2><A NAME="SEC273" HREF="schintro_toc.html#SEC273">What Does a Compiler Generate?</A></H2>
+<H2><A NAME="SEC275" HREF="schintro_toc.html#SEC275">What Does a Compiler Generate?</A></H2>
 
 <P>
 [ Talk about machine code, interpretive virtual machines, etc. ]
@@ -304,7 +304,7 @@ representation.
 </P>
 
 
-<H2><A NAME="SEC274" HREF="schintro_toc.html#SEC274">Basic Structure of the Compiler</A></H2>
+<H2><A NAME="SEC276" HREF="schintro_toc.html#SEC276">Basic Structure of the Compiler</A></H2>
 
 <P>
 The main function of the compiler is <CODE>compile</CODE>, which generates
@@ -373,7 +373,7 @@ them later.  The main thing to notice is that it looks a lot like
 </P>
 
 
-<H2><A NAME="SEC275" HREF="schintro_toc.html#SEC275">Data Representations, Calling Convention, etc.</A></H2>
+<H2><A NAME="SEC277" HREF="schintro_toc.html#SEC277">Data Representations, Calling Convention, etc.</A></H2>
 
 <P>
 Before trying to understand the compiler itself in more detail,
@@ -436,7 +436,7 @@ that the variables should be put in hardware registers.)
       
 
 
-<H3><A NAME="SEC276" HREF="schintro_toc.html#SEC276">The Registers</A></H3>
+<H3><A NAME="SEC278" HREF="schintro_toc.html#SEC278">The Registers</A></H3>
 
 <P>
 We'll assume that there are several important registers that
@@ -477,7 +477,7 @@ can be used by the code our compiler generates:
 
 
 
-<H3><A NAME="SEC277" HREF="schintro_toc.html#SEC277">The Evaluation Stack (or Eval Stack, for short)</A></H3>
+<H3><A NAME="SEC279" HREF="schintro_toc.html#SEC279">The Evaluation Stack (or Eval Stack, for short)</A></H3>
 
 <P>
 The eval stack is used for holding values that have been computed
@@ -529,7 +529,7 @@ are moved from the eval stack into a continuation before calling.
 </P>
 
 
-<H3><A NAME="SEC278" HREF="schintro_toc.html#SEC278">The Continuation Chain</A></H3>
+<H3><A NAME="SEC280" HREF="schintro_toc.html#SEC280">The Continuation Chain</A></H3>
 
 <P>
 The continuation chain is a data structure that fills roughly the
@@ -567,7 +567,7 @@ resume from the same continuation any number of times.
 </P>
 
 
-<H3><A NAME="SEC279" HREF="schintro_toc.html#SEC279">Environments</A></H3>
+<H3><A NAME="SEC281" HREF="schintro_toc.html#SEC281">Environments</A></H3>
 
 <P>
 The compiler assumes that a binding environment is a chain of
@@ -600,7 +600,7 @@ our runtime speed.)
 </P>
 
 
-<H3><A NAME="SEC280" HREF="schintro_toc.html#SEC280">Closure Representation and Calling</A></H3>
+<H3><A NAME="SEC282" HREF="schintro_toc.html#SEC282">Closure Representation and Calling</A></H3>
 
 <P>
 Closures in our system are represented as objects with two fields:
@@ -740,11 +740,11 @@ load to fetch that value from the template at run time.
 </P>
 
 
-<H2><A NAME="SEC281" HREF="schintro_toc.html#SEC281">Continuations</A></H2>
+<H2><A NAME="SEC283" HREF="schintro_toc.html#SEC283">Continuations</A></H2>
 
 
 
-<H3><A NAME="SEC282" HREF="schintro_toc.html#SEC282">Applying a Procedure Doesn't Save the Caller's State</A></H3>
+<H3><A NAME="SEC284" HREF="schintro_toc.html#SEC284">Applying a Procedure Doesn't Save the Caller's State</A></H3>
 
 <P>
 Remember that when we do a procedure call, we do <EM>not</EM> necessarily
@@ -766,7 +766,7 @@ register when it returns.
 </P>
 
 
-<H3><A NAME="SEC283" HREF="schintro_toc.html#SEC283">Continuation Saving</A></H3>
+<H3><A NAME="SEC285" HREF="schintro_toc.html#SEC285">Continuation Saving</A></H3>
 <P>
  
 <CODE>save-continuation</CODE> is the operation that saves the state of the
@@ -817,7 +817,7 @@ continuation is resumed, it will be branched to (put in the
 </P>
 
 
-<H3><A NAME="SEC284" HREF="schintro_toc.html#SEC284">An Example</A></H3>
+<H3><A NAME="SEC286" HREF="schintro_toc.html#SEC286">An Example</A></H3>
 
 <P>
 Now that we have a more detailed idea how the registers, eval stack,
@@ -880,7 +880,7 @@ Things to notice:
 
 
 
-<H3><A NAME="SEC285" HREF="schintro_toc.html#SEC285">Generating Unique Labels</A></H3>
+<H3><A NAME="SEC287" HREF="schintro_toc.html#SEC287">Generating Unique Labels</A></H3>
 
 <P>
 [ where does this go? ]
@@ -917,7 +917,7 @@ when translating intermediate code to machine language.
 </P>
 
 
-<H2><A NAME="SEC286" HREF="schintro_toc.html#SEC286">More on Representations of Environments</A></H2>
+<H2><A NAME="SEC288" HREF="schintro_toc.html#SEC288">More on Representations of Environments</A></H2>
 
 <P>
 To get reasonable performance for our system, we'll want to treat
@@ -1048,7 +1048,7 @@ Several things to note:
 
 
 
-<H2><A NAME="SEC287" HREF="schintro_toc.html#SEC287">Compiling Code for Literals</A></H2>
+<H2><A NAME="SEC289" HREF="schintro_toc.html#SEC289">Compiling Code for Literals</A></H2>
 
 <P>
 When the compiler compiles code for a literal, like <CODE>'foo</CODE> or
@@ -1113,7 +1113,7 @@ code that includes an updated <CODE>literal-state</CODE>. ]
 </P>
 
 
-<H2><A NAME="SEC288" HREF="schintro_toc.html#SEC288">Compiling Code for Top-Level Variable References</A></H2>
+<H2><A NAME="SEC290" HREF="schintro_toc.html#SEC290">Compiling Code for Top-Level Variable References</A></H2>
 
 <P>
 Because of lexical scoping, it is easy for the compiler to tell
@@ -1234,7 +1234,7 @@ assembly-language instructions.
 </P>
 
 
-<H2><A NAME="SEC289" HREF="schintro_toc.html#SEC289">Precomputing Local Variable Lookups using Lexical Scope</A></H2>
+<H2><A NAME="SEC291" HREF="schintro_toc.html#SEC291">Precomputing Local Variable Lookups using Lexical Scope</A></H2>
 
 <P>
 We can't really look up local variable bindings at compile time the way
@@ -1359,7 +1359,7 @@ we want to address here.)
 </P>
 
 
-<H3><A NAME="SEC290" HREF="schintro_toc.html#SEC290">Lexical Addressing and Compile-Time Environments</A></H3>
+<H3><A NAME="SEC292" HREF="schintro_toc.html#SEC292">Lexical Addressing and Compile-Time Environments</A></H3>
 
 <P>
 Computing lexical addresses is very easy for the compiler.  All it
@@ -1495,7 +1495,7 @@ can be executed in that environment.
 </P>
 
 
-<H3><A NAME="SEC291" HREF="schintro_toc.html#SEC291">A Detailed Example</A></H3>
+<H3><A NAME="SEC293" HREF="schintro_toc.html#SEC293">A Detailed Example</A></H3>
 
 <P>
 Taking it step by step, let's look at the compilation of the
@@ -1792,7 +1792,7 @@ code sequence
 
 
 
-<H2><A NAME="SEC292" HREF="schintro_toc.html#SEC292">Preserving Tail-Recursiveness using Compile-Time Continuations</A></H2>
+<H2><A NAME="SEC294" HREF="schintro_toc.html#SEC294">Preserving Tail-Recursiveness using Compile-Time Continuations</A></H2>
 
 <P>
 One very important thing we glossed over just now when describing
@@ -1819,7 +1819,7 @@ procedure call, e.g., returning the value of a variable or a literal.
 
 
 
-<H3><A NAME="SEC293" HREF="schintro_toc.html#SEC293">When Should We Save Continuations?</A></H3>
+<H3><A NAME="SEC295" HREF="schintro_toc.html#SEC295">When Should We Save Continuations?</A></H3>
 
 <P>
 The general rule is that if a procedure call is the last thing
@@ -1991,7 +1991,7 @@ with whatever flag it's given.)
 </P>
 
 
-<H4><A NAME="SEC294" HREF="schintro_toc.html#SEC294">Compiling Returns</A></H4>
+<H4><A NAME="SEC296" HREF="schintro_toc.html#SEC296">Compiling Returns</A></H4>
 
 <P>
 As mentioned above, when an expression other than a procedure
@@ -2113,7 +2113,7 @@ would probably recognize this situation, and eliminate the branch.)
  
 
 
-<H2><A NAME="SEC295" HREF="schintro_toc.html#SEC295">Compiling Top-Level Expressions</A></H2>
+<H2><A NAME="SEC297" HREF="schintro_toc.html#SEC297">Compiling Top-Level Expressions</A></H2>
 
 <P>
 We said earlier that the compiler mainly uses recursion to generate
@@ -2230,7 +2230,7 @@ procedure.
 </P>
 
 
-<H2><A NAME="SEC296" HREF="schintro_toc.html#SEC296">Compiling <CODE>lambda</CODE> Expressions Inside Procedures</A></H2>
+<H2><A NAME="SEC298" HREF="schintro_toc.html#SEC298">Compiling <CODE>lambda</CODE> Expressions Inside Procedures</A></H2>
 
 <P>
 When we compile a <CODE>lambda</CODE> expression, we must generate code that
@@ -2306,7 +2306,7 @@ and generates code like the above to reference the right literal.
 </P>
 
 
-<H2><A NAME="SEC297" HREF="schintro_toc.html#SEC297">Compiling Top-level Definitions</A></H2>
+<H2><A NAME="SEC299" HREF="schintro_toc.html#SEC299">Compiling Top-level Definitions</A></H2>
 
 <P>
 We said above that we can deal with top-level expressions by turning
@@ -2362,7 +2362,7 @@ before doing the above massaging and compiling.
 </P>
 
 
-<H2><A NAME="SEC298" HREF="schintro_toc.html#SEC298">Interfacing to the Runtime System</A></H2>
+<H2><A NAME="SEC300" HREF="schintro_toc.html#SEC300">Interfacing to the Runtime System</A></H2>
 
 <P>
 In order to support garbage collection (as is required for Scheme),
@@ -2400,11 +2400,11 @@ nonpointers.
 </P>
 
 
-<H3><A NAME="SEC299" HREF="schintro_toc.html#SEC299">Garbage Collection</A></H3>
+<H3><A NAME="SEC301" HREF="schintro_toc.html#SEC301">Garbage Collection</A></H3>
 
 
 
-<H4><A NAME="SEC300" HREF="schintro_toc.html#SEC300">Safe Points</A></H4>
+<H4><A NAME="SEC302" HREF="schintro_toc.html#SEC302">Safe Points</A></H4>
 
 <P>
 Many systems (like RScheme and Scheme-48) ensure that garbage
@@ -2438,7 +2438,7 @@ thread forces a GC while another thread is suspended.
 </P>
 
 
-<H4><A NAME="SEC301" HREF="schintro_toc.html#SEC301">GC at Any Time</A></H4>
+<H4><A NAME="SEC303" HREF="schintro_toc.html#SEC303">GC at Any Time</A></H4>
 
 <P>
 Some systems do not use safe points, and in effect make every
@@ -2469,15 +2469,15 @@ based on its having register allocated a variable there.
 </P>
 
 
-<H3><A NAME="SEC302" HREF="schintro_toc.html#SEC302">Interrupts</A></H3>
+<H3><A NAME="SEC304" HREF="schintro_toc.html#SEC304">Interrupts</A></H3>
 
 
 
-<H2><A NAME="SEC303" HREF="schintro_toc.html#SEC303">Advanced Compiler and Runtime System Techniques</A></H2>
+<H2><A NAME="SEC305" HREF="schintro_toc.html#SEC305">Advanced Compiler and Runtime System Techniques</A></H2>
 
 
 
-<H3><A NAME="SEC304" HREF="schintro_toc.html#SEC304">Inlining Small Procedures</A></H3>
+<H3><A NAME="SEC306" HREF="schintro_toc.html#SEC306">Inlining Small Procedures</A></H3>
 
 <P>
 The system we've described so far generates fairly slow code, and a
@@ -2546,7 +2546,7 @@ it is free to inline the code for that procedure into its callers.
 </P>
 
 
-<H3><A NAME="SEC305" HREF="schintro_toc.html#SEC305">Type Declarations and Type Analysis</A></H3>
+<H3><A NAME="SEC307" HREF="schintro_toc.html#SEC307">Type Declarations and Type Analysis</A></H3>
 
 <P>
 Another key performance problem with naive implementations of
@@ -2596,7 +2596,7 @@ can be collapsed into a single one.
 </P>
 
 
-<H3><A NAME="SEC306" HREF="schintro_toc.html#SEC306">Using More Hardware Registers</A></H3>
+<H3><A NAME="SEC308" HREF="schintro_toc.html#SEC308">Using More Hardware Registers</A></H3>
 
 <P>
 [ blah blah ]
@@ -2659,7 +2659,7 @@ guesses about what's what.)
 </P>
 
 
-<H3><A NAME="SEC307" HREF="schintro_toc.html#SEC307">Closure Analysis</A></H3>
+<H3><A NAME="SEC309" HREF="schintro_toc.html#SEC309">Closure Analysis</A></H3>
 
 <P>
 One of the performance problems with a naive implementation of
@@ -2884,7 +2884,7 @@ and go ahead and save a continuation with the right label?
 
 
 
-<H3><A NAME="SEC308" HREF="schintro_toc.html#SEC308">Register Allocating Loop Variables for Loops</A></H3>
+<H3><A NAME="SEC310" HREF="schintro_toc.html#SEC310">Register Allocating Loop Variables for Loops</A></H3>
 
 <P>
 Notice that register closure analysis is particularly important
@@ -2907,7 +2907,7 @@ just as efficient as any compiler's.
 </P>
 
 
-<H3><A NAME="SEC309" HREF="schintro_toc.html#SEC309">Conventional Optimizations</A></H3>
+<H3><A NAME="SEC311" HREF="schintro_toc.html#SEC311">Conventional Optimizations</A></H3>
 
 <P>
 Besides the optimizations described above, conventional compiler
@@ -2922,7 +2922,7 @@ produce better machine code.
 </P>
 
 
-<H3><A NAME="SEC310" HREF="schintro_toc.html#SEC310">Stack Caches</A></H3>
+<H3><A NAME="SEC312" HREF="schintro_toc.html#SEC312">Stack Caches</A></H3>
 
 <P>
 Inlining and closure analyisis can greatly reduce the amount of

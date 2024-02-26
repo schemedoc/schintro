@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.45
-     from schintro.txi on 23 January 1997 -->
+     from schintro.txi on 19 Febuary 1997 -->
 
 <TITLE>An Introduction to Scheme and its Implementation - Improving the Simple Interpreter</TITLE>
 </HEAD>
@@ -10,7 +10,7 @@ Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_116.html">previ
 <HR>
 
 
-<H3><A NAME="SEC142" HREF="schintro_toc.html#SEC142">Improving the Simple Interpreter</A></H3>
+<H3><A NAME="SEC144" HREF="schintro_toc.html#SEC144">Improving the Simple Interpreter</A></H3>
 
 <P>
 We can easily improve the little interpreter in lots of ways.
@@ -41,7 +41,7 @@ Here's what our new main dispatch routine looks like:
    (cond ;; variable reference
          ((symbol? expr)
           (eval-variable expr))
-         ;; combination OR special form
+         ;; combination OR special form (any parenthesized expr)
          ((pair? expr)
           (eval-list expr))
          ;; any kind of self-evaluating object
@@ -72,6 +72,18 @@ that covers both cases and can easily be extended.
 </PRE>
 
 <P>
+<EM>[hmm... haven't extended the reader to handle booleans yet...
+need to use the standard Scheme reader, or extend <CODE>micro-read</CODE>]</EM>
+
+</P>
+<P>
+Be sure you understand the significance of this.  We chose to read
+numeric literals as Scheme numbers, and boolean literals as Scheme
+objects.  This representation makes them easy to evaluate--we just
+return the same object that the reader created.
+
+</P>
+<P>
 We also need to recognize two basic types of compound expressions:
 combinations and special forms.  These (and only these) are represented
 as lists, so we can use <CODE>pair?</CODE> as a test, and dispatch to
@@ -79,10 +91,15 @@ as lists, so we can use <CODE>pair?</CODE> as a test, and dispatch to
 
 </P>
 <P>
-(What we're really doing here is checking to see whether we're evaluating
-a parenthesized expression.  Since parenthesized expressions are read
-in as lists, we can just check to see whether the s-expression is
-a list.)
+What we're really doing here is checking to see whether we're evaluating
+a parenthesized expression of either kind.  Since parenthesized expressions
+are read in as lists, we can just check to see whether the s-expression is
+a list.  That is, we chose to parse (read) parenthesized expressions
+as lists, and by checking to see if something's a list, we're implicitly
+checking whether it was a parenthesized expression in the original
+code.  (We could have chosen to represent parse trees as some other
+kind of tree, rather than s-expressions, but s-expressions are handy
+because Scheme provides procedures for manipulating and displaying them.) 
 
 </P>
 <P>
@@ -139,6 +156,12 @@ do the work.
 </PRE>
 
 <P>
+Notice that each special form has its own special routine to interpret
+it.  This is what makes special forms "special," in contrast to
+combinations, which can be handled by one procedure, <CODE>eval-combo</CODE>.
+
+</P>
+<P>
 Once the evaluator has recognized an <CODE>if</CODE> expression, it calls
 <CODE>eval-if</CODE> to do the work.  <CODE>eval-if</CODE> calls <CODE>eval</CODE>
 recursively, to evaluate the condition expression, and depending
@@ -164,11 +187,11 @@ the else branch is there.  If not, it just returns <CODE>#f</CODE>.)
 [ note that what we're doing includes parsing... one-branch vs.
   two branch <CODE>if</CODE>.  Should actually be doing <EM>more</EM> parsing,
   checking syntax and signaling errors gracefully.  E.g., should
-  check to see that <CODE>expr-length</CODE> is a legal length. ]
+  check to see that <CODE>expr-length</CODE> is a legal length. ]</EM>
 
 </P>
 <P>
-[ Also note that we're snarfing booleans, and our <CODE>if</CODE> behaves like
+<EM>[ Also note that we're snarfing booleans, and our <CODE>if</CODE> behaves like
   a Scheme <CODE>if</CODE>... but we don't have to.  We could put a different 
   interpretation on <CODE>if</CODE>, e.g., only interpreting <CODE>#t</CODE> as a
   true value. ]
@@ -177,7 +200,7 @@ the else branch is there.  If not, it just returns <CODE>#f</CODE>.)
 </P>
 
 
-<H4><A NAME="SEC143" HREF="schintro_toc.html#SEC143">Implementing toplevel variable bindings</A></H4>
+<H4><A NAME="SEC145" HREF="schintro_toc.html#SEC145">Implementing top-level variable bindings</A></H4>
 
 <P>
 For a toplevel binding environment, we'll use an association list.
@@ -345,7 +368,7 @@ forms <CODE>(define ...)</CODE> or <CODE>(set! ...)</CODE>, respectively.)
 
 
 
-<H4><A NAME="SEC144" HREF="schintro_toc.html#SEC144">Running the improved interpreter</A></H4>
+<H4><A NAME="SEC146" HREF="schintro_toc.html#SEC146">Running the improved interpreter</A></H4>
 
 <P>
 <EM>[ need some example uses ]</EM>

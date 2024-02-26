@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.45
-     from schintro.txi on 23 January 1997 -->
+     from schintro.txi on 19 Febuary 1997 -->
 
 <TITLE>An Introduction to Scheme and its Implementation - Variants of let</TITLE>
 </HEAD>
@@ -10,7 +10,7 @@ Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_125.html">previ
 <HR>
 
 
-<H2><A NAME="SEC159" HREF="schintro_toc.html#SEC159">Variants of <CODE>let</CODE>: <CODE>letrec</CODE> and <CODE>let*</CODE></A></H2>
+<H2><A NAME="SEC161" HREF="schintro_toc.html#SEC161">Variants of <CODE>let</CODE>: <CODE>letrec</CODE> and <CODE>let*</CODE></A></H2>
 
 <P>
 Scheme provides two useful variants of <CODE>let</CODE>.  <CODE>letrec</CODE>
@@ -22,7 +22,7 @@ can use the previous bindings.
 </P>
 
 
-<H3><A NAME="SEC160" HREF="schintro_toc.html#SEC160">Understanding <CODE>letrec</CODE></A></H3>
+<H3><A NAME="SEC162" HREF="schintro_toc.html#SEC162">Understanding <CODE>letrec</CODE></A></H3>
 
 <P>
 When a normal <CODE>let</CODE> is evaluated, the initial value expressions
@@ -40,14 +40,14 @@ this:
 </P>
 
 <PRE>
-; buggy example with tail-recursive local procedure
+;; buggy example with (non-)tail-recursive local procedure
 (define (some-procedure...)
    (let ((helper (lambda (x) 
                     ...
                     (if some-test?
-                        (helper ...))))) ; broken recursive call
+                        (helper ...))))) ;; broken recursive call
      ...
-     (helper ...)  ; call to recursive local procedure
+     (helper ...)  ;; call to (non-)recursive local procedure
      ...))
 </PRE>
 
@@ -78,9 +78,9 @@ a <CODE>letrec</CODE> instead of a <CODE>let</CODE>:
    (letrec ((helper (lambda (x) 
                        ...
                        (if some-test?
-                           (helper ...))))) ; recursive call
+                           (helper ...))))) ;; recursive call
      ...
-     (helper ...)  ; call to recursive local procedure
+     (helper ...)  ;; call to recursive local procedure
      ...))
 </PRE>
 
@@ -88,6 +88,21 @@ a <CODE>letrec</CODE> instead of a <CODE>let</CODE>:
 Now the procedure <CODE>helper</CODE> can "see its own name," since the
 lambda expression is evaluated in the environment where <CODE>helper</CODE>
 is bound.
+
+</P>
+<P>
+More concretely, notice that when this procedure is run, it creates
+an environment and closure that are linked circularly.  The environment
+contains a binding of <CODE>helper</CODE> that holds a pointer to the
+closure created by <CODE>lambda</CODE>.  The closure, in turn, contains
+a pointer back to that same environment, which is where it was
+created.  It is this circularity that makes the procedure recursive;
+when it refers to <CODE>helper</CODE>, it fetches the value of this
+binding, which points to itself.
+
+</P>
+<P>
+We can get the same effect using <CODE>let</CODE> and <CODE>set!</CODE>.
 
 </P>
 <P>
@@ -111,6 +126,12 @@ is equivalent to:
 </PRE>
 
 <P>
+Here the <CODE>let</CODE> creates a binding, initializing it with an
+arbitary value that isn't actually used--it's just a placeholder.
+Then, once the <CODE>let</CODE> is entered and the binding is visible,
+a closure is created (in that environment) and a pointer to it
+is installed in that binding.
+ 
 <CODE>letrec</CODE> can be used when defining mutually recursive procedures,
 each of which can see the others' names and call them.
 
@@ -143,7 +164,7 @@ to reference a shared variable, you can do this:
                         ... (helper1) ... var1 ...))
             (var1 #f))
      ...
-     (helper1)  ; start up mutual recursion
+     (helper1)  ;; start up mutual recursion
      ...))
 </PRE>
 
@@ -170,7 +191,7 @@ might be compiled as though it were a <CODE>let</CODE> like this:
       (set! helper1 (lambda ()
                        ... var1 ... (helper2) ...))
      ...
-     (helper1)  ; start up mutual recursion
+     (helper1)  ;; start up mutual recursion
      ...))
 </PRE>
 
@@ -201,7 +222,8 @@ Here the initialization of <CODE>var1</CODE> depends on the values of
 </P>
 
 
-<H4><A NAME="SEC161" HREF="schintro_toc.html#SEC161">Using <CODE>letrec</CODE> and <CODE>lambda</CODE> to Implement Modules</A></H4>
+
+<H4><A NAME="SEC163" HREF="schintro_toc.html#SEC163">Using <CODE>letrec</CODE> and <CODE>lambda</CODE> to Implement Modules</A></H4>
 
 <P>
 Standard Scheme does not have a module system, but <CODE>letrec</CODE> and
@@ -220,21 +242,21 @@ an association list of of procedures.
 
 </P>
 <P>
-Here we'll create a module called <CODE>foo</CODE> module, which defines four
+Here we'll create a module called <CODE>foo</CODE>, which defines four
 procedures and two variables, and exports two of the procedures, <CODE>foo</CODE>
 and <CODE>bar</CODE>.
 
 <PRE>
 (define foo-module
-   ; create a letrec environment with internal definitions
-   ; of some variables and procedures
+   ;; create a letrec environment with internal definitions
+   ;; of some variables and procedures
    (letrec ((private-proc1 (lambda (...) ...))
             (private-proc2 (lambda (...) ...))
             (private-var1 ...)
             (private-var2 ...)
             (foo (lambda (...) ...))
             (bar (lambda (...) ...)))
-      ; return an association list of "exported" closures
+      ;; return an association list of "exported" closures
       (list (list 'foo foo)
             (list 'bar bar))))
 </PRE>
@@ -298,7 +320,7 @@ will execute in the environment where it was defined, namely the
 
 
 
-<H3><A NAME="SEC162" HREF="schintro_toc.html#SEC162"><CODE>let*</CODE></A></H3>
+<H3><A NAME="SEC164" HREF="schintro_toc.html#SEC164"><CODE>let*</CODE></A></H3>
 
 <P>
 For situations where the order of initialization is important, Scheme
@@ -311,7 +333,7 @@ Suppose we tried the following using <CODE>let</CODE>:
 </P>
 
 <PRE>
-(define (foo x)
+(define (foo epsilon)
    (let ((a 0)
          (upper (+ a epsilon))
          (lower (- a epsilon)))
@@ -369,11 +391,11 @@ is exactly equivalent to
 
 
 
-<H2><A NAME="SEC163" HREF="schintro_toc.html#SEC163">Iteration Constructs</A></H2>
+<H2><A NAME="SEC165" HREF="schintro_toc.html#SEC165">Iteration Constructs</A></H2>
 
 
 
-<H3><A NAME="SEC164" HREF="schintro_toc.html#SEC164">Named <CODE>let</CODE></A></H3>
+<H3><A NAME="SEC166" HREF="schintro_toc.html#SEC166">Named <CODE>let</CODE></A></H3>
 
 <P>
 Named <CODE>let</CODE> is a general and flexible iteration construct that is
@@ -446,7 +468,7 @@ The above example is exactly equivalent to:
                   (display i)   ; procedure whose body
                   (if (&#60; i 10)  ; is the loop body
                       (loop (+ i 1))))))
-   (loop 0)) ; start the recursion with 0 as arg i
+   (loop 0)) ;; start the recursion with 0 as arg i
 </PRE>
 
 <P>
@@ -474,8 +496,9 @@ For example, here's procedure which uses a loop to search a
 list of alternating key/value pairs.  (This is not an association list,
 but a linear list of alternating keys and values, called a property
 list.)  It iterates through the list two elements at a time.  If it finds
-an odd-numbered element that's eq? to what it's looking for, it returns the
-next (even-numbered) element;  otherwise, it continues through the loop.
+an odd-numbered element that's <CODE>eq?</CODE> to what it's looking for, it
+returns the next (even-numbered) element;  otherwise, it continues through
+the loop.
 
 </P>
 
@@ -504,7 +527,7 @@ next (even-numbered) element;  otherwise, it continues through the loop.
                             (cadr l))
                            (#t
                             (loop (cddr l))))))))
-      (loop lis)))   ; start the recursion
+      (loop lis)))   ;; start the recursion
 </PRE>
 
 <P>
@@ -528,9 +551,9 @@ directly to the next iteration of the outer loop.  We can do this:
 (let outer-loop ((i ...))
    (let inner-loop ((j ...))
       (if (should-abort-inner-loop)
-          (outer-loop ...)) ; go directly to next iteration of outer loop
+          (outer-loop ...))  ;; go directly to next iteration of outer loop
       ...  ; do normal inner loop action
-      ...(inner-loop ...)  ; iterate inner loop normally
+      ...(inner-loop ...)  ;; iterate inner loop normally
    ...
    ... (outer-loop ...))   ; iterate outer loop normally
 </PRE>
@@ -570,11 +593,11 @@ Some things to notice about Scheme loops:
 
 
 
-<H2><A NAME="SEC165" HREF="schintro_toc.html#SEC165">Programming with Procedures and Environments</A></H2>
+<H2><A NAME="SEC167" HREF="schintro_toc.html#SEC167">Programming with Procedures and Environments</A></H2>
 
 
 
-<H2><A NAME="SEC166" HREF="schintro_toc.html#SEC166">Exercises</A></H2>
+<H2><A NAME="SEC168" HREF="schintro_toc.html#SEC168">Exercises</A></H2>
 
 <HR>
 Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_125.html">previous</A>, <A HREF="schintro_127.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.

@@ -1,0 +1,1586 @@
+--2024-02-26 18:02:18--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/
+Resolving www.cs.utexas.edu (www.cs.utexas.edu)... 128.83.120.48
+Connecting to www.cs.utexas.edu (www.cs.utexas.edu)|128.83.120.48|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 31339 (31K) [text/html]
+Saving to: ‘index.html.tmp’
+
+     0K .......... .......... ..........                      100% 99.1K=0.3s
+
+Last-modified header missing -- time-stamps turned off.
+2024-02-26 18:02:19 (99.1 KB/s) - ‘index.html.tmp’ saved [31339/31339]
+
+Loading robots.txt; please ignore errors.
+--2024-02-26 18:02:19--  https://www.cs.utexas.edu/robots.txt
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2189 (2.1K) [text/plain]
+Saving to: ‘robots.txt’
+
+     0K ..                                                    100% 32.1M=0s
+
+2024-02-26 18:02:19 (32.1 MB/s) - ‘robots.txt’ saved [2189/2189]
+
+Removing index.html.tmp since it should be rejected.
+
+--2024-02-26 18:02:19--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/?C=N;O=D
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 31339 (31K) [text/html]
+Saving to: ‘index.html?C=N;O=D.tmp’
+
+     0K .......... .......... ..........                      100% 99.9K=0.3s
+
+Last-modified header missing -- time-stamps turned off.
+2024-02-26 18:02:20 (99.9 KB/s) - ‘index.html?C=N;O=D.tmp’ saved [31339/31339]
+
+Removing index.html?C=N;O=D.tmp since it should be rejected.
+
+--2024-02-26 18:02:20--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/?C=M;O=A
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 31339 (31K) [text/html]
+Saving to: ‘index.html?C=M;O=A.tmp’
+
+     0K .......... .......... ..........                      100%  198K=0.2s
+
+Last-modified header missing -- time-stamps turned off.
+2024-02-26 18:02:20 (198 KB/s) - ‘index.html?C=M;O=A.tmp’ saved [31339/31339]
+
+Removing index.html?C=M;O=A.tmp since it should be rejected.
+
+--2024-02-26 18:02:20--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/?C=S;O=A
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 31339 (31K) [text/html]
+Saving to: ‘index.html?C=S;O=A.tmp’
+
+     0K .......... .......... ..........                      100%  159K=0.2s
+
+Last-modified header missing -- time-stamps turned off.
+2024-02-26 18:02:21 (159 KB/s) - ‘index.html?C=S;O=A.tmp’ saved [31339/31339]
+
+Removing index.html?C=S;O=A.tmp since it should be rejected.
+
+--2024-02-26 18:02:21--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/?C=D;O=A
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 31339 (31K) [text/html]
+Saving to: ‘index.html?C=D;O=A.tmp’
+
+     0K .......... .......... ..........                      100%  191K=0.2s
+
+Last-modified header missing -- time-stamps turned off.
+2024-02-26 18:02:21 (191 KB/s) - ‘index.html?C=D;O=A.tmp’ saved [31339/31339]
+
+Removing index.html?C=D;O=A.tmp since it should be rejected.
+
+--2024-02-26 18:02:21--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_1.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 547 [text/html]
+Saving to: ‘schintro_1.html’
+
+     0K                                                       100% 9.84M=0s
+
+2024-02-26 18:02:21 (9.84 MB/s) - ‘schintro_1.html’ saved [547/547]
+
+--2024-02-26 18:02:21--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_2.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 1374 (1.3K) [text/html]
+Saving to: ‘schintro_2.html’
+
+     0K .                                                     100% 21.8M=0s
+
+2024-02-26 18:02:21 (21.8 MB/s) - ‘schintro_2.html’ saved [1374/1374]
+
+--2024-02-26 18:02:21--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_3.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2305 (2.3K) [text/html]
+Saving to: ‘schintro_3.html’
+
+     0K ..                                                    100% 12.3M=0s
+
+2024-02-26 18:02:22 (12.3 MB/s) - ‘schintro_3.html’ saved [2305/2305]
+
+--2024-02-26 18:02:22--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_4.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 6536 (6.4K) [text/html]
+Saving to: ‘schintro_4.html’
+
+     0K ......                                                100% 53.3M=0s
+
+2024-02-26 18:02:22 (53.3 MB/s) - ‘schintro_4.html’ saved [6536/6536]
+
+--2024-02-26 18:02:22--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_5.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 5028 (4.9K) [text/html]
+Saving to: ‘schintro_5.html’
+
+     0K ....                                                  100% 39.0M=0s
+
+2024-02-26 18:02:22 (39.0 MB/s) - ‘schintro_5.html’ saved [5028/5028]
+
+--2024-02-26 18:02:22--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_6.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2611 (2.5K) [text/html]
+Saving to: ‘schintro_6.html’
+
+     0K ..                                                    100% 34.6M=0s
+
+2024-02-26 18:02:22 (34.6 MB/s) - ‘schintro_6.html’ saved [2611/2611]
+
+--2024-02-26 18:02:22--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_7.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 4677 (4.6K) [text/html]
+Saving to: ‘schintro_7.html’
+
+     0K ....                                                  100% 37.2M=0s
+
+2024-02-26 18:02:22 (37.2 MB/s) - ‘schintro_7.html’ saved [4677/4677]
+
+--2024-02-26 18:02:22--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_8.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 3351 (3.3K) [text/html]
+Saving to: ‘schintro_8.html’
+
+     0K ...                                                   100% 28.5M=0s
+
+2024-02-26 18:02:23 (28.5 MB/s) - ‘schintro_8.html’ saved [3351/3351]
+
+--2024-02-26 18:02:23--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_9.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2411 (2.4K) [text/html]
+Saving to: ‘schintro_9.html’
+
+     0K ..                                                    100% 35.9M=0s
+
+2024-02-26 18:02:23 (35.9 MB/s) - ‘schintro_9.html’ saved [2411/2411]
+
+--2024-02-26 18:02:23--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_10.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 1830 (1.8K) [text/html]
+Saving to: ‘schintro_10.html’
+
+     0K .                                                     100% 18.8M=0s
+
+2024-02-26 18:02:23 (18.8 MB/s) - ‘schintro_10.html’ saved [1830/1830]
+
+--2024-02-26 18:02:23--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_11.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2012 (2.0K) [text/html]
+Saving to: ‘schintro_11.html’
+
+     0K .                                                     100% 30.5M=0s
+
+2024-02-26 18:02:23 (30.5 MB/s) - ‘schintro_11.html’ saved [2012/2012]
+
+--2024-02-26 18:02:23--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_12.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 3244 (3.2K) [text/html]
+Saving to: ‘schintro_12.html’
+
+     0K ...                                                   100% 3.59M=0.001s
+
+2024-02-26 18:02:23 (3.59 MB/s) - ‘schintro_12.html’ saved [3244/3244]
+
+--2024-02-26 18:02:23--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_13.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 5037 (4.9K) [text/html]
+Saving to: ‘schintro_13.html’
+
+     0K ....                                                  100% 41.8M=0s
+
+2024-02-26 18:02:24 (41.8 MB/s) - ‘schintro_13.html’ saved [5037/5037]
+
+--2024-02-26 18:02:24--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_14.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 5944 (5.8K) [text/html]
+Saving to: ‘schintro_14.html’
+
+     0K .....                                                 100% 51.5M=0s
+
+2024-02-26 18:02:24 (51.5 MB/s) - ‘schintro_14.html’ saved [5944/5944]
+
+--2024-02-26 18:02:24--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_15.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 1885 (1.8K) [text/html]
+Saving to: ‘schintro_15.html’
+
+     0K .                                                     100% 11.0M=0s
+
+2024-02-26 18:02:24 (11.0 MB/s) - ‘schintro_15.html’ saved [1885/1885]
+
+--2024-02-26 18:02:24--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_16.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2018 (2.0K) [text/html]
+Saving to: ‘schintro_16.html’
+
+     0K .                                                     100% 18.3M=0s
+
+2024-02-26 18:02:24 (18.3 MB/s) - ‘schintro_16.html’ saved [2018/2018]
+
+--2024-02-26 18:02:24--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_17.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 3433 (3.4K) [text/html]
+Saving to: ‘schintro_17.html’
+
+     0K ...                                                   100%  193K=0.02s
+
+2024-02-26 18:02:25 (193 KB/s) - ‘schintro_17.html’ saved [3433/3433]
+
+--2024-02-26 18:02:25--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_18.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 4854 (4.7K) [text/html]
+Saving to: ‘schintro_18.html’
+
+     0K ....                                                  100% 37.0M=0s
+
+2024-02-26 18:02:25 (37.0 MB/s) - ‘schintro_18.html’ saved [4854/4854]
+
+--2024-02-26 18:02:25--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_19.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2476 (2.4K) [text/html]
+Saving to: ‘schintro_19.html’
+
+     0K ..                                                    100% 39.4M=0s
+
+2024-02-26 18:02:25 (39.4 MB/s) - ‘schintro_19.html’ saved [2476/2476]
+
+--2024-02-26 18:02:25--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_20.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 1544 (1.5K) [text/html]
+Saving to: ‘schintro_20.html’
+
+     0K .                                                     100% 25.4M=0s
+
+2024-02-26 18:02:25 (25.4 MB/s) - ‘schintro_20.html’ saved [1544/1544]
+
+--2024-02-26 18:02:25--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_21.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 7203 (7.0K) [text/html]
+Saving to: ‘schintro_21.html’
+
+     0K .......                                               100% 35.0M=0s
+
+2024-02-26 18:02:25 (35.0 MB/s) - ‘schintro_21.html’ saved [7203/7203]
+
+--2024-02-26 18:02:25--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_22.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 4524 (4.4K) [text/html]
+Saving to: ‘schintro_22.html’
+
+     0K ....                                                  100% 37.8M=0s
+
+2024-02-26 18:02:26 (37.8 MB/s) - ‘schintro_22.html’ saved [4524/4524]
+
+--2024-02-26 18:02:26--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_23.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2029 (2.0K) [text/html]
+Saving to: ‘schintro_23.html’
+
+     0K .                                                     100% 28.5M=0s
+
+2024-02-26 18:02:26 (28.5 MB/s) - ‘schintro_23.html’ saved [2029/2029]
+
+--2024-02-26 18:02:26--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_24.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 4652 (4.5K) [text/html]
+Saving to: ‘schintro_24.html’
+
+     0K ....                                                  100% 37.3M=0s
+
+2024-02-26 18:02:26 (37.3 MB/s) - ‘schintro_24.html’ saved [4652/4652]
+
+--2024-02-26 18:02:26--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_25.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2596 (2.5K) [text/html]
+Saving to: ‘schintro_25.html’
+
+     0K ..                                                    100% 38.1M=0s
+
+2024-02-26 18:02:26 (38.1 MB/s) - ‘schintro_25.html’ saved [2596/2596]
+
+--2024-02-26 18:02:26--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_26.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 810 [text/html]
+Saving to: ‘schintro_26.html’
+
+     0K                                                       100% 14.3M=0s
+
+2024-02-26 18:02:26 (14.3 MB/s) - ‘schintro_26.html’ saved [810/810]
+
+--2024-02-26 18:02:26--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_27.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2139 (2.1K) [text/html]
+Saving to: ‘schintro_27.html’
+
+     0K ..                                                    100% 32.4M=0s
+
+2024-02-26 18:02:26 (32.4 MB/s) - ‘schintro_27.html’ saved [2139/2139]
+
+--2024-02-26 18:02:26--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_28.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 1556 (1.5K) [text/html]
+Saving to: ‘schintro_28.html’
+
+     0K .                                                     100% 25.6M=0s
+
+2024-02-26 18:02:27 (25.6 MB/s) - ‘schintro_28.html’ saved [1556/1556]
+
+--2024-02-26 18:02:27--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_29.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 1737 (1.7K) [text/html]
+Saving to: ‘schintro_29.html’
+
+     0K .                                                     100% 28.6M=0s
+
+2024-02-26 18:02:27 (28.6 MB/s) - ‘schintro_29.html’ saved [1737/1737]
+
+--2024-02-26 18:02:27--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_30.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 5257 (5.1K) [text/html]
+Saving to: ‘schintro_30.html’
+
+     0K .....                                                 100% 47.3M=0s
+
+2024-02-26 18:02:27 (47.3 MB/s) - ‘schintro_30.html’ saved [5257/5257]
+
+--2024-02-26 18:02:27--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_31.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 3923 (3.8K) [text/html]
+Saving to: ‘schintro_31.html’
+
+     0K ...                                                   100% 14.3M=0s
+
+2024-02-26 18:02:27 (14.3 MB/s) - ‘schintro_31.html’ saved [3923/3923]
+
+--2024-02-26 18:02:27--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_32.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 4510 (4.4K) [text/html]
+Saving to: ‘schintro_32.html’
+
+     0K ....                                                  100% 36.1M=0s
+
+2024-02-26 18:02:27 (36.1 MB/s) - ‘schintro_32.html’ saved [4510/4510]
+
+--2024-02-26 18:02:27--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_33.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 3178 (3.1K) [text/html]
+Saving to: ‘schintro_33.html’
+
+     0K ...                                                   100% 27.3M=0s
+
+2024-02-26 18:02:27 (27.3 MB/s) - ‘schintro_33.html’ saved [3178/3178]
+
+--2024-02-26 18:02:27--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_34.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 3471 (3.4K) [text/html]
+Saving to: ‘schintro_34.html’
+
+     0K ...                                                   100% 31.2M=0s
+
+2024-02-26 18:02:28 (31.2 MB/s) - ‘schintro_34.html’ saved [3471/3471]
+
+--2024-02-26 18:02:28--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_35.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 3012 (2.9K) [text/html]
+Saving to: ‘schintro_35.html’
+
+     0K ..                                                    100% 27.1M=0s
+
+2024-02-26 18:02:28 (27.1 MB/s) - ‘schintro_35.html’ saved [3012/3012]
+
+--2024-02-26 18:02:28--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_36.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 1745 (1.7K) [text/html]
+Saving to: ‘schintro_36.html’
+
+     0K .                                                     100% 21.1M=0s
+
+2024-02-26 18:02:28 (21.1 MB/s) - ‘schintro_36.html’ saved [1745/1745]
+
+--2024-02-26 18:02:28--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_37.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 9823 (9.6K) [text/html]
+Saving to: ‘schintro_37.html’
+
+     0K .........                                             100% 7.06M=0.001s
+
+2024-02-26 18:02:28 (7.06 MB/s) - ‘schintro_37.html’ saved [9823/9823]
+
+--2024-02-26 18:02:28--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_38.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 4821 (4.7K) [text/html]
+Saving to: ‘schintro_38.html’
+
+     0K ....                                                  100% 36.5M=0s
+
+2024-02-26 18:02:28 (36.5 MB/s) - ‘schintro_38.html’ saved [4821/4821]
+
+--2024-02-26 18:02:28--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_39.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 1798 (1.8K) [text/html]
+Saving to: ‘schintro_39.html’
+
+     0K .                                                     100% 24.5M=0s
+
+2024-02-26 18:02:29 (24.5 MB/s) - ‘schintro_39.html’ saved [1798/1798]
+
+--2024-02-26 18:02:29--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_40.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 1251 (1.2K) [text/html]
+Saving to: ‘schintro_40.html’
+
+     0K .                                                     100% 19.9M=0s
+
+2024-02-26 18:02:29 (19.9 MB/s) - ‘schintro_40.html’ saved [1251/1251]
+
+--2024-02-26 18:02:29--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_41.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 971 [text/html]
+Saving to: ‘schintro_41.html’
+
+     0K                                                       100% 16.0M=0s
+
+2024-02-26 18:02:29 (16.0 MB/s) - ‘schintro_41.html’ saved [971/971]
+
+--2024-02-26 18:02:29--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_42.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 1746 (1.7K) [text/html]
+Saving to: ‘schintro_42.html’
+
+     0K .                                                     100% 24.9M=0s
+
+2024-02-26 18:02:29 (24.9 MB/s) - ‘schintro_42.html’ saved [1746/1746]
+
+--2024-02-26 18:02:29--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_43.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2201 (2.1K) [text/html]
+Saving to: ‘schintro_43.html’
+
+     0K ..                                                    100% 19.3M=0s
+
+2024-02-26 18:02:30 (19.3 MB/s) - ‘schintro_43.html’ saved [2201/2201]
+
+--2024-02-26 18:02:30--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_44.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 1198 (1.2K) [text/html]
+Saving to: ‘schintro_44.html’
+
+     0K .                                                     100% 20.8M=0s
+
+2024-02-26 18:02:30 (20.8 MB/s) - ‘schintro_44.html’ saved [1198/1198]
+
+--2024-02-26 18:02:30--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_45.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 1763 (1.7K) [text/html]
+Saving to: ‘schintro_45.html’
+
+     0K .                                                     100% 32.3M=0s
+
+2024-02-26 18:02:30 (32.3 MB/s) - ‘schintro_45.html’ saved [1763/1763]
+
+--2024-02-26 18:02:30--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_46.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 23773 (23K) [text/html]
+Saving to: ‘schintro_46.html’
+
+     0K .......... .......... ...                             100%  154K=0.2s
+
+2024-02-26 18:02:30 (154 KB/s) - ‘schintro_46.html’ saved [23773/23773]
+
+--2024-02-26 18:02:30--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_47.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 3089 (3.0K) [text/html]
+Saving to: ‘schintro_47.html’
+
+     0K ...                                                   100% 26.5M=0s
+
+2024-02-26 18:02:30 (26.5 MB/s) - ‘schintro_47.html’ saved [3089/3089]
+
+--2024-02-26 18:02:30--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_48.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 1505 (1.5K) [text/html]
+Saving to: ‘schintro_48.html’
+
+     0K .                                                     100% 15.0M=0s
+
+2024-02-26 18:02:31 (15.0 MB/s) - ‘schintro_48.html’ saved [1505/1505]
+
+--2024-02-26 18:02:31--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_49.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 4380 (4.3K) [text/html]
+Saving to: ‘schintro_49.html’
+
+     0K ....                                                  100% 17.6M=0s
+
+2024-02-26 18:02:31 (17.6 MB/s) - ‘schintro_49.html’ saved [4380/4380]
+
+--2024-02-26 18:02:31--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_50.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2994 (2.9K) [text/html]
+Saving to: ‘schintro_50.html’
+
+     0K ..                                                    100% 26.7M=0s
+
+2024-02-26 18:02:31 (26.7 MB/s) - ‘schintro_50.html’ saved [2994/2994]
+
+--2024-02-26 18:02:31--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_51.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 3973 (3.9K) [text/html]
+Saving to: ‘schintro_51.html’
+
+     0K ...                                                   100% 15.6M=0s
+
+2024-02-26 18:02:31 (15.6 MB/s) - ‘schintro_51.html’ saved [3973/3973]
+
+--2024-02-26 18:02:31--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_52.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 3354 (3.3K) [text/html]
+Saving to: ‘schintro_52.html’
+
+     0K ...                                                   100% 23.3M=0s
+
+2024-02-26 18:02:31 (23.3 MB/s) - ‘schintro_52.html’ saved [3354/3354]
+
+--2024-02-26 18:02:31--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_53.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 1822 (1.8K) [text/html]
+Saving to: ‘schintro_53.html’
+
+     0K .                                                     100% 23.8M=0s
+
+2024-02-26 18:02:32 (23.8 MB/s) - ‘schintro_53.html’ saved [1822/1822]
+
+--2024-02-26 18:02:32--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_54.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 5767 (5.6K) [text/html]
+Saving to: ‘schintro_54.html’
+
+     0K .....                                                 100% 46.6M=0s
+
+2024-02-26 18:02:32 (46.6 MB/s) - ‘schintro_54.html’ saved [5767/5767]
+
+--2024-02-26 18:02:32--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_55.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 1801 (1.8K) [text/html]
+Saving to: ‘schintro_55.html’
+
+     0K .                                                     100% 15.5M=0s
+
+2024-02-26 18:02:32 (15.5 MB/s) - ‘schintro_55.html’ saved [1801/1801]
+
+--2024-02-26 18:02:32--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_56.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 3678 (3.6K) [text/html]
+Saving to: ‘schintro_56.html’
+
+     0K ...                                                   100% 33.1M=0s
+
+2024-02-26 18:02:32 (33.1 MB/s) - ‘schintro_56.html’ saved [3678/3678]
+
+--2024-02-26 18:02:32--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_57.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2589 (2.5K) [text/html]
+Saving to: ‘schintro_57.html’
+
+     0K ..                                                    100% 35.3M=0s
+
+2024-02-26 18:02:32 (35.3 MB/s) - ‘schintro_57.html’ saved [2589/2589]
+
+--2024-02-26 18:02:32--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_58.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 3094 (3.0K) [text/html]
+Saving to: ‘schintro_58.html’
+
+     0K ...                                                   100% 26.8M=0s
+
+2024-02-26 18:02:32 (26.8 MB/s) - ‘schintro_58.html’ saved [3094/3094]
+
+--2024-02-26 18:02:32--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_59.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 4587 (4.5K) [text/html]
+Saving to: ‘schintro_59.html’
+
+     0K ....                                                  100% 38.0M=0s
+
+2024-02-26 18:02:33 (38.0 MB/s) - ‘schintro_59.html’ saved [4587/4587]
+
+--2024-02-26 18:02:33--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_60.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2203 (2.2K) [text/html]
+Saving to: ‘schintro_60.html’
+
+     0K ..                                                    100% 33.9M=0s
+
+2024-02-26 18:02:33 (33.9 MB/s) - ‘schintro_60.html’ saved [2203/2203]
+
+--2024-02-26 18:02:33--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_61.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 6618 (6.5K) [text/html]
+Saving to: ‘schintro_61.html’
+
+     0K ......                                                100% 54.9M=0s
+
+2024-02-26 18:02:33 (54.9 MB/s) - ‘schintro_61.html’ saved [6618/6618]
+
+--2024-02-26 18:02:33--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_62.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2429 (2.4K) [text/html]
+Saving to: ‘schintro_62.html’
+
+     0K ..                                                    100% 19.8M=0s
+
+2024-02-26 18:02:33 (19.8 MB/s) - ‘schintro_62.html’ saved [2429/2429]
+
+--2024-02-26 18:02:33--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_63.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2778 (2.7K) [text/html]
+Saving to: ‘schintro_63.html’
+
+     0K ..                                                    100% 38.4M=0s
+
+2024-02-26 18:02:33 (38.4 MB/s) - ‘schintro_63.html’ saved [2778/2778]
+
+--2024-02-26 18:02:33--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_64.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 4722 (4.6K) [text/html]
+Saving to: ‘schintro_64.html’
+
+     0K ....                                                  100% 39.5M=0s
+
+2024-02-26 18:02:33 (39.5 MB/s) - ‘schintro_64.html’ saved [4722/4722]
+
+--2024-02-26 18:02:33--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_65.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 4696 (4.6K) [text/html]
+Saving to: ‘schintro_65.html’
+
+     0K ....                                                  100% 41.5M=0s
+
+2024-02-26 18:02:34 (41.5 MB/s) - ‘schintro_65.html’ saved [4696/4696]
+
+--2024-02-26 18:02:34--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_66.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 8387 (8.2K) [text/html]
+Saving to: ‘schintro_66.html’
+
+     0K ........                                              100% 7.20M=0.001s
+
+2024-02-26 18:02:34 (7.20 MB/s) - ‘schintro_66.html’ saved [8387/8387]
+
+--2024-02-26 18:02:34--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_67.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 3730 (3.6K) [text/html]
+Saving to: ‘schintro_67.html’
+
+     0K ...                                                   100% 31.2M=0s
+
+2024-02-26 18:02:34 (31.2 MB/s) - ‘schintro_67.html’ saved [3730/3730]
+
+--2024-02-26 18:02:34--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_68.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 6271 (6.1K) [text/html]
+Saving to: ‘schintro_68.html’
+
+     0K ......                                                100% 16.5M=0s
+
+2024-02-26 18:02:34 (16.5 MB/s) - ‘schintro_68.html’ saved [6271/6271]
+
+--2024-02-26 18:02:34--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_69.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 1496 (1.5K) [text/html]
+Saving to: ‘schintro_69.html’
+
+     0K .                                                     100% 22.6M=0s
+
+2024-02-26 18:02:34 (22.6 MB/s) - ‘schintro_69.html’ saved [1496/1496]
+
+--2024-02-26 18:02:34--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_70.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 3267 (3.2K) [text/html]
+Saving to: ‘schintro_70.html’
+
+     0K ...                                                   100% 18.3M=0s
+
+2024-02-26 18:02:34 (18.3 MB/s) - ‘schintro_70.html’ saved [3267/3267]
+
+--2024-02-26 18:02:34--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_71.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 1840 (1.8K) [text/html]
+Saving to: ‘schintro_71.html’
+
+     0K .                                                     100% 15.1M=0s
+
+2024-02-26 18:02:35 (15.1 MB/s) - ‘schintro_71.html’ saved [1840/1840]
+
+--2024-02-26 18:02:35--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_72.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 10816 (11K) [text/html]
+Saving to: ‘schintro_72.html’
+
+     0K ..........                                            100% 8.62M=0.001s
+
+2024-02-26 18:02:35 (8.62 MB/s) - ‘schintro_72.html’ saved [10816/10816]
+
+--2024-02-26 18:02:35--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_73.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 3549 (3.5K) [text/html]
+Saving to: ‘schintro_73.html’
+
+     0K ...                                                   100% 10.8M=0s
+
+2024-02-26 18:02:35 (10.8 MB/s) - ‘schintro_73.html’ saved [3549/3549]
+
+--2024-02-26 18:02:35--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_74.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2015 (2.0K) [text/html]
+Saving to: ‘schintro_74.html’
+
+     0K .                                                     100% 9.91M=0s
+
+2024-02-26 18:02:35 (9.91 MB/s) - ‘schintro_74.html’ saved [2015/2015]
+
+--2024-02-26 18:02:35--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_75.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2423 (2.4K) [text/html]
+Saving to: ‘schintro_75.html’
+
+     0K ..                                                    100% 34.5M=0s
+
+2024-02-26 18:02:35 (34.5 MB/s) - ‘schintro_75.html’ saved [2423/2423]
+
+--2024-02-26 18:02:35--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_76.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2364 (2.3K) [text/html]
+Saving to: ‘schintro_76.html’
+
+     0K ..                                                    100% 34.2M=0s
+
+2024-02-26 18:02:35 (34.2 MB/s) - ‘schintro_76.html’ saved [2364/2364]
+
+--2024-02-26 18:02:35--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_77.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 776 [text/html]
+Saving to: ‘schintro_77.html’
+
+     0K                                                       100% 13.0M=0s
+
+2024-02-26 18:02:36 (13.0 MB/s) - ‘schintro_77.html’ saved [776/776]
+
+--2024-02-26 18:02:36--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_78.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 688 [text/html]
+Saving to: ‘schintro_78.html’
+
+     0K                                                       100% 12.2M=0s
+
+2024-02-26 18:02:36 (12.2 MB/s) - ‘schintro_78.html’ saved [688/688]
+
+--2024-02-26 18:02:36--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_79.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2257 (2.2K) [text/html]
+Saving to: ‘schintro_79.html’
+
+     0K ..                                                    100% 33.6M=0s
+
+2024-02-26 18:02:36 (33.6 MB/s) - ‘schintro_79.html’ saved [2257/2257]
+
+--2024-02-26 18:02:36--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_80.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 4617 (4.5K) [text/html]
+Saving to: ‘schintro_80.html’
+
+     0K ....                                                  100% 43.2M=0s
+
+2024-02-26 18:02:36 (43.2 MB/s) - ‘schintro_80.html’ saved [4617/4617]
+
+--2024-02-26 18:02:36--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_81.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 4312 (4.2K) [text/html]
+Saving to: ‘schintro_81.html’
+
+     0K ....                                                  100% 36.7M=0s
+
+2024-02-26 18:02:36 (36.7 MB/s) - ‘schintro_81.html’ saved [4312/4312]
+
+--2024-02-26 18:02:36--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_82.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 4692 (4.6K) [text/html]
+Saving to: ‘schintro_82.html’
+
+     0K ....                                                  100% 41.4M=0s
+
+2024-02-26 18:02:36 (41.4 MB/s) - ‘schintro_82.html’ saved [4692/4692]
+
+--2024-02-26 18:02:36--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_83.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2036 (2.0K) [text/html]
+Saving to: ‘schintro_83.html’
+
+     0K .                                                     100% 36.0M=0s
+
+2024-02-26 18:02:37 (36.0 MB/s) - ‘schintro_83.html’ saved [2036/2036]
+
+--2024-02-26 18:02:37--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_84.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2381 (2.3K) [text/html]
+Saving to: ‘schintro_84.html’
+
+     0K ..                                                    100% 36.6M=0s
+
+2024-02-26 18:02:37 (36.6 MB/s) - ‘schintro_84.html’ saved [2381/2381]
+
+--2024-02-26 18:02:37--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_85.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 1658 (1.6K) [text/html]
+Saving to: ‘schintro_85.html’
+
+     0K .                                                     100% 10.8M=0s
+
+2024-02-26 18:02:37 (10.8 MB/s) - ‘schintro_85.html’ saved [1658/1658]
+
+--2024-02-26 18:02:37--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_86.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 6006 (5.9K) [text/html]
+Saving to: ‘schintro_86.html’
+
+     0K .....                                                 100% 30.0M=0s
+
+2024-02-26 18:02:37 (30.0 MB/s) - ‘schintro_86.html’ saved [6006/6006]
+
+--2024-02-26 18:02:37--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_87.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 3848 (3.8K) [text/html]
+Saving to: ‘schintro_87.html’
+
+     0K ...                                                   100% 36.0M=0s
+
+2024-02-26 18:02:38 (36.0 MB/s) - ‘schintro_87.html’ saved [3848/3848]
+
+--2024-02-26 18:02:38--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_88.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2480 (2.4K) [text/html]
+Saving to: ‘schintro_88.html’
+
+     0K ..                                                    100% 25.2M=0s
+
+2024-02-26 18:02:38 (25.2 MB/s) - ‘schintro_88.html’ saved [2480/2480]
+
+--2024-02-26 18:02:38--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_89.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 796 [text/html]
+Saving to: ‘schintro_89.html’
+
+     0K                                                       100% 14.3M=0s
+
+2024-02-26 18:02:38 (14.3 MB/s) - ‘schintro_89.html’ saved [796/796]
+
+--2024-02-26 18:02:38--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_90.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 765 [text/html]
+Saving to: ‘schintro_90.html’
+
+     0K                                                       100%  229K=0.003s
+
+2024-02-26 18:02:38 (229 KB/s) - ‘schintro_90.html’ saved [765/765]
+
+--2024-02-26 18:02:38--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_91.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 1209 (1.2K) [text/html]
+Saving to: ‘schintro_91.html’
+
+     0K .                                                     100% 19.2M=0s
+
+2024-02-26 18:02:38 (19.2 MB/s) - ‘schintro_91.html’ saved [1209/1209]
+
+--2024-02-26 18:02:38--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_92.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 11173 (11K) [text/html]
+Saving to: ‘schintro_92.html’
+
+     0K ..........                                            100% 3.62M=0.003s
+
+2024-02-26 18:02:38 (3.62 MB/s) - ‘schintro_92.html’ saved [11173/11173]
+
+--2024-02-26 18:02:38--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_93.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 11319 (11K) [text/html]
+Saving to: ‘schintro_93.html’
+
+     0K .......... .                                          100% 8.33M=0.001s
+
+2024-02-26 18:02:39 (8.33 MB/s) - ‘schintro_93.html’ saved [11319/11319]
+
+--2024-02-26 18:02:39--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_94.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 3670 (3.6K) [text/html]
+Saving to: ‘schintro_94.html’
+
+     0K ...                                                   100% 33.0M=0s
+
+2024-02-26 18:02:39 (33.0 MB/s) - ‘schintro_94.html’ saved [3670/3670]
+
+--2024-02-26 18:02:39--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_95.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 3940 (3.8K) [text/html]
+Saving to: ‘schintro_95.html’
+
+     0K ...                                                   100% 39.1M=0s
+
+2024-02-26 18:02:39 (39.1 MB/s) - ‘schintro_95.html’ saved [3940/3940]
+
+--2024-02-26 18:02:39--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_96.html
+Connecting to www.cs.utexas.edu (www.cs.utexas.edu)|128.83.120.48|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 3586 (3.5K) [text/html]
+Saving to: ‘schintro_96.html’
+
+     0K ...                                                   100% 32.0M=0s
+
+2024-02-26 18:02:41 (32.0 MB/s) - ‘schintro_96.html’ saved [3586/3586]
+
+--2024-02-26 18:02:41--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_97.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 1431 (1.4K) [text/html]
+Saving to: ‘schintro_97.html’
+
+     0K .                                                     100%  336K=0.004s
+
+2024-02-26 18:02:41 (336 KB/s) - ‘schintro_97.html’ saved [1431/1431]
+
+--2024-02-26 18:02:41--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_98.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 7414 (7.2K) [text/html]
+Saving to: ‘schintro_98.html’
+
+     0K .......                                               100% 58.9M=0s
+
+2024-02-26 18:02:42 (58.9 MB/s) - ‘schintro_98.html’ saved [7414/7414]
+
+--2024-02-26 18:02:42--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_99.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 6882 (6.7K) [text/html]
+Saving to: ‘schintro_99.html’
+
+     0K ......                                                100% 59.7M=0s
+
+2024-02-26 18:02:42 (59.7 MB/s) - ‘schintro_99.html’ saved [6882/6882]
+
+--2024-02-26 18:02:42--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_100.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 9649 (9.4K) [text/html]
+Saving to: ‘schintro_100.html’
+
+     0K .........                                             100% 6.82M=0.001s
+
+2024-02-26 18:02:42 (6.82 MB/s) - ‘schintro_100.html’ saved [9649/9649]
+
+--2024-02-26 18:02:42--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_101.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 3015 (2.9K) [text/html]
+Saving to: ‘schintro_101.html’
+
+     0K ..                                                    100% 30.3M=0s
+
+2024-02-26 18:02:42 (30.3 MB/s) - ‘schintro_101.html’ saved [3015/3015]
+
+--2024-02-26 18:02:42--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_102.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 4994 (4.9K) [text/html]
+Saving to: ‘schintro_102.html’
+
+     0K ....                                                  100% 33.8M=0s
+
+2024-02-26 18:02:42 (33.8 MB/s) - ‘schintro_102.html’ saved [4994/4994]
+
+--2024-02-26 18:02:42--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_103.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 7311 (7.1K) [text/html]
+Saving to: ‘schintro_103.html’
+
+     0K .......                                               100% 48.8M=0s
+
+2024-02-26 18:02:42 (48.8 MB/s) - ‘schintro_103.html’ saved [7311/7311]
+
+--2024-02-26 18:02:42--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_104.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 4520 (4.4K) [text/html]
+Saving to: ‘schintro_104.html’
+
+     0K ....                                                  100% 29.5M=0s
+
+2024-02-26 18:02:43 (29.5 MB/s) - ‘schintro_104.html’ saved [4520/4520]
+
+--2024-02-26 18:02:43--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_105.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 11506 (11K) [text/html]
+Saving to: ‘schintro_105.html’
+
+     0K .......... .                                          100% 9.22M=0.001s
+
+2024-02-26 18:02:43 (9.22 MB/s) - ‘schintro_105.html’ saved [11506/11506]
+
+--2024-02-26 18:02:43--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_106.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 13502 (13K) [text/html]
+Saving to: ‘schintro_106.html’
+
+     0K .......... ...                                        100% 85.5K=0.2s
+
+2024-02-26 18:02:43 (85.5 KB/s) - ‘schintro_106.html’ saved [13502/13502]
+
+--2024-02-26 18:02:43--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_107.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 1345 (1.3K) [text/html]
+Saving to: ‘schintro_107.html’
+
+     0K .                                                     100% 13.2M=0s
+
+2024-02-26 18:02:43 (13.2 MB/s) - ‘schintro_107.html’ saved [1345/1345]
+
+--2024-02-26 18:02:43--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_108.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 8847 (8.6K) [text/html]
+Saving to: ‘schintro_108.html’
+
+     0K ........                                              100% 6.74M=0.001s
+
+2024-02-26 18:02:44 (6.74 MB/s) - ‘schintro_108.html’ saved [8847/8847]
+
+--2024-02-26 18:02:44--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_109.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 857 [text/html]
+Saving to: ‘schintro_109.html’
+
+     0K                                                       100% 13.9M=0s
+
+2024-02-26 18:02:44 (13.9 MB/s) - ‘schintro_109.html’ saved [857/857]
+
+--2024-02-26 18:02:44--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_110.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 4716 (4.6K) [text/html]
+Saving to: ‘schintro_110.html’
+
+     0K ....                                                  100% 43.2M=0s
+
+2024-02-26 18:02:44 (43.2 MB/s) - ‘schintro_110.html’ saved [4716/4716]
+
+--2024-02-26 18:02:44--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_111.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 1201 (1.2K) [text/html]
+Saving to: ‘schintro_111.html’
+
+     0K .                                                     100% 22.9M=0s
+
+2024-02-26 18:02:44 (22.9 MB/s) - ‘schintro_111.html’ saved [1201/1201]
+
+--2024-02-26 18:02:44--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_112.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 5171 (5.0K) [text/html]
+Saving to: ‘schintro_112.html’
+
+     0K .....                                                 100% 10.8M=0s
+
+2024-02-26 18:02:44 (10.8 MB/s) - ‘schintro_112.html’ saved [5171/5171]
+
+--2024-02-26 18:02:44--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_113.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2133 (2.1K) [text/html]
+Saving to: ‘schintro_113.html’
+
+     0K ..                                                    100% 9.83M=0s
+
+2024-02-26 18:02:44 (9.83 MB/s) - ‘schintro_113.html’ saved [2133/2133]
+
+--2024-02-26 18:02:44--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_114.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 6150 (6.0K) [text/html]
+Saving to: ‘schintro_114.html’
+
+     0K ......                                                100% 18.3M=0s
+
+2024-02-26 18:02:45 (18.3 MB/s) - ‘schintro_114.html’ saved [6150/6150]
+
+--2024-02-26 18:02:45--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_115.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 22290 (22K) [text/html]
+Saving to: ‘schintro_115.html’
+
+     0K .......... .......... .                               100%  136K=0.2s
+
+2024-02-26 18:02:45 (136 KB/s) - ‘schintro_115.html’ saved [22290/22290]
+
+--2024-02-26 18:02:45--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_116.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 17370 (17K) [text/html]
+Saving to: ‘schintro_116.html’
+
+     0K .......... ......                                     100%  108K=0.2s
+
+2024-02-26 18:02:45 (108 KB/s) - ‘schintro_116.html’ saved [17370/17370]
+
+--2024-02-26 18:02:45--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_117.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 11487 (11K) [text/html]
+Saving to: ‘schintro_117.html’
+
+     0K .......... .                                          100% 9.08M=0.001s
+
+2024-02-26 18:02:45 (9.08 MB/s) - ‘schintro_117.html’ saved [11487/11487]
+
+--2024-02-26 18:02:45--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_118.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 779 [text/html]
+Saving to: ‘schintro_118.html’
+
+     0K                                                       100% 13.3M=0s
+
+2024-02-26 18:02:46 (13.3 MB/s) - ‘schintro_118.html’ saved [779/779]
+
+--2024-02-26 18:02:46--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_119.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 792 [text/html]
+Saving to: ‘schintro_119.html’
+
+     0K                                                       100% 14.0M=0s
+
+2024-02-26 18:02:46 (14.0 MB/s) - ‘schintro_119.html’ saved [792/792]
+
+--2024-02-26 18:02:46--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_120.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 820 [text/html]
+Saving to: ‘schintro_120.html’
+
+     0K                                                       100% 12.6M=0s
+
+2024-02-26 18:02:46 (12.6 MB/s) - ‘schintro_120.html’ saved [820/820]
+
+--2024-02-26 18:02:46--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_121.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 9792 (9.6K) [text/html]
+Saving to: ‘schintro_121.html’
+
+     0K .........                                             100% 7.04M=0.001s
+
+2024-02-26 18:02:46 (7.04 MB/s) - ‘schintro_121.html’ saved [9792/9792]
+
+--2024-02-26 18:02:46--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_122.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 18888 (18K) [text/html]
+Saving to: ‘schintro_122.html’
+
+     0K .......... ........                                   100%  121K=0.2s
+
+2024-02-26 18:02:46 (121 KB/s) - ‘schintro_122.html’ saved [18888/18888]
+
+--2024-02-26 18:02:46--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_123.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 20166 (20K) [text/html]
+Saving to: ‘schintro_123.html’
+
+     0K .......... .........                                  100%  128K=0.2s
+
+2024-02-26 18:02:47 (128 KB/s) - ‘schintro_123.html’ saved [20166/20166]
+
+--2024-02-26 18:02:47--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_124.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 6845 (6.7K) [text/html]
+Saving to: ‘schintro_124.html’
+
+     0K ......                                                100% 41.8M=0s
+
+2024-02-26 18:02:47 (41.8 MB/s) - ‘schintro_124.html’ saved [6845/6845]
+
+--2024-02-26 18:02:47--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_125.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 11501 (11K) [text/html]
+Saving to: ‘schintro_125.html’
+
+     0K .......... .                                          100% 9.95M=0.001s
+
+2024-02-26 18:02:47 (9.95 MB/s) - ‘schintro_125.html’ saved [11501/11501]
+
+--2024-02-26 18:02:47--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_126.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 18568 (18K) [text/html]
+Saving to: ‘schintro_126.html’
+
+     0K .......... ........                                   100% 5.93M=0.003s
+
+2024-02-26 18:02:47 (5.93 MB/s) - ‘schintro_126.html’ saved [18568/18568]
+
+--2024-02-26 18:02:47--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_127.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 41930 (41K) [text/html]
+Saving to: ‘schintro_127.html’
+
+     0K .......... .......... .......... ..........           100%  252K=0.2s
+
+2024-02-26 18:02:48 (252 KB/s) - ‘schintro_127.html’ saved [41930/41930]
+
+--2024-02-26 18:02:48--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_128.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 2279 (2.2K) [text/html]
+Saving to: ‘schintro_128.html’
+
+     0K ..                                                    100% 23.4M=0s
+
+2024-02-26 18:02:48 (23.4 MB/s) - ‘schintro_128.html’ saved [2279/2279]
+
+--2024-02-26 18:02:48--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_129.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 7709 (7.5K) [text/html]
+Saving to: ‘schintro_129.html’
+
+     0K .......                                               100% 59.3M=0s
+
+2024-02-26 18:02:48 (59.3 MB/s) - ‘schintro_129.html’ saved [7709/7709]
+
+--2024-02-26 18:02:48--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_130.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 52881 (52K) [text/html]
+Saving to: ‘schintro_130.html’
+
+     0K .......... .......... .......... .......... .......... 96%  158K 0s
+    50K .                                                     100% 32.8K=0.3s
+
+2024-02-26 18:02:48 (163 KB/s) - ‘schintro_130.html’ saved [52881/52881]
+
+--2024-02-26 18:02:48--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_131.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 828 [text/html]
+Saving to: ‘schintro_131.html’
+
+     0K                                                       100% 9.51M=0s
+
+2024-02-26 18:02:49 (9.51 MB/s) - ‘schintro_131.html’ saved [828/828]
+
+--2024-02-26 18:02:49--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_132.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 804 [text/html]
+Saving to: ‘schintro_132.html’
+
+     0K                                                       100% 13.5M=0s
+
+2024-02-26 18:02:49 (13.5 MB/s) - ‘schintro_132.html’ saved [804/804]
+
+--2024-02-26 18:02:49--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_133.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 72156 (70K) [text/html]
+Saving to: ‘schintro_133.html’
+
+     0K .......... .......... .......... .......... .......... 70%  158K 0s
+    50K .......... ..........                                 100% 7.37M=0.3s
+
+2024-02-26 18:02:49 (221 KB/s) - ‘schintro_133.html’ saved [72156/72156]
+
+--2024-02-26 18:02:49--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_134.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 780 [text/html]
+Saving to: ‘schintro_134.html’
+
+     0K                                                       100% 12.4M=0s
+
+2024-02-26 18:02:49 (12.4 MB/s) - ‘schintro_134.html’ saved [780/780]
+
+--2024-02-26 18:02:49--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_135.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 771 [text/html]
+Saving to: ‘schintro_135.html’
+
+     0K                                                       100% 15.0M=0s
+
+2024-02-26 18:02:50 (15.0 MB/s) - ‘schintro_135.html’ saved [771/771]
+
+--2024-02-26 18:02:50--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_136.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 784 [text/html]
+Saving to: ‘schintro_136.html’
+
+     0K                                                       100% 9.97M=0s
+
+2024-02-26 18:02:50 (9.97 MB/s) - ‘schintro_136.html’ saved [784/784]
+
+--2024-02-26 18:02:50--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_137.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 792 [text/html]
+Saving to: ‘schintro_137.html’
+
+     0K                                                       100% 13.7M=0s
+
+2024-02-26 18:02:50 (13.7 MB/s) - ‘schintro_137.html’ saved [792/792]
+
+--2024-02-26 18:02:50--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_138.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 765 [text/html]
+Saving to: ‘schintro_138.html’
+
+     0K                                                       100% 13.8M=0s
+
+2024-02-26 18:02:50 (13.8 MB/s) - ‘schintro_138.html’ saved [765/765]
+
+--2024-02-26 18:02:50--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_139.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 748 [text/html]
+Saving to: ‘schintro_139.html’
+
+     0K                                                       100% 7.93M=0s
+
+2024-02-26 18:02:50 (7.93 MB/s) - ‘schintro_139.html’ saved [748/748]
+
+--2024-02-26 18:02:50--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_140.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 1482 (1.4K) [text/html]
+Saving to: ‘schintro_140.html’
+
+     0K .                                                     100% 14.9M=0s
+
+2024-02-26 18:02:50 (14.9 MB/s) - ‘schintro_140.html’ saved [1482/1482]
+
+--2024-02-26 18:02:50--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_141.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 15488 (15K) [text/html]
+Saving to: ‘schintro_141.html’
+
+     0K .......... .....                                      100% 10.0M=0.001s
+
+2024-02-26 18:02:51 (10.0 MB/s) - ‘schintro_141.html’ saved [15488/15488]
+
+--2024-02-26 18:02:51--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_142.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 111030 (108K) [text/html]
+Saving to: ‘schintro_142.html’
+
+     0K .......... .......... .......... .......... .......... 46%  295K 0s
+    50K .......... .......... .......... .......... .......... 92%  170K 0s
+   100K ........                                              100% 6.29M=0.5s
+
+2024-02-26 18:02:51 (233 KB/s) - ‘schintro_142.html’ saved [111030/111030]
+
+--2024-02-26 18:02:51--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_143.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 9908 (9.7K) [text/html]
+Saving to: ‘schintro_143.html’
+
+     0K .........                                             100% 5.09M=0.002s
+
+2024-02-26 18:02:52 (5.09 MB/s) - ‘schintro_143.html’ saved [9908/9908]
+
+--2024-02-26 18:02:52--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_foot.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 7734 (7.6K) [text/html]
+Saving to: ‘schintro_foot.html’
+
+     0K .......                                               100% 28.8M=0s
+
+2024-02-26 18:02:52 (28.8 MB/s) - ‘schintro_foot.html’ saved [7734/7734]
+
+--2024-02-26 18:02:52--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/schintro_toc.html
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 28399 (28K) [text/html]
+Saving to: ‘schintro_toc.html’
+
+     0K .......... .......... .......                         100%  176K=0.2s
+
+2024-02-26 18:02:52 (176 KB/s) - ‘schintro_toc.html’ saved [28399/28399]
+
+--2024-02-26 18:02:52--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/?C=N;O=A
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 31339 (31K) [text/html]
+Saving to: ‘index.html?C=N;O=A.tmp’
+
+     0K .......... .......... ..........                      100%  194K=0.2s
+
+Last-modified header missing -- time-stamps turned off.
+2024-02-26 18:02:53 (194 KB/s) - ‘index.html?C=N;O=A.tmp’ saved [31339/31339]
+
+Removing index.html?C=N;O=A.tmp since it should be rejected.
+
+--2024-02-26 18:02:53--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/?C=M;O=D
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 31339 (31K) [text/html]
+Saving to: ‘index.html?C=M;O=D.tmp’
+
+     0K .......... .......... ..........                      100%  200K=0.2s
+
+Last-modified header missing -- time-stamps turned off.
+2024-02-26 18:02:53 (200 KB/s) - ‘index.html?C=M;O=D.tmp’ saved [31339/31339]
+
+Removing index.html?C=M;O=D.tmp since it should be rejected.
+
+--2024-02-26 18:02:53--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/?C=S;O=D
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 31339 (31K) [text/html]
+Saving to: ‘index.html?C=S;O=D.tmp’
+
+     0K .......... .......... ..........                      100%  198K=0.2s
+
+Last-modified header missing -- time-stamps turned off.
+2024-02-26 18:02:53 (198 KB/s) - ‘index.html?C=S;O=D.tmp’ saved [31339/31339]
+
+Removing index.html?C=S;O=D.tmp since it should be rejected.
+
+--2024-02-26 18:02:53--  https://www.cs.utexas.edu/ftp/garbage/cs345/schintro-v14/?C=D;O=D
+Reusing existing connection to www.cs.utexas.edu:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 31339 (31K) [text/html]
+Saving to: ‘index.html?C=D;O=D.tmp’
+
+     0K .......... .......... ..........                      100%  204K=0.1s
+
+Last-modified header missing -- time-stamps turned off.
+2024-02-26 18:02:54 (204 KB/s) - ‘index.html?C=D;O=D.tmp’ saved [31339/31339]
+
+Removing index.html?C=D;O=D.tmp since it should be rejected.
+
+FINISHED --2024-02-26 18:02:54--
+Total wall clock time: 36s
+Downloaded: 155 files, 1.2M in 4.1s (290 KB/s)

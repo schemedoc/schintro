@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.45
-     from schintro.txi on 23 January 1997 -->
+     from schintro.txi on 19 Febuary 1997 -->
 
 <TITLE>An Introduction to Scheme and its Implementation - Lists</TITLE>
 </HEAD>
@@ -10,7 +10,7 @@ Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_92.html">previo
 <HR>
 
 
-<H3><A NAME="SEC98" HREF="schintro_toc.html#SEC98">Lists (Hunk F)</A></H3>
+<H3><A NAME="SEC99" HREF="schintro_toc.html#SEC99">Lists (Hunk F)</A></H3>
 
 
 <PRE>
@@ -355,7 +355,7 @@ prints like a variable name.)
 </P>
 <P>
 Quoting is so common that Scheme provides a special bit of syntactic
-sugar to make it easier.  In instead of writing out <CODE>(quote</CODE>
+sugar to make it easier.  Instead of writing out <CODE>(quote</CODE>
 before an expression, and a closing parenthesis after, you can just use
 the special character <CODE>'</CODE>.  Whatever follows should be the
 textual representation of a data structure, and Scheme constructs
@@ -375,12 +375,18 @@ Scheme&#62;'(#f #t)
 </PRE>
 
 <P>
+Notice that you only need one quote character at the beginning
+of a whole literal--you don't need to separately quote the
+subparts, and you shouldn't.
+
+</P>
+<P>
 Later, I'll talk about quoting things besides lists.  Quoted lists
 are enough for now--we'll use them a lot in examples.
 
 </P>
 <P>
-<EM>[ Should demonstrate list, length append, reverse, and
+<EM>[ Should demonstrate list, length, append, reverse, and
         member here, combining them in various ways. ]</EM>
         
 
@@ -394,7 +400,7 @@ read Hunk G before returning here and continuing this tutorial.
 </PRE>
 
 <P>
-(Go BACK to read Hunk G, which starts at section <A HREF="schintro_47.html#SEC53">Type and Equality Predicates (Hunk G)</A>.)
+(Go BACK to read Hunk G, which starts at section <A HREF="schintro_47.html#SEC54">Type and Equality Predicates (Hunk G)</A>.)
 
 </P>
 

@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.45
-     from schintro.txi on 23 January 1997 -->
+     from schintro.txi on 19 Febuary 1997 -->
 
 <TITLE>An Introduction to Scheme and its Implementation - interpreting let</TITLE>
 </HEAD>
@@ -10,7 +10,7 @@ Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_123.html">previ
 <HR>
 
 
-<H3><A NAME="SEC155" HREF="schintro_toc.html#SEC155">Interpreting <CODE>let</CODE></A></H3>
+<H3><A NAME="SEC157" HREF="schintro_toc.html#SEC157">Interpreting <CODE>let</CODE></A></H3>
 
 <P>
 The procedure <CODE>eval-let</CODE> will be stored in the binding for the
@@ -23,20 +23,20 @@ and call it to evaluate the expression.
 <PRE>
 (define (eval-let let-form envt)
 
-   ; extract the relevant portions of the let form
+   ;; extract the relevant portions of the let form
    (let ((binding-forms (cadr let-form))
          (body-forms (cddr let-form)))
          
-      ; break up the bindings part of the form
+      ;; break up the bindings part of the form
       (let ((var-list (map car binding-forms))
             (init-expr-list (map cadr binding-forms)))
 
-         ; evaluate initial value expressions in old envt, create a
-         ; new envt to bind values,
+         ;; evaluate initial value expressions in old envt, create a
+         ;; new envt to bind values,
          (let ((new-envt (make-envt var-list
                                     (eval-multi init-expr-list envt)
                                     envt)))
-            ; evaluate the body in new envt
+            ;; evaluate the body in new envt
             (eval-sequence body-forms new-envt)))))
 </PRE>
 
@@ -134,11 +134,11 @@ in the interpreter.)
 </P>
 
 
-<H3><A NAME="SEC156" HREF="schintro_toc.html#SEC156">Variable References and <CODE>set!</CODE></A></H3>
+<H3><A NAME="SEC158" HREF="schintro_toc.html#SEC158">Variable References and <CODE>set!</CODE></A></H3>
 
 <P>
 <CODE>eval-symbol</CODE> handles variable references.  It looks up the
-binding of the symbol, if there is one--if not, it's an unbound
+binding of the symbol, if there is one--if not, it signals an unbound
 variable error--and checks to see that it's a variable reference
 and not a special form or macro.  If it is a normal variable,
 it fetches the value from the binding and returns it.
@@ -149,8 +149,7 @@ it fetches the value from the binding and returns it.
 (define (eval-symbol name-symbol envt)
    (let ((binding-info (envt-lexical-lookup envt name-symbol)))
       (cond ((not binding-info)
-             (run-time-error "Symbol does not have value"
-                             name-symbol))
+             (error "Unbound variable" name-symbol))
             ((eq? (binding-type binding-info) '&#60;variable&#62;)
              (bdg-variable-ref binding info))
             (else
@@ -171,7 +170,7 @@ and called (by <CODE>eval-list</CODE>) to evaluate <CODE>set!</CODE> expressions
          (value-expr (caddr set-form)))
       (let ((binding-info (envt-lexical-lookup envt name)))
          (cond ((not binding-info)
-                (run-time-error "Attempt to set! undeclared variable" name))
+                (error "Attempt to set! unbound variable" name))
                ((eq? (binding-type binding-info) '&#60;variable&#62;)
                 (bdg-variable-set! binding-info (eval value-expr envt)))
                (else

@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.45
-     from schintro.txi on 23 January 1997 -->
+     from schintro.txi on 19 Febuary 1997 -->
 
 <TITLE>An Introduction to Scheme and its Implementation - Interpretation and Compilation</TITLE>
 </HEAD>
@@ -10,7 +10,7 @@ Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_111.html">previ
 <HR>
 
 
-<H2><A NAME="SEC131" HREF="schintro_toc.html#SEC131">Interpretation and Compilation</A></H2>
+<H2><A NAME="SEC132" HREF="schintro_toc.html#SEC132">Interpretation and Compilation</A></H2>
 
 <P>
 Programming languages are usually implemented by interpreters or
@@ -33,11 +33,11 @@ languages work, including UNIX shells and Tcl.
 A pure compiler reads the source text of a program, and translates it into
 machine code that will have the effect of executing the program when it
 is run.  A big advantage of compilers is that they can read through and
-analyze the source program <EM>once</EM>, and generate code that you can run to
-give the same effect as interpreting the program.  Rather than analyzing
-each expression each time they encounter it, compilers do the analysis
-once, but record the actions an interpreter <EM>would</EM> take at that
-point in the program.
+analyze the source program <EM>once</EM>, and generate code that you can
+run to give the same effect as interpreting the program.  Rather than
+analyzing each expression each time they encounter it, compilers do the
+analysis once, but record the actions an interpreter <EM>would</EM> take
+at that point in the program.
 
 </P>
 <P>
@@ -98,8 +98,8 @@ of a system, and too many programs have bad ones.
 Understanding how a Scheme interpreter works
 may clarify language issues.  It gives you a nice, concrete understanding
 of what Scheme does when it encounters an expression, so you know what
-your programs will do--it'll be obvious when you need a quote, or
-parentheses, and when you don't.
+your programs will do--for example, it'll be obvious when you need a
+quote, or parentheses, and when you don't.
 <LI>
 
 Every programmer should understand the basics of how a compiler works.

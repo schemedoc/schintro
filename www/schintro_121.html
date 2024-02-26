@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <!-- This HTML file has been created by texi2html 1.45
-     from schintro.txi on 23 January 1997 -->
+     from schintro.txi on 19 Febuary 1997 -->
 
 <TITLE>An Introduction to Scheme and its Implementation - Understanding let</TITLE>
 </HEAD>
@@ -10,10 +10,10 @@ Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_120.html">previ
 <HR>
 
 
-<H3><A NAME="SEC148" HREF="schintro_toc.html#SEC148"><CODE>let</CODE></A></H3>
+<H3><A NAME="SEC150" HREF="schintro_toc.html#SEC150"><CODE>let</CODE></A></H3>
 
 <P>
-One difference between C or Pascal blocks and Scheme <CODE>let</CODE>'s
+One difference between a C or Pascal block and a Scheme <CODE>let</CODE>
 is that <CODE>let</CODE> variable bindings don't necessarily cease
 to exist when the <CODE>let</CODE> is exited, and the bindings therefore
 can't be allocated on a stack in the general case.  (The
@@ -52,7 +52,10 @@ The interpreter maintains a pointer to the "current environment"
 when evaluating an expression.  This pointer always points
 to the environment the currently-executing code must execute
 in, i.e., the variable bindings it must see for the variables
-it uses.
+it uses.  When we evaluate a variable, we look for a binding
+of its name in the current environment, by searching up
+the environment chain starting from the "current environment"
+pointer.
 
 </P>
 <P>
@@ -82,7 +85,7 @@ envt |  * -+-------&#62;|  car |  *--+----&#62; #&#60;proc ...&#62;#
 </PRE>
 
 <P>
-(Here' we've drawn the environment as a simple table of names and
+(Here I've drawn the environment as a simple table of names and
 bindings.  It might actually be implemented as an association list,
 as in our simple example interpreter, or more likely as a hash table.)
 
@@ -101,10 +104,14 @@ off the stack when a <CODE>let</CODE> is exited.
 
 </P>
 <P>
-Each frame holds binds created by a particular binding contour
+Each frame holds bindings created by a particular binding construct
 in the program, e.g., on entering a <CODE>let</CODE>.  A whole environment
-consists not only of one frame, but of the chain of frames starting
-at a particular frame.
+is not represented by just one frame, but by the chain of frames starting
+at a particular frame.  In the figure below, for example, the smaller
+binding frame only holds bindings of <CODE>x</CODE> and <CODE>y</CODE>, but
+it represents an environment that includes bindings of <CODE>car</CODE>,
+etc.  The environment inherits bindings from the environment it's
+scoped inside, and this is what the <CODE>scope link</CODE> is for.
 
 </P>
 
@@ -138,8 +145,8 @@ envt |  +--+-------&#62;|[scope]|  *  |
 
 <P>
                                               
-The link that connects the two frames (tables) is called a <EM>scope</EM> link.
-It reflects the nesting of naming scopes in the program.  In this
+The link that connects the two frames (tables) is called a scope
+link.  It reflects the nesting of naming scopes in the program.  In this
 case, when a variable is referenced inside the <CODE>let</CODE>, the search
 for a binding begins at the new frame (table).  If it is not
 found, the search follows the scope link to the next frame
@@ -166,7 +173,8 @@ its space.
 </P>
 <P>
 Keep in mind that an <EM>environment</EM> is a language-level entity,
-and just consists of a set of bindings.  Our chain of frames is
+and just consists of a set of bindings;  it is just a mapping from
+names to storage that can hold values.   Our chain of frames is
 a convenient and efficient data structure we've chosen to <EM>implement</EM>
 this abstraction, so that environments nest properly.
 
@@ -178,12 +186,16 @@ that begins a list may be thought of as pointer to the pair itself,
 or as a pointer to the whole list of pairs connected by their
 cdr's.  Likewise, a pointer to an environment frame points to that
 frame, but also points to the sequence of environment frames connected
-by their scope links.
+by their scope links.  This corresponds to the scope rule that
+an expression can see bindings created by enclosing expressions,
+as long as they're not shadowed by another binding in between.
 
 </P>
 <P>
 As with pairs and lists, environment frames can share structure,
 and the same frame may be part of several (nested) environments.
+(As we'll see later, this is important for implementing lexical scope
+correctly in the presence of first-class procedures.)
 
 </P>
 <P>
@@ -201,6 +213,12 @@ If we think of
 environments as sets of bindings, the act of pushing an environment
 frame on the front of an environment creates a new environment
 with new bindings added--and with any shadowed bindings <EM>removed</EM>.
+We don't actually modify the old environments, however--they're not
+changed by the creation of new environments with scope links to them.
+What effectively "removes" a binding to create a new envioronment
+is our search procedures--it searches an environment front-to
+back, to find the binding of a name, and ignores any bindings
+after the first one it finds.
 
 </P>
 <P>
