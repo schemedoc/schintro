@@ -1,0 +1,108 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Structure of this Book</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_6.html">previous</A>, <A HREF="schintro_8.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H2><A NAME="SEC7" HREF="schintro_toc.html#SEC7">Structure of this Book</A></H2>
+
+<P>
+This book's structure reflects its tutorial intent, rather than
+any strong grouping of concepts.  In the next three chapters, ideas
+are introduced in the order that I think they're easiest to learn.  
+Each chapter introduces a few more or less related ideas, with small
+code examples, and ends with more examples of Scheme programs to show
+why the ideas are useful.  The later chapters introduce relatively
+independent topics.
+
+</P>
+<P>
+[ The following needs to be reworked a little, after the actual
+  document structure settles down. ]
+
+</P>
+<P>
+section <A HREF="schintro_8.html#SEC8">Introduction</A> describes some basic features of Scheme, including
+a little syntax, and gives code examples to show that Scheme can be used
+like most programming languages--you don't give up much when using Scheme,
+and it's not hard to switch.
+
+</P>
+<P>
+section <A HREF="schintro_79.html#SEC84">Using Scheme (A Tutorial)</A> gives a tutorial on Scheme programming, 
+intended to be used while sitting at a running Scheme system and trying
+examples interactively.
+
+</P>
+<P>
+section <A HREF="schintro_111.html#SEC130">Writing an Interpreter</A> presents an simple interpreter for a subset
+of Scheme.
+
+</P>
+<P>
+section <A HREF="schintro_119.html#SEC146">Environments and Procedures</A> describes Scheme's binding environments
+and procedures, and shows how procedural abstraction can be very
+powerful in a language with first-class procedures, block structure
+indefinite extent (garbage collection).  It then shows an implementation
+of binding environements and procedures for the interpreter from the
+previous chapter, and shows how to use Scheme's binding and
+procedure-defining constructs in fairly sophisticated ways.
+
+</P>
+<P>
+section <A HREF="schintro_127.html#SEC167">Recursion in Scheme</A> discusses recursion, and especially
+<EM>tail recursion</EM>.  
+
+</P>
+<P>
+section <A HREF="schintro_128.html#SEC178">Quasiquotation and Macros</A> presents quasiquotation, a means of
+constructing complex data structures and variants of stereotyped
+data structures, and then presents macros, a facility for defining your
+own "special forms" in Scheme.  Macros let you define your own control
+constructs, data-structuring systems such as object systems, etc.  (If
+you've ever been daunted by problems with C or Lisp macros, don't
+worry--Scheme macros fix the major problems with older macro systems.)
+Macros are also interesting because they're often used in the implementation
+of Scheme itself.  They allow the language implementation to be structured
+in a layers, with most of the language written in the language
+itself, by bootstrapping up from a very small core language understood
+by the compiler.
+
+</P>
+<P>
+section <A HREF="schintro_134.html#SEC247">Other Useful Features</A> presents a variety of miscellaneous features
+of Scheme that are useful in writing real programs.  They're not part of
+the conceptual core of Scheme, but any useful language should have them.
+
+</P>
+<P>
+section <A HREF="schintro_133.html#SEC202">Records and Object Orientation</A> ...
+
+</P>
+<P>
+section <A HREF="schintro_141.html#SEC262"><CODE>call-with-current-continuation</CODE></A> discusses first-class continuations,
+the most powerful control construct in Scheme.  Continuations allow you
+to capture the state of the activation stack (sort of), and return to
+that state to resume at a given point in a program's execution. 
+Continuations are conceptually weird, and are not to be used casually,
+but tremendously expressive for things like backtracking, threads, etc. 
+
+</P>
+<P>
+section <A HREF="schintro_142.html#SEC269">A Simple Scheme Compiler</A> presents an example Scheme program that
+happens to be a simple compiler for Scheme.  It's a "toy" compiler,
+but a real compiler nonetheless, with all of the basic features of any
+Scheme compiler, but minimal boring "support" hacks to perform
+tokenization, storage management, etc.
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_6.html">previous</A>, <A HREF="schintro_8.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

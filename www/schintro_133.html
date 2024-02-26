@@ -1,0 +1,2040 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Records and Object Orientation</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_132.html">previous</A>, <A HREF="schintro_134.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H1><A NAME="SEC202" HREF="schintro_toc.html#SEC202">Records and Object Orientation</A></H1>
+
+<P>
+Most programming languages have a standard facility for defining
+new types of <EM>records</EM> or <EM>structures</EM>.  A record is
+an object with named fields.  For example, we might define a
+<CODE>point</CODE> record type, to represent geometric points in a plane.
+Each <CODE>point</CODE> object might have a <CODE>x</CODE> field and a <CODE>y</CODE>
+field, giving the horizontal and vertical coordinates of a point
+relative to the origin.  Once this <CODE>point</CODE> class is defined,
+we can create <EM>instances</EM> of it, i.e., actual objects of type
+point, to represent particular points in space.
+
+</P>
+<P>
+Scheme is an unusual language in that there is not a standard facility
+for defining new types.  We can build a type-definition facility, however,
+using macros.
+
+</P>
+<P>
+In this chapter, I'll show a simple record definition facility written
+in Scheme.  Then I'll describe a simple object-oriented programming
+system for Scheme, and show how it can be implemented in Scheme, too.
+(Both of these systems rely on Lisp-style macros, which are not standard
+Scheme, but are available in almost every Scheme implementation.)
+
+</P>
+
+
+
+<H2><A NAME="SEC203" HREF="schintro_toc.html#SEC203">Records (Structures)</A></H2>
+
+
+
+<H3><A NAME="SEC204" HREF="schintro_toc.html#SEC204">Using Procedural Abstraction to Implement Data Abstraction</A></H3>
+
+<P>
+Scheme's main abstraction mechanism is procedural abstraction.  We
+can define procedures that represent higher-level operations, i.e.,
+operations not built into the language, but which are useful for
+our purposes.  We can construct <EM>abstract data types</EM>, which
+are data types that represent higher-level concepts (such as points
+in a coordinate space), and use procedures to implement the operations.
+
+</P>
+<P>
+For example, we can fake a <CODE>point</CODE> data type by hand, by writing
+a set of procedures that will construct point objects and access
+their fields.  We can choose a representation of points in terms
+of preexisting Scheme types, and write our procedures accordingly.
+
+</P>
+<P>
+For example, we can use Scheme vectors to represent points, with
+each point represented as a small vector, with a slot for the x 
+field and a slot for the y field.   We can write a handful of
+procedures to create and operate on instances of our <CODE>point</CODE>
+data type, which will really allocate Scheme vectors and operate
+on them in ways that are consistent with our higher-level <CODE>point</CODE>
+abstraction.
+
+</P>
+<P>
+We start with a <EM>constructor</EM> procedure <CODE>make-point</CODE>, which will
+create ("construct") a point object and initialize its <CODE>x</CODE> and
+<CODE>y</CODE> fields.  It really allocates a Scheme vector.  The zeroth slot
+of the vector holds the symbol <CODE>point</CODE>, so that we can tell it
+represents a point object.
+
+</P>
+
+<PRE>
+; a point is represented as a three-element vector, with the 0th
+; slot holding the symbol point, the 1st slot representing
+; the x field,, and the 2nd slot representing the y field.
+
+(define (make-point x y)
+   (vector 'point x y))
+</PRE>
+
+<P>
+We also define a predicate for testing whether an object is a
+<CODE>point</CODE> record.  It checks to see if the object is actuall
+a Scheme vector and its zeroth slot holds the symbol <CODE>point</CODE>.
+This isn't perfect--we might mistake another vector that happens
+to hold that symbol in its zeroth slot for a point, but we'll
+ignore that for now.  (It's easy to fix, and we'll fix it later
+when we build a more sophisticated object system.)
+
+</P>
+
+<PRE>
+; check to see if something is a point by checking to see if it's
+; a vector whose 0th slot holds the symbol point.
+(define (point? obj)
+   (and (vector? obj)
+        (eq? (vector-ref obj 0) 'point)))
+</PRE>
+
+<P>
+Now we define accessor procedures to get and set the x and y fields
+of our points--the 1st and 2nd slots of the vector we use to
+represent a point.
+
+</P>
+
+<PRE>
+; accessors to get and set the value of a point's x field.
+(define (point-x obj)
+   (vector-ref obj 1))
+   
+(define (point-x-set! obj value)
+   (vector-set obj 1 value))
+
+; accessors to get and set the value of a point's y field.
+(define (point-y obj)
+   (vector-ref obj 2))
+   
+(define (point-y-set! obj)
+   (vector-set! obj 2 value))
+</PRE>
+
+<P>
+This isn't perfect, either--we should probably test to make sure
+an object is a <CODE>point</CODE> before operating on it as a <CODE>point</CODE>.
+For example, <CODE>point-x</CODE> should be more like this:
+
+</P>
+
+<PRE>
+(define (point-x obj)
+   (if (point? obj)
+       (vector-ref obj 1)
+       (error "attempt to apply point-x to a non-point)))
+</PRE>
+
+<P>
+Once we've defined the procedures that represent operations on
+an abstract data type, we can ignore how it's implemented--we
+no longer have to worry about how <CODE>point</CODE>s are represented.
+
+</P>
+<P>
+We can also change the implementation of an abstract data type
+by redefining the procedures that create and operate on instances
+of that type.
+
+</P>
+<P>
+For example, we could decide to represent points as lists, rather
+than vectors, and redefine the constructor, predicate, and accessors
+to use that representation.
+
+</P>
+<P>
+We could also change the representation to polar form, rather than Cartesian,
+storing a direction and distance from the origin rather than x and y
+distances.  With a polar representation, we could still support the operations
+that return or set x coordinates, using trigonometric functions to compute
+them from the direction and distance.
+
+</P>
+
+
+<H3><A NAME="SEC205" HREF="schintro_toc.html#SEC205">Automating the Construction of Abstract Data Types with Macros</A></H3>
+
+<P>
+As I just showed, it's easy to define an abstract data type in Scheme,
+by hand, using procedural abstraction.  Doing this for every abstract
+data type is very tedious, however, so it would be good to automate
+the process and provide a declarative interface to it.
+
+</P>
+<P>
+We'd like to be able to write something like this:
+
+</P>
+
+<PRE>
+(define-structure point
+   x
+   y)
+</PRE>
+
+<P>
+and have Scheme automatically construct the constructor, type predicate,
+and accessor procedures for us.  In most languages, this is done by
+the compiler, but we can tell Scheme how to do it by defining
+<CODE>define-structure</CODE> as a macro.  Whenever the interpreter or
+compiler encounters a <CODE>define-structure</CODE> form, our macro
+transformation procedure will be called and will generate the
+relevant procedures, which will then be interpreted or compiled
+in place of the <CODE>define-structure</CODE> form.
+
+</P>
+
+<P>
+We'll use a <CODE>define-macro</CODE> (Lisp-style) macro for this.
+this macro will intercept each <CODE>define-structure</CODE> form,
+analyze it, and produce an s-expression that is a sequence of
+procedure definitions to be interpreted or compiled.  Each
+define-structure form will be translated into a <CODE>begin</CODE>
+form containing a series of procedure definitions.
+
+</P>
+
+<PRE>
+; define-struct is a macro that takes a struct name and any number of field
+; names, all of which should be symbols.  Then it generates a begin expression
+; to be compiled, where the begin expression contains the constructor for this
+; structure type, a predicate to identify instances of this structure type,
+; and all of the accessor definitions for its fields.
+
+(define-macro (define-struct struct-name . field-names)
+
+   ; analyze the macro call expression and construct some handy symbols
+   ; and an s-expression that will define and record the accessor methods.
+
+   (let* ((maker-name (string-&#62;symbol
+                       (string-append "make-"
+                                      (symbol-&#62;string struct-name))))
+          (pred-name (string-&#62;symbol
+                      (string-append (symbol-&#62;string struct-name) "?")))
+          (accessor-defns (generate-accessor-defns struct-name field-names)))
+      ; return an s-expression that's a series of definitions to be
+      ; interpreted or compiled.
+      `(begin (define (,maker-name ,@field-names)
+                 (vector ',struct-name ,@field-names))
+              (define (,pred-name obj)        
+                 (and (vector? obj)
+                      (eq? (vector-ref obj 0) ,struct-name)))
+              ,@accessor-defns)))
+</PRE>
+
+<P>
+To generate all of the accessor definitions, we call a special helper
+routine, <CODE>generate-accessor-defns</CODE>, and splice the result into
+the sequence of definitions using <CODE>unquote-splicing</CODE> (<CODE>,@</CODE>).
+<CODE>generate-accessor-definitions</CODE> simply iterates over the 
+list of slot names tail-recursively (using named <CODE>let</CODE>), consing
+two definitions onto the definitions for the rest of the slots:
+
+</P>
+
+<PRE>
+; generate-accessor-defns generates a list of s-expressions that
+; define the accessors (getters and setters) for a structure.
+
+(define (generate-accessor-defns structname fnames)
+
+   (let ((structname-string (symbol-&#62;string structname)))
+
+      ; loop over the fieldnames, and for each fieldname, generate two
+      ; s-expressions:  one that is a definition of a getter, and one that's
+      ; a definition of a setter.
+      ; As we loop, increment a counter i so that we can use it as the index
+      ; for each slot we're generating accessors for
+
+      (let loop ((fieldnames fnames)
+                 (i 1))
+         (if (null? fieldnames)
+             '()
+             ; take a fieldname symbol, convert to string, append it to the
+             ; struct name string with a hyphen in the middle, and convert
+             ; that to a symbol...
+             (let* ((fieldname-string (symbol-&#62;string (car fieldnames)))
+                    (getter-name (string-&#62;symbol
+                                  (string-append structname-string
+                                                 "-"
+                                                 fieldname-string)))
+                    (setter-name (string-&#62;symbol
+                                  (string-append structname-string
+                                                 "-"
+                                                 fieldname-string
+                                                 "-set!"))))
+
+                 ; now construct the define forms and cons them onto the
+                 ; front of the list of the remaining define forms, generated
+                 ; iteratively (tail-recursively)
+
+                 (cons `(define (,getter-name obj)
+                           (vector-ref obj ,i))
+                       (cons `(define (,setter-name obj value)
+                                 (vector-set! obj ,i value))
+                             (loop (cdr fieldnames)
+                                   (+ i 1))))))))) 
+</PRE>
+
+<P>
+                                            
+
+</P>
+
+
+<H2><A NAME="SEC206" HREF="schintro_toc.html#SEC206">Simple Uses of OOP Objects</A></H2>
+
+<P>
+In this section, I'll discuss a simple object system and how it
+it used.  This object system is not part of Standard Scheme,
+but can be [almost entirely ?] implemented in portable Scheme, and
+used in any Scheme system with a reasonably powerful macro system.
+
+</P>
+<P>
+The object system is based on <EM>classes</EM> and <EM>generic
+procedures</EM>.  It is a subset of the RScheme object
+system, and its basic functionality is similar to a subset
+of CLOS object system for Common Lisp, the Dylan object system,
+Meroon, TinyCLOS, and STkLOS. 
+
+</P>
+
+
+<H3><A NAME="SEC207" HREF="schintro_toc.html#SEC207">Late Binding</A></H3>
+
+<P>
+One of the major features of object-based and object-oriented programming is
+<EM>late binding of methods</EM>, which means that we can write code in terms             
+of abstract operations without knowing exactly which concrete operations
+will be executed at run time.
+
+</P>
+<P>
+For example, consider a graphical program that maintains a list of
+objects whose graphical reprsentations are visiblle on the user's screen,
+and periodically redraws those objects.  It might iterate over this
+"display list" of objects, applying a drawing routine to each object
+to display it on the screen.  In most interesting applications, there would
+be a variety of graphical object types, each of which is drawn in a different
+ways.
+
+</P>
+<P>
+If our graphical objects are represented as traditional records, such
+as C structs or Pascal records, the drawing routine must be modified
+each time a new graphical type is added to the program.  For example,
+suppose we have a routine <CODE>draw</CODE> which can draw any kind
+of object on the screen.  <CODE>draw</CODE> might be written with
+a case expression, like this:
+
+</P>
+
+<PRE>
+ (define (draw obj)
+    (cond ((triangle? obj)
+           (draw-triangle obj))
+          ((square? obj)
+           (draw-square obj))
+          ((circle? obj)
+           (draw-circle obj))
+          ; more branches...
+          ;    .
+          ;    .
+          ;    .
+          ((regular-pentagon? obj)
+           (draw-regular-pentagon obj))
+</PRE>
+
+<P>
+           
+Each time we define a new kind of record that represents a graphical
+object, we must add a branch to this <CODE>cond</CODE> to check for that
+kind of object, and call the appropriate drawing routine.
+
+</P>
+<P>
+In large, sophisticated programs that deal with many kinds of objects,
+the code may be littered with <CODE>cond</CODE> or <CODE>case</CODE> statements
+like this, which represent <EM>abstract operations</EM>, and map them
+onto concrete operations for specific types.  (This example maps
+the abstract operation "draw an object" onto concrete operations
+like <CODE>draw-triangle</CODE>, <CODE>draw-square</CODE>, and so on.)
+
+</P>
+<P>
+Such code is very difficult to maintain and extend.  Whenever a new
+type is added to the system, all of the <CODE>cond</CODE> or <CODE>case</CODE>
+expressions that could be affected must be located and modified.
+
+</P>
+<P>
+What we would like is a way of specifying how an abstract operation
+is implemented for a particular kind of object, and having the system
+keep track of the details.  For example, we'd like to say at <EM>one</EM>
+point in the program, "here's how you draw a regular pentagon,"
+and then be able to use regular pentagons freely.  We can then use
+the abstract operation <CODE>draw</CODE>, and rely on the system to automatically
+check what kind of object is being drawn, find the appropriate drawing
+routine for that type, and call it to draw that particular object.
+
+</P>
+<P>
+For example, the routine that draws all of the visible objects
+might just look like this:
+
+</P>
+<P>
+<CODE>(map draw display-list)</CODE>
+
+</P>
+<P>
+When we later add a new type, such as <CODE>irregular-hexagon</CODE>, we can
+just define a <EM>method</EM> for drawing irregular hexagons, and the
+system will automatically make the <CODE>draw</CODE> operation work for
+irregular hexagons.  We don't have to go find all of the code that
+might encounter irregular hexagons and modify it.
+
+</P>
+<P>
+This feature is called <EM>late binding of methods</EM>.  When we write
+code that uses an abstract operation, we don't have to specify exactly
+what concrete operation should be performed.
+
+</P>
+<P>
+(Note: here we're using
+a fairly general sense of the word "binding," which is more
+general than the notion of variable binding.  We're making an association
+between a piece of code and the operation it represents, rather than
+between a name and a piece of storage.  In this general sense, "binding"
+means to associate something with something else, and in this example,
+we associating the abstract operation <CODE>draw</CODE> with the particular
+procedure needed to draw a particular object at run time.)
+
+</P>
+<P>
+As we'll see a little later, we can define a <EM>generic procedure</EM>
+that reprsents the abstract <CODE>draw</CODE> operation, and rely on an object
+system to bind that abstract operation to the appropriate drawing
+procedure for a particular type at run time.  When we later define
+new types and methods for drawing them, the generic procedure will be
+automatically updated to handle them.   This lets us write most of
+our code at a higher level of abstraction, in terms of operations
+that "just work" for all of the relevant types.  (E.g., we might
+have abstract operations that can draw, move, and hide any kind
+of graphical object, so that we don't need to worry about the differences
+between the different kinds of graphical objects if those differences
+don't matter for what we're trying to do.)
+
+</P>
+
+
+
+<H3><A NAME="SEC208" HREF="schintro_toc.html#SEC208">Class Definitions and Slot Specifications</A></H3>
+
+<P>
+A <EM>class</EM> is an object that describes a particular kind of object.
+A <EM>class definition</EM> is an expression like a record or structure
+definition, which defines the structure of that kind of object.
+Classes can also have associated behavior or <EM>methods</EM>, which
+are routines for performing particular operations on instances
+of a class.
+
+</P>
+<P>
+For example, suppose we would like to have a class of objects that
+can be used to represent points in two-dimensional space.  Each
+point object will have an <CODE>x</CODE> slot and a <CODE>y</CODE> slot, which
+hold the object's position in the x and y dimensions.
+
+</P>
+<P>
+(A <EM>slot</EM> is a field of an object, which in other languages may
+be known as an <EM>instance variable</EM>, a <EM>data member</EM>,
+an <EM>attribute</EM>, or a <EM>feature</EM>.)
+
+</P>
+<P>
+We can define our point class like this:
+
+</P>
+
+<PRE>
+(define-class &#60;point&#62; (&#60;object&#62;)
+   (x init-value: 0)
+   (y init-value: 0))
+</PRE>
+
+<P>
+   
+Here we have chosen to name the class <CODE>&#60;point&#62;</CODE>.  By convention,
+we use angle brackets to begin and end the names of classes, so that
+it's clear that they are class names, not names of normal objects.
+
+</P>
+<P>
+The parenthesized expression after the class name <CODE>&#60;point&#62;</CODE> is
+a sequence of <EM>superclass</EM> names, which will be explained
+later.<A NAME="FOOT11" HREF="schintro_foot.html#FOOT11">(11)</A>
+(When in doubt, it is a good idea to use <CODE>&#60;object&#62;</CODE> as
+the sole superclass, so use <CODE>(&#60;object&#62;)</CODE> after the class
+name in the class definition.)
+
+</P>
+<P>
+The two remaining fields after the superclasses are the <EM>slot
+specifications</EM>, which say what kinds of fields an instance of
+<CODE>&#60;point&#62;</CODE> will have.  A slot specification is written
+in parentheses, and the first thing is the name of the slot.
+After that come <EM>keyword/value</EM> pairs.  Here we use
+the keyword <CODE>init-value:</CODE> followed by the value <CODE>0</CODE>.
+
+</P>
+<P>
+The specification <CODE>(x init-value: 0)</CODE> says that each instance
+of &#60;point&#62; will have a slot (field) named <CODE>x</CODE>, and that the
+initial value of the field is <CODE>0</CODE>.  That is, when we create a
+<CODE>&#60;point&#62;</CODE> instance to represent a 2-d point, the initial
+x value will be zero.  Likewise, the slot specification
+<CODE>(y init-value 0</CODE> says that each point will also have a 
+<CODE>y</CODE> slot whose initial value is <CODE>0</CODE>.
+
+</P>
+<P>
+We can create an instance of an object by using the special
+form <CODE>make</CODE>, which is actually implemented as a macro.
+The <CODE>make</CODE> operation takes a class as its first argument,
+and returns a new object that is an instance of that class.
+
+</P>
+<P>
+To make a <CODE>&#60;point&#62;</CODE>, we might use the <CODE>make</CODE> expression
+
+</P>
+
+<PRE>
+(make &#60;point&#62;)
+</PRE>
+
+<P>
+This expression returns a new point whose x and y slots are
+initialized to zero.
+
+</P>
+<P>
+If we want the slots of an object to be initialized to a requested
+value at the time the object is initialized--rather than always
+being initialized the to the same value for every object, we
+can omit the initial value specification in the class definition,
+and provide it to the <CODE>make</CODE> call that creates an object.
+
+</P>
+
+<PRE>
+(define-class &#60;point&#62; (&#60;object&#62;)
+   (x)
+   (y))
+</PRE>
+
+<P>
+Given this class definition, we can use <CODE>make</CODE> to create
+a <CODE>&#60;point&#62;</CODE> instance with particular x and y values:
+
+</P>
+
+<PRE>
+(define my-point
+        (make &#60;point&#62; x: 10 y: 20)) 
+</PRE>
+
+<P>
+Here we've created a point object with an x value of 10 and a y
+value of 20.  Note that the x value is labeled by a keyword
+<CODE>x:</CODE>.  As in a class definition, a keyword argument to
+<CODE>make</CODE> looks sort of like an argument, but it really isn't:
+it's the <EM>name</EM> of the following argument.
+
+</P>
+<P>
+Keyword arguments to <CODE>define-class</CODE> and <CODE>make</CODE> let
+you write the arguments in any order, by giving the name
+before the value.  We could have written the above call to
+<CODE>make</CODE> with the values in the opposite order:
+
+</P>
+
+<PRE>
+(define my-point (make &#60;point&#62; y: 20 x: 10))
+</PRE>
+
+<P>
+The result of this definition is exactly the same as the
+earlier one.  The <CODE>make</CODE> macro will sort out the arguments,
+looking at the keyword to figure out what the following arguments
+are for. 
+
+</P>
+<P>
+By default, when we define a class with slots <CODE>x</CODE> and <CODE>y</CODE>,
+we implicitly define operations on those fields of those objects.
+
+</P>
+<P>
+For each field, two routines are defined, a <EM>getter</EM>, which
+fetches the value of the field, and a <EM>setter</EM>, which sets
+the value of the field.  The name of the getter is just
+the name of the field.  The name of the setter starts with <CODE>set-</CODE>,
+followed by the name of the field, followed by an exclamation point to
+indicate that the operation is destructive (i.e., modifies the state
+of the object by replacing an old value with a new one.)
+
+</P>
+<P>
+Given the point we created, we can ask the value of its <CODE>x</CODE>
+field by evaluating the expression <CODE>(x my-point)</CODE>, which
+will return <CODE>10</CODE>.  We can change teh value to 50 by evaluating
+the expression <CODE>(set-x! my-point 50)</CODE>.  We can increment
+it by 1 with the expression
+
+</P>
+
+<PRE>
+(set-x! my-point
+        (+ 1 (x my-point)))
+</PRE>
+
+<P>
+Different kinds of objects can have fields with the same name,
+and the getters and setters will operate on the appropriate field
+of whatever kind of object they are applied to.  (Accessors
+are actually generic procedures, which will be explained later.)
+
+</P>
+
+
+
+<H3><A NAME="SEC209" HREF="schintro_toc.html#SEC209">Generic Procedures and Methods</A></H3>
+
+<P>
+A <EM>generic procedure</EM> is a procedure that does a certain
+operation, but may do it in different ways depending
+on what kind of argument it is given.  A generic procedure can
+be <EM>specialized</EM>, telling it how to perform a particular kind
+of operation for a particular kind of argument.
+
+</P>
+<P>
+A <EM>method definition</EM> specifies how a generic operation should
+be done for an object of a particular type.  Conceptually, a generic
+function keeps track of all of the methods which perform a particular
+operation on different kinds of objects.  A generic procedure is called
+just like any other function, but the first thing it does is to look
+up the appropriate method for the kind of object being operated on.
+Then it applies that method.  A generic procedure is therefore a kind
+of dispatcher, which maps abstract operations onto the actual procedures
+for performing them.
+
+</P>
+<P>
+For example, suppose we would like to define several classes,
+@code&#60;stack&#62;, @code&#60;queue&#62;, and @code&#60;d-e-queue&#62;, to represent
+stacks, queues, and double-ended queues, respectively.
+
+</P>
+<P>
+We could define stack this way:
+
+</P>
+
+<PRE>
+(define-class &#60;stack&#62; (&#60;object&#62;)
+   (items init-value: '())   ; list of items in the stack
+</PRE>
+
+<P>
+  
+An instance of <CODE>&#60;stack&#62;</CODE> has one field, <CODE>items</CODE>, which
+points to a list of items in the stack.  We can push items onto the
+stack by <CODE>cons</CODE>ing them onto the front of its list of items, or
+pop items off of the stack by <CODE>cdr</CODE>ing the list.
+
+</P>
+<P>
+To define the behavior of <CODE>&#60;stack&#62;</CODE>---and things like stacks--we
+need some generic procedures, <CODE>insert-first!</CODE> and <CODE>remove-first!</CODE>.
+These will add an item to the front (top) of a stack, or remove
+and return the item from the front (top) of a stack, respectively.
+
+</P>
+
+<PRE>
+(define-generic (insert-first! obj item))
+
+(define-generic (remove-first! obj))
+</PRE>
+
+<P>
+These two generic procedures define "generic operations" which
+may be supported by different classes, but do semantically
+"the same thing."  That is, the generic procedures don't represent
+how to do a particular kind of operation on a particular kind
+of object, but instead represent a general kind of operation that
+we can define for different kinds of objects. 
+
+</P>
+<P>
+This pair of generic procedures therefore acts as an <EM>abstract
+data type</EM>, which represents object that can behave as stacks.
+The don't say how any particular implementation of stacks works.
+
+</P>
+<P>
+To make the generic operations work for the particular class
+<CODE>&#60;stack&#62;</CODE>, we need to define <EM>methods</EM> that say
+<EM>how</EM> to perform the <CODE>insert-first!</CODE> and
+<CODE>remove-first!</CODE> operations on objects that are instances
+of class <CODE>&#60;stack&#62;</CODE>.
+
+</P>
+<P>
+For this, we use the macro <CODE>define-method</CODE>.  Here's the
+definition of the <CODE>insert-first!</CODE> operation for the class
+<CODE>&#60;stack&#62;</CODE>:
+
+</P>
+
+
+<PRE>
+(define-method (insert-first! (self &#60;stack&#62;) item)
+   (set-items! self
+               (cons item (items self))))    
+</PRE>
+
+<P>
+This <EM>method</EM> definition is very much like a procedure
+definition.  Here we're defining a method that takes two
+arguments, named <EM>self</EM> and <CODE>item</CODE>.  The calling form
+<CODE>(insert-first! (&#60;stack&#62; self) item)</CODE> says that this is
+the particular procedure to use for the generic procedure
+<CODE>insert-first!</CODE> operation when it's given two arguments,
+and the first argument is an instance of class <CODE>&#60;stack&#62;</CODE>.
+
+</P>
+<P>
+That is, we're defining a procedure of two arguments, <CODE>self</CODE>
+and <CODE>item</CODE>, but we're also saying that this procedure is to
+be used <EM>by</EM> the generic procedure <CODE>insert-first!</CODE>
+only when its first argument is a stack.  (The names <CODE>self</CODE>
+and <CODE>item</CODE> were chosen for convenience--as with a normal
+procedure, we can name arguments anything we want.)
+
+</P>
+<P>
+Given this definition, when <CODE>insert-first!</CODE> is called
+with two arguments, and the first is a stack, this procedure
+will be executed to perform the operation in the appropriate
+way for stacks.  We say that we are <EM>specializing</EM> the
+generic procedure <CODE>insert-first!</CODE> for instances of the
+class <CODE>&#60;stack&#62;</CODE>.
+
+</P>
+<P>
+The body of this method definition refers to the stack being
+operated on as <CODE>self</CODE>, the name given as the first
+argument name; it refers to the second argument, which is
+being pushed on the stack, as <CODE>item</CODE>.  The body
+of the method is
+
+<PRE>
+(set-items! self
+            (cons item (items self)))
+</PRE>
+
+<P>
+which relies on the getter and setter implicitly defined for
+the <CODE>items</CODE> slot by the class definition.  It fetches
+the value of the <CODE>head</CODE> slot of <CODE>self</CODE> using
+<CODE>head</CODE>, <CODE>cons</CODE>es the argument <CODE>item</CODE> onto
+that list, and assigns the result to the head slot using
+<CODE>set-head!</CODE>.
+
+</P>
+<P>
+The method for the generic procedure <CODE>remove-first!</CODE> when
+applied to stacks could be defined like this:
+
+</P>
+
+<PRE>
+(define-method (remove-first! (self &#60;stack&#62;))
+   (let ((first-item (car (items self))))
+      (set-items! (cdr (items self))))) 
+</PRE>
+
+<P>
+Now let's implement a queue data type.  Like a stack, a queue data
+type allows you to push an item on the front of an ordered sequence
+of items--it supports the <CODE>insert-first!</CODE> operation.
+
+</P>
+<P>
+However, a queue doesn't let you add items to the front--it only
+lets you add items to the rear.  So our <CODE>&#60;queue&#62;</CODE> class should
+support <CODE>remove-first!</CODE>, like <CODE>&#60;stack&#62;</CODE>, but <CODE>insert-last!</CODE>
+instead of <CODE>insert-first!</CODE>.
+
+</P>
+<P>
+This means that we can define a method for <CODE>&#60;queue&#62;</CODE> on the
+<CODE>remove-first!</CODE> generic procedures, but we need a new generic
+procedure <CODE>insert-last!</CODE>, which represents the abstract operation
+of removing the last item from an ordered sequence.
+
+</P>
+
+<PRE>
+(define-generic insert-last!)
+</PRE>
+
+<P>
+The pair of generic operations <CODE>insert-last!</CODE> and <CODE>remove-first!</CODE>
+represent the abstract datatype of queues and things that can behave
+like queues.
+
+</P>
+<P>
+To actually implement queues, we need a class definition and some
+method definitions, to say how a queue should be represented, and
+how the queue operations should be done on it.
+
+</P>
+<P>
+For a queue, it's good for accesses to be fast at either end, so we'll
+want a doubly-linked list, rather than a simple list of pairs.
+Here's a class definition for <CODE>&#60;queue&#62;</CODE>:
+
+</P>
+
+<PRE>
+(define-class &#60;queue&#62; (&#60;object&#62;)
+   (front '())
+   (rear '()))
+</PRE>
+
+<P>
+Each <CODE>&#60;queue&#62;</CODE>s keep a pointer to the beginning of the linked list
+and a pointer to the end of the linked list.  The queue itself is
+structured as a doubly-linked list of queue nodes, each of which has a
+pointer to an <EM>item</EM> that's conceptually in the queue, plus a
+<CODE>next</CODE> pointer to the next doubly-linked list node, and a <CODE>prev</CODE>
+pointer to the previous one.
+
+</P>
+<P>
+To implement the doubly-linked list, we'll use a helper class to implement
+the list nodes, called <CODE>&#60;d-l-list-node&#62;</CODE>.
+
+</P>
+
+<PRE>
+(define-class &#60;d-l-list-node&#62; (&#60;object&#62;)
+   (item)
+   (next)
+   (prev))
+</PRE>
+
+<P>
+This definition will implicitly define setters and getters for the
+fields, e.g., <CODE>set-next!</CODE> and <CODE>set-next!</CODE> for the <CODE>next</CODE>
+field of a <CODE>&#60;d-l-list-node&#62;</CODE>.
+
+</P>
+<P>
+Now we can define the methods for the <CODE>remove-first!</CODE> and
+<CODE>insert-last!</CODE> operations on instances of <CODE>&#60;queue&#62;</CODE>.
+
+</P>
+
+<PRE>
+(define (insert-last! (self &#60;queue&#62;) item)
+   (let ((new-node (make &#60;d-l-list-node&#62; item: item
+                                         prev: (rear self))
+                                         next: '())))
+      (cond ((null? (front self))          ; nothing in queue yet?
+             (set-front! self new-node)              ; this will be first
+            (else                              ; otherwise
+             (set-next! (rear self) new-node))) ; append to rear of list
+      (set-rear! self new-node))))   ; update rear pointer
+</PRE>
+
+
+<PRE>
+(define (remove-first! (self &#60;queue&#62;))
+   (let ((first-node (front self)))
+      (if (null? first-node)
+          (error "attempt to remove-first! from an empty queue:" self)
+          (let* ((first-item (item first-node))
+                 (rest (next first-node)))
+             (cond((null? rest)    ; no nodes left in queue?
+                   (set-front! self '()) 
+                   (set-rear! self '()))
+                  (else
+                   (set-prev! rest '())
+                   (set-front! self rest)))))))
+</PRE>
+
+<P>
+Note that what stacks and queues both support the abstract operation
+of removing the first item, but each does it in a different way--the
+same operation (generic procedure) is implemented by different code
+(methods).
+
+</P>
+
+
+<H2><A NAME="SEC210" HREF="schintro_toc.html#SEC210">Generic Procedures and Classes are First-Class</A></H2>
+
+<P>
+A generic procedure is a procedure, like any other--it is a first-class
+object that happens to be callable as a procedure.  You can therefore
+use store generic procedures in data structures, pass them as arguments
+to other procedures, and so on.
+
+</P>
+<P>
+For example, in a graphical program, we may have a generic <CODE>draw</CODE>
+procedure to display any kind of graphical object, and each class of
+graphical object may have its own <CODE>draw</CODE> method.  By mapping the
+generic procedure <CODE>draw</CODE> over a list of graphical objects, like this,
+
+<PRE>
+(map draw list-of-objects-to-be-drawn)
+</PRE>
+
+<P>
+we can invoke the appropriate draw method for each kind of object.
+
+</P>
+<P>
+In our system, classes are also first class.  When we use <CODE>define-class</CODE>
+to define a class named <CODE>&#60;point&#62;</CODE>, we are actually doing two things:
+we are creating a special kind of object to represent the class,
+and we are defining a variable named <CODE>&#60;point&#62;</CODE> initialized
+with a pointer to the class object.
+
+</P>
+
+
+<H2><A NAME="SEC211" HREF="schintro_toc.html#SEC211">Implementing the Simple Object System</A></H2>
+
+<P>
+In this section, I'll present a simple implementation of the simple
+object system described so far.  Our object system is based on
+<EM>metaobjects</EM>, i.e., objects which represent or manipulate
+other objects such as class instances and methods.  (The <EM>meta-</EM> is
+Greek for "about," "beyond," or "after".
+
+</P>
+<P>
+In programming language terminology, metaobjects are objects that
+are "about" other objects or procedures.  The two most important
+kinds of metaobjects are class objects and generic procedure objects.
+A <EM>class</EM> object represents instances of a particular class, and
+a generic procedure object represents a generic operation.
+
+</P>
+<P>
+Metaobjects control how other objects behave.  For example, a class
+object controls how instances of the class are constructed, and
+a generic procedure object controls when and how the particular
+methods on that generic procedure are invoked to do the right thing
+for particular kinds of objects.
+
+</P>
+<P>
+A big advantage of the metaobject approach is that since metaobjects
+are just objects in the language, we can implement most or all of
+the object system in the language--in this section, we'll show
+how to implement a simple object system for Scheme, in portable
+Scheme.  (We will rely on macros, which some versions of Scheme don't
+support yet, however.)  An advantage of writing a Scheme object
+system in Scheme is that we can modify and extend the object system
+without having to change the compiler.
+
+</P>
+<P>
+We will use macros to translate class, generic procedure, and method
+definitions into standard Scheme data structures and procedures.  A class
+object in our system is just a data structure, for which we'll use
+a vector (one-dimensional array) as the main representation.  A class
+object will record all of the information necessary to create instances
+of that class.
+
+</P>
+<P>
+Instances of a class will also be represented as Scheme vectors.  Each
+slot of an object will be represented as a field of a vector, and
+we'll translate slot names into vector indexes.
+
+</P>
+<P>
+Generic procedures will be represented as Scheme procedures, constructed
+in a way that lets us define methods--each generic procedure will 
+maintain a table of methods indexed by which classes they work for.
+When a generic procedure is called in the normal way, it check the
+class of the object it's being applied to, and will search its table
+of methods for the appropriate method, and call that method, passing
+along the same arguments.  Methods will also be represented as Scheme
+procedures.
+
+</P>
+
+
+<H3><A NAME="SEC212" HREF="schintro_toc.html#SEC212">Implementing <CODE>define-class</CODE></A></H3>
+
+<P>
+<CODE>define-class</CODE> is a macro which accepts the users's description
+of a class, massages it a little, and passes it on to the procedure
+<CODE>create-class</CODE> to construct a class object.
+
+</P>
+<P>
+The reason that <CODE>define-class</CODE> is written as a macro and not
+a procedure is so that the arguments to the macro won't be evaluated
+immediately.  For example, the class name (e.g., <CODE>&#60;point&#62;</CODE> or
+<CODE>&#60;queue</CODE> passed to <CODE>define-class</CODE> isn't a variable to
+be evaluated--it's a symbol to be used as the name of the class.
+
+</P>
+<P>
+When a call to <CODE>define-macro</CODE> is compiled (or interpreted),
+the transformation procedure for the macro does two things.
+First, it constructs the class object and adds it to a special
+data structure by calling <CODE>register-class</CODE>.  Then it
+generates code to define a variable whose name is the name
+of the class, and initialize that with a pointer to the
+class.  The generated code (the variable definition) is returned
+by the transformer, and that's what's interpreted or compiled
+at the point where the macro was called.
+
+</P>
+<P>
+For example, consider a call to create a <CODE>&#60;point&#62;</CODE> class:
+
+</P>
+
+<PRE>
+(define-class &#60;point&#62; (&#60;object&#62;)
+   (x)
+   (y))
+</PRE>
+
+<P>
+This should be translated by macro processing into a variable definition
+for <CODE>&#60;point&#62;</CODE>, which will hold a pointer to the class object, like
+this:
+
+</P>
+
+<P>
+<CODE>(define &#60;point&#62;</CODE> <EM>complicated_expression</EM><CODE>)</CODE>
+
+</P>
+<P>
+where <EM>complicated_expression</EM> has the side-effect of constructing
+the class object, registering its existence with related objects (virtual
+procedures for the accessors), and so on.  <CODE>complicated_expression</CODE>
+should look something like this, for our <CODE>&#60;point&#62;</CODE> definition:
+
+</P>
+
+<PRE>
+; construct an association list describing the slots of this kind of object,
+; indexed by slot name and holding the routines to get and set the slot
+; values.
+
+(let ((slots-alist (generate-slots-alist '((x) (y)))))
+
+   ; create the class object, implemented as a Scheme vector
+   (let ((class-object (vector &#60;&#60;class&#62;&#62;       ; pointer to class of class
+                               '&#60;point&#62;        ; name symbol for this class
+                               (list &#60;object&#62;) ; list of superclass objects
+                               slots-alist     ; slot names/getters/setters
+                               '*dummy*)))     ; placeholder
+                               
+      ; create and install the instance allocation routine, which will create
+      ; and initialize an instance of this class, implemented as a vector
+      (vector-set! class-object 4 (lambda (x y)
+                                     (vector class-object x y)))
+                                     
+      
+      ; register accessor methods with appropriate generic procedures
+      (register-accessor-methods class-object slots-alist)
+      
+      ; and return the class object we constructed
+      class-object))
+</PRE>
+
+<P>
+In more detail, what this generated code does is:
+
+</P>
+
+<UL>
+<LI>builds an association list, indexed by slot name, holding getter and
+
+      setter procedures for each slot of a <CODE>&#60;point&#62;</CODE> object.
+      It creates procedures that will get and set the values of the
+      slots <CODE>x</CODE> and <CODE>y</CODE>, which have been mapped to
+      indexed fields <CODE>1</CODE> and <CODE>2</CODE> of the vector used
+      to represent an instance.  (These are the methods for the
+      generic procedures <CODE>x</CODE>, <CODE>set-x!</CODE>, <CODE>y</CODE>,
+      and <CODE>set-y!</CODE>, which will be registered with those
+      generic procedures.)
+<LI>creates a vector that will be the class object.  Its 0th slot
+
+      is initialized with a pointer to the special object <CODE>&#60;class&#62;</CODE>,
+      which identifies this object as a class object.<A NAME="FOOT12" HREF="schintro_foot.html#FOOT12">(12)</A>  The 1st slot holds
+      a pointer to the name symbol that is this class's class name.
+      (This is just for documentation purposes.)  The 2nd slot holds
+      a list of pointers to this object's immediate superclasses.
+      (Note that this is a list of pointers to actual class objects,
+      not name symbols.<A NAME="FOOT13" HREF="schintro_foot.html#FOOT13">(13)</A>
+<LI>creates a procedure that will allocate and initialize an
+
+      instance, given the initial values of the slots.  A pointer
+      to this object is stored in the class object.  (This side-effect
+      is needed because the class object must be created before this
+      procedure, so that the class pointer is available to it.)
+      This procedure takes the slot values in the same order the
+      slots are laid out.  (The <CODE>make</CODE> macro will ensure that
+      arguments are passed in the right order from calls to <CODE>make</CODE>
+      using keywords.)      
+<LI>registers the accessor methods for the slots with the appropriate
+
+      generic procedures.  For now, we'll assume that the generic procedure
+      objects already exist--they must be defined explicitly, like any
+      other generic procedures.  Later we'll show how the necessary
+      generic procedure definitions can be automatically generated as
+      needed.
+<LI>returns the class object.
+
+</UL>
+
+<P>
+Since this is all done in the initial value expression of the
+definition of the variable <CODE>&#60;point&#62;</CODE>, the returned class
+object becomes the initial value of that variable binding.
+
+</P>
+<P>
+Once all this is done, we could create an instance of class point
+by extracting the allocator procedure from the class object and calling
+it with the initial values in the proper order.  For example,
+
+</P>
+
+<PRE>
+((vector-ref &#60;point&#62; 4) 20 30)
+</PRE>
+
+<P>
+would extract the point-allocator procedure from the &#60;point&#62; class
+object, and call it to create a <CODE>&#60;point&#62;</CODE> instance with an
+<CODE>x</CODE> value of 20 and a <CODE>y</CODE> value of 30.  (The <CODE>make</CODE>
+macro will provide a friendlier interface.) 
+
+</P>
+<P>
+Now we'll show a simplified version of the procedure
+<CODE>generate-class-code</CODE>, which generates the kind of class-creating
+s-expression shown above.
+
+</P>
+
+<P>
+Now let's look at the macro to produce code like this from a simple
+class definition.
+
+</P>
+<P>
+For now, we'll assume that the body of the class definition
+consists of nothing but slot declarations with no keword options--initial
+value specifiers or other options--i.e., they're one-element
+lists holding just a symbol that names a slot.  Ignoring inheritance
+and assuming that a class includes only the slots declared in
+this class definition, we'll simply assign slots index numbers in the
+order they're declared.
+
+</P>
+<P>
+We'll also continue to ignore issues of inheritance
+and automatic generation of generic procedures for slot accessor
+methods.   When we implement inheritance, described later, we'll
+need to do something with the list of superclasses.)
+
+</P>
+
+
+<PRE>
+(define-macro (define-class class-name superclass-list . slot-decls)
+   `(define ,class-name
+            (let ((slots-slist (generate-slots-alist ',slot-decls 1)))
+
+               ; create the class object, implemented as a Scheme vector
+               (let ((class-object (vector &#60;&#60;class&#62;&#62;            ; metaclass
+                                           ',class-name         ; name
+                                           (list ,@superclass-list) ; supers
+                                           slots-alist          ; slots
+                                           '*dummy*)))          ; creator
+ 
+                   ; install a routine to create instances                             
+                   (vector-set! class-object
+                                4
+                                ; creation routine takes slot values
+                                ; as args, creates a vector w/class
+                                ; pointer for this class followed by
+                                ; slot values in place.
+                                (lambda ,(map car slot-decls)
+                                   (vector class-object
+                                           ,@(map car slot-decls))))
+                                     
+      
+                   ; register accessor methods with appropriate generic procs 
+                   (register-accessor-methods class-object slots-alist)
+      
+                   class-object))
+</PRE>
+
+<P>
+Two important helper routines are used by this macro:
+<CODE>generate-slots-alist</CODE> and <CODE>register-accessor-methods</CODE>.
+
+</P>
+<P>
+The initial value expression for <CODE>slots-alist</CODE>
+is a call to <CODE>generate-slots-alist</CODE>, with an argument
+that is a quoted version of the argument declarations passed to
+the macro.  Notice that we're using unquote inside a quoted
+expression, and this works.  The value of slot-decls will be
+substituted inside the quote expression during macro processing.
+
+</P>
+<P>
+For the <CODE>&#60;point&#62;</CODE> definition, the expression
+<CODE>(generate-slots-alist ',slot-decls 1)</CODE> will translate to
+<CODE>(generate-slots-alist '((x) (y)) 1)</CODE>.<A NAME="FOOT14" HREF="schintro_foot.html#FOOT14">(14)</A>
+   
+Several other expressions in the macro work this way, as well:
+For the <CODE>&#60;point&#62;</CODE> example, <CODE>',class-name</CODE> will translate
+into <CODE>'&#60;point&#62;</CODE>, a literal referring to the name symbol for the
+particular class we're defining.
+
+</P>
+<P>
+Likewise, <CODE>(list ,@superclass-list)</CODE>, which uses unquote-splicing,
+will be translated to <CODE>(list &#60;object&#62;)</CODE>;  when that expression is
+evaluated, the value of the variable <CODE>&#60;object&#62;</CODE> will be fetched and
+put in a list.  (Notice that this makes a list with the actual class
+object in it, not the <EM>symbol</EM> <CODE>&#60;object&#62;</CODE>.)  The lambda
+expression that generates an instance creating procedure uses
+both unquote and unquote-splicing:
+
+</P>
+
+<PRE>
+(lambda ,(map car slot-decls)
+   (vector class-name ,@(map car slot-decls))
+</PRE>
+
+<P>
+It will translate to
+
+</P>
+
+<PRE>
+(lambda (x y)
+   (vector class-name x y))
+</PRE>
+
+<P>
+ 
+                          
+<CODE>generate-slots-alist</CODE> just traverses the list of slot
+declarations recursively, inrementing an index of which slot number is next,
+and constructs  list of associations, one per slot.  Each association is a
+list hose car (i.e., the key) is the name of the slot, and its second
+and third elements are procedures to access the slot.  The actual
+accessor procedures are generated by calls to <CODE>slot-n-getter</CODE>
+and <CODE>slot-n-setter</CODE>, which return procedures to get or
+set the <EM>n</EM>th slot of a vector.
+
+</P>
+
+<PRE>
+(define (generate-slots-alist slot-decls slot-num)
+   (if (null? slot-decls)
+       '()
+       (cons `(,(caar slot-decls)
+               ,(slot-n-getter slot-num)
+               ,(slot-n-setter slot-num))
+             (generate-slots-alist (cdr slot-decls)
+                                   (+ 1 slot-num))))) 
+</PRE>
+
+<P>
+(This procedure is initially called with a slot-num of 1, reserving
+the zeroth slot for the class pointer.) 
+
+</P>
+<P>
+Here are simple versions of <CODE>slot-n-getter</CODE> and <CODE>slot-n-setter</CODE>.
+Each one simply makes a closure of an accessor procedure, capturing
+the environment where n is bound, to specialize the accessor to access
+a particular slot.  (If we handle keyword options, we'll have to make
+the code a little more complicated.)
+
+</P>
+
+<PRE>
+(define (slot-n-getter offset)
+   (lambda (obj)                        ; return a procedure to read
+      (vector-ref obj offset)))         ; slot n of an object
+(define (slot-n-setter offset)
+   (lambda (obj value)                  ; return a procedure to update
+      (vector-set! obj offset value)))  ; slot n of an object
+</PRE>
+
+<P>
+We construct a new closure for each slot accessor, but that really
+isn't necessary.  We could cache the closures, and always return
+the same closure when we need an accessor for a particular slot
+offset.
+
+</P>
+
+
+
+<H4><A NAME="SEC213" HREF="schintro_toc.html#SEC213">class <CODE>&#60;&#60;class&#62;&#62;</CODE></A></H4>
+
+<P>
+Our simple object system implementation assumes that every instance
+is represented as a Scheme vector whose 0th slot holds a pointer
+to a class object, which is also an object in the system.  This
+implies that a class object must also have a class pointer in
+its zeroth slot.  A question naturally arises as to what the
+class of a class object is, and what <EM>its</EM> class pointer
+points to.
+
+</P>
+<P>
+This is actually a deep philosophical question, and for advanced
+and powerful object system, it has practical consequences.  For
+our little object system, we'll settle the question in a simple
+way.  All class objects have a class pointer that points to
+a special object, the class of all classes.  We call this object
+<CODE>&#60;&#60;class&#62;&#62;</CODE>, where the doubled angle brackets suggest that
+it is not only a class, but the class of other class objects.
+This is known as a <CODE>metaclass</CODE>, because it's a class that's
+about classes.
+
+</P>
+<P>
+It doesn't do very much--it just gives a special object
+we can use as the class value for other class objects, so that
+we can tell that they're classes.
+
+</P>
+<P>
+In our simple system, the unique object <CODE>&#60;&#60;class&#62;&#62;</CODE> has
+a class pointer that points <EM>to itself</EM>---that is, it describes
+itself in the same sense that it describes other classes.  This
+circularity isn't harmful, and allows us to terminate the possibly
+infinite regression of classes, metaclasses, meta-metaclasses,
+and so on.
+
+</P>
+<P>
+We construct this one special object "by hand." Like other class
+objects in our system, it is represented as a Scheme vector whose
+first element points to itself, and which has a few other standard
+fields.  Most of the standard fields will be empty, because
+class &#60;&#60;class&#62;&#62; has no superclasses, no slots, and no allocator--because
+we create the one instance specially.  
+
+</P>
+<P>
+The following definition suffices to create the class <CODE>&#60;&#60;class&#62;&#62;</CODE>:
+
+</P>
+
+<PRE>
+(define &#60;&#60;class&#62;&#62;
+        (let ((the-object (vector '*dummy*   ; placeholder for class ptr
+                                  '&#60;&#60;class&#62;&#62; ; name of this class
+                                  '()        ; superclasses (none)
+                                  '()        ; slots (none)
+                                  #f         ; allocator (none)
+                                  '())))     ; prop. list (initially empty)
+           ; set class pointer to refer to itself
+           (vector-set! the-object 0 the-object)
+           ; and return the class object as initial value for define
+           the-object))
+</PRE>
+
+<P>
+Once this is done, we can define a few other routines that will come
+in handy in implementing the rest of the object system:
+
+</P>
+<P>
+<CODE>instance?</CODE> is a predicate that checks whether an object is an
+instance of a class in our class system, as opposed to a plain old
+Scheme object like a pair or a number.  (In a better object system,
+like RScheme's, all Scheme objects would also be instances of classes,
+but we'll ignore that for now.)
+
+</P>
+
+<PRE>
+; An object is an instance of a class if it's represented as a
+; Scheme vector whose 0th slot holds a class object.
+; Note: we assume that we never shove class objects into other
+;       vectors.  We could relax this assumption, but our code
+;       would be slower.
+(define (instance? obj)
+   (and (vector? obj)
+        (class? (vector-ref 0 obj)))
+</PRE>
+
+<P>
+ 
+
+<PRE>
+; An object is a class (meta)object if it's represented as a Scheme
+; vector whose 0th slot holds a pointer to the class &#60;&#60;class&#62;&#62;.
+; Note: we assume that we never shove the &#60;&#60;class&#62;&#62; object into
+;       other vectors.  We could relax this, at a speed cost.
+(define (class? obj)
+   (and (vector? obj)
+        (eq? (vector-ref 0 obj) &#60;&#60;class&#62;&#62;)))
+</PRE>
+
+
+<PRE>
+; We can fetch the class of an instance by extracting the value
+; in its zeroth slot.  Note that we don't check that the argument
+; obj *is* an instance, so applying this to a non-instance is an error.
+(define (class-of-instance obj)
+   (vector-ref obj 0))
+</PRE>
+
+
+
+<H3><A NAME="SEC214" HREF="schintro_toc.html#SEC214">Implementing <CODE>define-generic</CODE></A></H3>
+
+<P>
+Each generic procedure maintains a table of methods that are defined
+on it, indexed by the classes they are applicable to.  In our simple
+object system implementation, this table will be implemented as an
+association list, keyed by class pointer.  That is, the association
+list is a list of lists, and each of those lists holds a class object
+and a procedure.  The class object represents the class on which
+the method is defined, and the procedure is the method itself.
+
+</P>
+<P>
+When the generic procedure is called on a particular instance, it will
+extract the class pointer from the zeroth slot of the instance, and
+use it as a key to probe its own association list.  It will then extract
+the procedure that's the second element of the resulting list, and
+call it.  When calling the method, it will pass along the same arguments
+it received.
+
+</P>
+<P>
+This scheme can be rather slow--a linear search of all methods may
+be slow if there are many methods defined on a generic procedure, and
+especially if the frequently-called ones are not near the front of
+the list.  We could speed this up considerably by using caching tricks,
+e.g., reorganizing the list to put recently-used elements at the front.
+A more aggressive system could figure out how to avoid looking up methods
+at runtime in most cases, but that's considerably more complicated.
+We won't bother with any of that for now, to keep our example system
+simple.
+
+</P>
+<P>
+(Understanding this simple system will be a good start toward
+understanding more sophisticated systems that perform much better,
+and even this simple system is fast enough for many real-world uses,
+such as most scripting and GUI programming, or coarse-grained
+object-oriented programming where most of the real work is done in
+non-object-oriented code.)
+
+</P>
+<P>
+When we evaluate an expression such as 
+
+<PRE>
+(define-generic (insert-first! obj item)) 
+</PRE>
+
+<P>
+we would like the macro to be translated into code that will do
+several things:
+
+</P>
+
+<UL>
+<LI>
+
+      create an association list to store methods later defined on
+      this generic procedure
+<LI>
+
+      create the generic procedure itself
+<LI>
+
+      provide a means for adding methods to the association list.
+<LI>
+
+      bind the name (e.g., <CODE>insert-first!</CODE> and initialize
+      the binding with a pointer to the generic procedure.
+</UL>
+
+<P>
+The first two and the last are easy, and we'll ignore the third for
+now.  <CODE>define-generic</CODE> can generate code like this:
+
+</P>
+
+<PRE>
+(define insert-first!
+        ;  create an environment that only the generic procedure will
+        ;  be able to see.
+        (let ((method-alist '()))
+           ;  create and return the generic procedure that can see that
+           ;  method a-list.
+           (lambda (obj item)
+              (let* ((class (class-of-instance obj))
+                     (method (cadr (assq class method-alist))))
+                 (if method
+                     (method obj item)
+                     (error "method not found"))))))
+</PRE>
+
+<P>
+Here we use <CODE>let</CODE> to create a local variable binding to hold
+the association list, and capture it by using lambda to create
+the generic procedure in its scope.  Once the procedure is returned
+from the let, only that procedure will ever be able to operate on
+that association list. 
+
+</P>
+<P>
+The procedure returned by <CODE>lambda</CODE> will take the two arguments
+specified by the generic procedure declaration, extract the class pointer
+from the first argument object, probe the association list to get the
+appropriate method for that class, and (tail-)call that method, passing
+along the original arguments.  If it fails to find a method for the
+class of the instance it's being applied to, it signals an error.
+
+</P>
+<P>
+Keeping in mind that this code doesn't quite work because we can't
+actually add methods to the method association list, we could
+define <CODE>define-generic</CODE> as a macro this way:  
+
+</P>
+
+<PRE>
+(define-macro (define-generic name . args)
+   `(define ,name
+            (let ((method-alist '()))
+               (lambda (,@args)
+                 (let* ((class (class-of-instance ,(car args))))
+                        (method (cadr (assq class method-alist))))
+                    (if method
+                        (method obj item)
+                        (error "method not found"))))))
+</PRE>
+
+<P>
+To allow methods to be added to the method-alist, we'll change
+the macro to create another procedure, along with the generic
+procedure, in the environment where <CODE>method-list</CODE> is visible.
+This procedure can be used to add a new method to the method
+association lists.  This table will be an association list
+stored in the global variable <CODE>*generic-procedures*</CODE>.
+
+</P>
+
+<P>
+We'll also maintain a table of generic procedures and the corresponding
+procedures that add methods to their association lists.  While we're
+at it, we'll modify <CODE>define-generic</CODE> record the name of a generic
+procedure when it's defined, so that it can print out a more helpful
+error message when a lookup fails.  The inital value expression
+will be a letrec which lets us define four variables, two of
+which are procedure-valued, and then returns one of those procedures,
+the actual generic procedure 
+
+</P>
+
+
+<PRE>
+         
+(define *generic-procedures* '())
+
+(define-macro (define-generic name . args)
+   `(define ,name
+            (letrec ((gp-name ,name)
+                     (method-alist '())
+                     (method-adder
+                      (lambda (generic-proc method)
+                            (set! method-alist
+                                  (cons (list generic-proc method)
+                                        method-alist)))) 
+                     (generic-proc
+                      (lambda (,@args)
+                         (let* ((class (class-of-instance ,(car args))))
+                                (method (cadr (assq class
+                                                    method-alist))))
+                            (if method
+                                (method obj item)
+                                (error "method not found for "
+                                       gp-name))))))
+                                       
+               ; add the generic procedure and its method-adding
+               ; routine to the association list of generic procedures
+                      
+               (set! *generic-procedures*
+                     (cons (list generic-proc method-adder)
+                           *generic-procedures*))
+                           
+               generic-procedure)))
+</PRE>
+
+<P>
+ 
+
+
+<H3><A NAME="SEC215" HREF="schintro_toc.html#SEC215">Implementing <CODE>define-method</CODE></A></H3>
+
+<P>
+Now that each generic procedure is associated with a method-adding
+procedure that can add to its list of methods, we can define the
+<CODE>define-method</CODE> macro.  <CODE>define-method</CODE> will create a
+method using <CODE>lambda</CODE>, and add it to the generic procedure's
+method association list, indexed by the class that it is to
+be used for.
+
+</P>
+<P>
+In this simple system, where only the first argument is dispatched
+on (used in selecting the appropriate method), we only need to
+treat the first argument declaration specially.
+
+</P>
+
+<P>
+Consider an example the example of defining an <CODE>insert-first!</CODE>
+method for class <CODE>stack</CODE>.
+
+</P>
+
+<PRE>
+(define-method (insert-first! (self &#60;stack&#62;) item)
+   (set-items! self
+               (cons item (items self))))    
+</PRE>
+
+<P>
+We'd like this to be translated by macro processing into the equivalent
+
+</P>
+
+<PRE>
+(add-method-to-generic-proc insert-first!
+                            &#60;stack&#62;
+                            (lambda (self item)
+                               (set-items! self
+                                           (cons item (items self)))))   
+</PRE>
+
+<P>
+The real work is done by the procedure <CODE>add-method-to-generic-procedure</CODE>,
+which we can write as
+
+</P>
+
+<PRE>
+(define (add-method-to-generic-procedure generic-proc class method)
+   (let ((method-adder! (cadr (assq *generic-procedures* generic-proc))))
+      (method-adder! class method)))
+</PRE>
+
+<P>
+This procedure expects three arguments--a generic procedure object,
+a class object, and a closure that implments the corresponding method.
+It searces the association list
+ 
+The calling pattern for the <CODE>define-method</CODE> macro will ensure that
+the actual calling expression is destructured into three parts, giving
+us the first argument's name and the name and its class.
+
+</P>
+
+<PRE>
+(define-macro (define-method (gp (arg1 class) . args) . body)
+   `(add-method-to-generic-proc ,gp
+                                ,class
+                                (lambda (arg1 ,@args)
+                                   ,@body)))
+</PRE>
+
+
+
+<H4><A NAME="SEC216" HREF="schintro_toc.html#SEC216">Installing Accessor Methods</A></H4>
+
+<P>
+Given the code we've seen so far, we've almost got a working object system,
+but we left out a detail when we defined <CODE>define-class</CODE>.  Recall that
+the accessor routines for a class's slots are supposed to be used as
+methods on generic procedures such as <CODE>x</CODE>.  <CODE>define-class</CODE>
+generates code that calls <CODE>register-accessor-methods</CODE>, to install
+the accessor routines for the slots of a class as methods on generic
+procedures.
+
+</P>
+<P>
+<CODE>register-accessor-methods</CODE> iterates over the slots association
+list of the class, looking at each slot name and its corresponding
+accessors, and adding the accessor procedures to the appropriate generic
+procedure.  For a given slot name, the appropriate generic procedure
+name is automatically constructed using the accessor naming conventions.
+
+</P>
+<P>
+[ OOPS--theres a hitch here.  We didn't index the generic procedures
+  by name...
+  
+  it's also awkward that Scheme doesn't provide a standard bound?
+  procedure so that we can tell if the generic procedure already
+  exists.  Is it even possible to automatically define the
+  generic procedures in absolutely portable Scheme, without doing
+  something painful?
+  
+  I suppose that if we can search the list of generic procedures by
+  name, the macro transformer for define-class can look to see which
+  accessor names don't have corresponding generic functions, BEFORE
+  actually generating the transformed code.  It could then add a
+  (define-generic ...) to its output for each accessor that doesn't
+  already have an existing generic procedure to add it to.  Tedious,
+  and annoying to have to explain. ]
+ 
+
+</P>
+
+
+<H4><A NAME="SEC217" HREF="schintro_toc.html#SEC217">Keyword options</A></H4>
+
+
+
+<H3><A NAME="SEC218" HREF="schintro_toc.html#SEC218">Inheritance</A></H3>
+
+<P>
+So far we've described a simple object-based programming system and
+shown how it can be implemented.  A fully object-oriented system requires
+another feature---<EM>inheritance</EM>.
+
+</P>
+<P>
+Inheritance allows you to define a new class in terms of another class.
+For example, we might have a class <CODE>&#60;point&#62;</CODE>, and want to define
+a similar class, <CODE>&#60;colored-point&#62;</CODE>, which records the color to
+be used to display a point when it is drawn on the user's screen.
+
+</P>
+<P>
+Given our simple object-based system so far, we would have to define
+<CODE>colored-point</CODE> from scratch, defining its x and y fields as
+well as its color field.  This definition would be mostly redundant
+with the definition of <CODE>&#60;point&#62;</CODE>, making the code harder to
+understand and maintain.
+
+</P>
+<P>
+Inheritance lets us define new classes by describing its differences
+from another class.  For example, we could define colored-point
+like this:
+
+</P>
+
+<PRE>
+(define-class &#60;colored-point&#62; (&#60;point&#62;)
+   (color)) 
+</PRE>
+
+<P>
+This definition says that instances of <CODE>&#60;colored-point&#62;</CODE> have
+all of the slots of <CODE>&#60;points&#62;</CODE> (i.e., <CODE>x</CODE> and <CODE>y</CODE>),
+as well as another slot, <CODE>color</CODE>.  We say that <CODE>&#60;colored-point&#62;</CODE>
+<EM>inherits</EM> the slotss defined for <CODE>&#60;point&#62;</CODE>.
+
+</P>
+<P>
+Inheritance applies to methods as well as slots.  The definition
+above tells our object system that the methods defined for the
+superclass <CODE>&#60;point&#62;</CODE> should also be used for <CODE>&#60;colored-point&#62;s</CODE>,
+unless we specifically define new methods just for <CODE>&#60;colored-point&#62;s</CODE>
+on the same generic procedures.
+
+</P>
+<P>
+This gives us a concise declarative way of defining classes--we can
+declare that a <CODE>&#60;colored-point&#62;</CODE> is like a <CODE>&#60;point&#62;</CODE>, except
+for the particular differences we specify.  The object system then
+infers what slots a <CODE>&#60;colored-point&#62;</CODE> must have from this declaration
+(and methods we define for this class) <EM>plus</EM> the declarations for
+<CODE>&#60;point&#62;</CODE> and its methods.
+
+</P>
+<P>
+Note that inheritance is transitive.  If we define a subclass of
+<EM>&#60;colored-point&#62;</EM>, say <CODE>&#60;flashing-colored-point&#62;</CODE>, it will inherit
+the slots and methods of <CODE>&#60;colored-point&#62;</CODE>, and also the slots
+and methods of <CODE>&#60;point&#62;</CODE>.  
+
+</P>
+
+
+
+<H3><A NAME="SEC219" HREF="schintro_toc.html#SEC219">Overriding and Refining Inherited Methods</A></H3>
+
+<P>
+By default, a class inherits all of the methods defined for
+its superclasses.  We can <EM>override</EM> an inherited definition,
+though, by defining a method definition explicitly.  For example,
+we might have a <CODE>draw</CODE> method for class <CODE>&#60;point&#62;</CODE> which
+simply draws a black pixel on the screen at the point's coordinates.
+(This might be through a call to an underlying graphics library
+provided by the operating system.)  For <CODE>&#60;colored-point&#62;</CODE>,
+we would probably want to define a new <CODE>draw</CODE> method so that
+the point would be drawn in color.
+
+</P>
+<P>
+Sometimes, we don't want to completely redefine an inherited method
+for a new class, but we would like to refine it--we may want to
+define the new method <EM>in terms of</EM> the inherited method.
+
+</P>
+<P>
+For example, suppose we have a class <CODE>&#60;queue&#62;</CODE>, which maintains
+a queue as we saw earlier, and we woulto refine it to
+create a new kind of queue that keeps track of the size of the
+queue--i.e., the number of items in the queue.
+
+</P>
+<P>
+We might define <CODE>&#60;counted-queue&#62;</CODE> as a subclass of <CODE>&#60;queue&#62;</CODE>,
+but with a size slot, like this:
+
+</P>
+
+<PRE>
+(define &#60;counted-queue&#62; (&#60;queue&#62;)
+   (size initial-value: 0))
+</PRE>
+
+<P>
+Then we can define the <CODE>get-first</CODE> and <CODE>put-last</CODE> methods
+for <CODE>counted-queue</CODE> in terms of the corresponding methods for
+<CODE>&#60;queue&#62;</CODE>.  We do this by using a special pseudo-procedure
+called <CODE>next-method</CODE>.  Inside a method definition, the name
+<CODE>next-method</CODE> refers to an inherited procedure by the same
+name.  This allows us to call the inherited version of a method
+even though we're overriding that definition.
+
+</P>
+
+<PRE>
+(define-method (get-first! (self &#60;counted-queue&#62;))
+   (count-set! self (- (count self) 1))  ; update count of items, and
+   (next-method self))                       ; call inherited get-first
+</PRE>
+
+
+<PRE>
+(define-method (put-last! (self &#60;counted-queue&#62;) item)
+   (next-method self item)
+   (count-set! self (+ (count self) 1))
+</PRE>
+
+<P>
+<CODE>next-method</CODE>'s name comes from the fact that it represents the
+<EM>next most specific method</EM> for this operation applied to this class,
+according to the inheritance graph.  The method we're defining is the
+most specific method, because it's defined for this class exactly, and
+the inherited one is the <EM>next</EM> most specific.  (The inherited
+one may in turn call a method that was inherited earlier, which will
+in turn be the <EM>next</EM> most specific method, and so on.)
+                                  
+
+
+<H3><A NAME="SEC220" HREF="schintro_toc.html#SEC220">Late Binding and Inheritance</A></H3>
+
+
+
+<H3><A NAME="SEC221" HREF="schintro_toc.html#SEC221">Implementing an Object System with Inheritance</A></H3>
+
+
+
+<H3><A NAME="SEC222" HREF="schintro_toc.html#SEC222">Interfaces and Inheritance</A></H3>
+
+
+
+<H2><A NAME="SEC223" HREF="schintro_toc.html#SEC223">A More Advanced Object System and Implementation</A></H2>
+
+<P>
+The simple object system
+
+</P>
+
+
+<H3><A NAME="SEC224" HREF="schintro_toc.html#SEC224">Language Features</A></H3>
+
+
+
+<H4><A NAME="SEC225" HREF="schintro_toc.html#SEC225">Purity</A></H4>
+
+
+
+<H4><A NAME="SEC226" HREF="schintro_toc.html#SEC226">Encapsulation</A></H4>
+<P>
+    
+
+
+<H4><A NAME="SEC227" HREF="schintro_toc.html#SEC227">Multiple Dispatching</A></H4>
+
+
+
+<H4><A NAME="SEC228" HREF="schintro_toc.html#SEC228">Multiple Inheritance</A></H4>
+
+
+
+<H4><A NAME="SEC229" HREF="schintro_toc.html#SEC229">Explictit Subtyping</A></H4>
+
+
+
+<H4><A NAME="SEC230" HREF="schintro_toc.html#SEC230">Control Over Compilation</A></H4>
+
+
+
+<H4><A NAME="SEC231" HREF="schintro_toc.html#SEC231">A Metaobject Protocol</A></H4>
+
+<P>
+ 
+
+</P>
+
+
+<H3><A NAME="SEC232" HREF="schintro_toc.html#SEC232">Implementation Improvements</A></H3>
+
+
+
+<H4><A NAME="SEC233" HREF="schintro_toc.html#SEC233">Factoring out Work at Compile Time</A></H4>
+
+
+
+<H4><A NAME="SEC234" HREF="schintro_toc.html#SEC234">Supporting Runtime Changes</A></H4>
+
+
+
+<H4><A NAME="SEC235" HREF="schintro_toc.html#SEC235">Faster Dynamic Dispatching</A></H4>
+
+
+
+<H4><A NAME="SEC236" HREF="schintro_toc.html#SEC236">Compiling Slot Accessors And Methdos Inline</A></H4>
+
+
+
+<H4><A NAME="SEC237" HREF="schintro_toc.html#SEC237">Exploiting Type Information</A></H4>
+
+
+
+<H4><A NAME="SEC238" HREF="schintro_toc.html#SEC238">Advanced Compilation Techniques</A></H4>
+
+
+
+<H2><A NAME="SEC239" HREF="schintro_toc.html#SEC239">Some Shortcomings of Standard Scheme for Object System Implementation</A></H2>
+
+
+
+<H3><A NAME="SEC240" HREF="schintro_toc.html#SEC240">Inability to Define Disjoint Types</A></H3>
+
+
+
+<H3><A NAME="SEC241" HREF="schintro_toc.html#SEC241">Lack of Type Objects for Predefined Types</A></H3>
+
+
+
+<H3><A NAME="SEC242" HREF="schintro_toc.html#SEC242">Lack of Weak Tables and Extensible Closure Types.</A></H3>
+
+
+
+<H3><A NAME="SEC243" HREF="schintro_toc.html#SEC243">Standard Macros are Limited</A></H3>
+
+
+
+<H3><A NAME="SEC244" HREF="schintro_toc.html#SEC244">Unspecified Time of Macro Processing</A></H3>
+
+<P>
+(And no <CODE>bound?</CODE> either, so it's hard to ensure things like generation
+of generic procedures for accessors exactly once.)
+ 
+
+</P>
+
+
+<H3><A NAME="SEC245" HREF="schintro_toc.html#SEC245">Lack of Type Declarations</A></H3>
+
+<P>
+(Check-me-on-this declarations vs. trust-me declarations.)
+
+</P>
+
+
+
+<H3><A NAME="SEC246" HREF="schintro_toc.html#SEC246">Lack of a Standard <CODE>bound?</CODE> procedure</A></H3>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_132.html">previous</A>, <A HREF="schintro_134.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

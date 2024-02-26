@@ -1,0 +1,204 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Defining Variables and Procedures</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_13.html">previous</A>, <A HREF="schintro_15.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H4><A NAME="SEC14" HREF="schintro_toc.html#SEC14">Defining Variables and Procedures</A></H4>
+
+<P>
+You can define a variable in Scheme using a <CODE>define</CODE>:
+
+</P>
+
+<PRE>
+(define my-variable 5)
+</PRE>
+
+<P>
+This tells Scheme to allocate space for <CODE>my-variable</CODE>, and initialize
+that storage with the value <CODE>5</CODE>.
+
+</P>
+<P>
+In Scheme, you always give a variable an initial value, so there's
+no such thing as an uninitialized variable or an unininitialized
+variable error.
+
+</P>
+<P>
+Scheme values are always pointers to objects, so when we use the literal
+<CODE>5</CODE>, Scheme interprets that as meaning <EM>a pointer to the object</EM>
+<CODE>5</CODE>.  Numbers are objects you can have pointers to, just like any
+other kind of data structure.  (Actually, most Scheme implementations
+use a couple of tricks to avoid pointer overheads on numbers, but that
+doesn't show up at the language level.  You don't have to be aware
+of it.)
+
+</P>
+<P>
+After the above definition, we can draw the resulting situation like
+this:
+
+</P>
+
+<PRE>
+       +-------+
+   foo |   *---+---&#62;5
+       +-------+
+</PRE>
+
+<P>
+The <CODE>define</CODE> expression does three things: 
+
+</P>
+
+<UL>
+<LI>It <EM>declares</EM> to Scheme that we're going to have a variable
+
+      named <CODE>foo</CODE> in the current scope.  (I'll talk about scoping
+      a lot, later.)
+<LI>It tells Scheme to actually allocate storage for the variable.  The
+
+      storage is called a <EM>binding</EM>---we "bind" the variable <CODE>foo</CODE>
+      to a particular piece of memory, so that we can refer to that
+      storage by the name <CODE>foo</CODE>.
+<LI>It tells Scheme what initial value to put in the storage.
+
+</UL>
+
+<P>
+These three things happen when you define variables in other languages,
+too.  In Scheme we have names for all three.
+
+</P>
+<P>
+In the picture, the box represents the fact that Scheme has allocated
+storage for a variable.  The name <CODE>foo</CODE> beside the box means
+that we've given that storage the name <CODE>foo</CODE>.  The arrow says
+that the value in the box is a pointer to the integer object <CODE>5</CODE>.
+(Don't worry about how the integer object is actually represented.  It
+doesn't really matter.)
+
+</P>
+<P>
+You can define new procedures with <CODE>define</CODE>, too:
+
+</P>
+
+<PRE>
+(define (two-times x)
+   (+ x x))
+</PRE>
+
+<P>
+Here we've defined a procedure named <CODE>two-times</CODE>, which takes one
+argument, <CODE>x</CODE>.  It then calls the addition procedure <CODE>+</CODE>
+to add the argument value to itself, and returns the result of the
+addition.
+
+</P>
+<P>
+Notice the sytnactic difference between the variable definition and the
+procedure definition: for a procedure definition, there are parentheses 
+around the name, and the argument name(s) follow that inside the parentheses.
+
+</P>
+<P>
+This resembles the way the procedure is called.  Consider the procedure
+call expression <CODE>(two-times 5)</CODE>, which returns <CODE>10</CODE>;  it
+looks like the definition's <CODE>(two-times x)</CODE>, except that we've put
+the <EM>actual</EM> argument 5 in place of the <EM>formal parameter</EM>
+<CODE>x</CODE>.
+
+</P>
+<P>
+<A NAME="IDX2"></A>
+<A NAME="IDX3"></A>
+<A NAME="IDX4"></A>
+<A NAME="IDX5"></A>
+
+</P>
+<P>
+Here's a bit of programming language terminology you should know: the
+arguments you pass to a procedure are sometimes called <EM>actual
+parameters</EM>.  The argument variables <EM>inside</EM> the procedure are
+called <EM>formal parameters</EM>---they stand for whatever is actually
+passed to the procedure at run time.  "Actual" means what you actually
+pass to the procedure, and "formal" means what you call that on the 
+inside of the procedure.  Usually, I'll just talk about "arguments,"
+but that's the same thing as "actual parameters."  Sometimes I'll talk
+about "argument variables," and that's the same thing as "formal
+parameters."
+
+</P>
+<P>
+You can define a procedure of zero arguments, but you still have
+to put parentheses around the procedure name, to make it clear that
+you're defining a procedure.  You put parentheses around its name
+when you call it, too, to make it clear that it's a procedure call.
+
+</P>
+<P>
+For example, this is a definition of a variable whose initial value
+is <CODE>15</CODE>:
+
+</P>
+
+<PRE>
+(define foo 15)
+</PRE>
+
+<P>
+but this is a definition of a procedure <CODE>foo</CODE> which returns
+<CODE>15</CODE> when called.
+
+</P>
+
+<PRE>
+(define (foo) 15)
+</PRE>
+
+
+<PRE>
+       +-------+
+   foo |   *---+---&#62;#&#60;procedure&#62;
+       +-------+
+</PRE>
+
+<P>
+This picture shows that when you define a procedure, you're really
+defining a variable <EM>whose value happens to be a (pointer to
+a) procedure</EM>.  For now, you don't really have to worry about that.
+The main thing to know is that now you can call the procedure
+by the name <CODE>foo</CODE>.  For example, the procedure call expression
+<CODE>(foo)</CODE> will return <CODE>15</CODE>, because all the body of the
+procedure does is return the value <CODE>15</CODE>.
+
+</P>
+<P>
+Usually, we indent procedure definitions like this, with the
+body starting a new line, and indented a few characters:
+
+</P>
+
+<PRE>
+(define (foo)
+   15)
+</PRE>
+
+<P>
+This makes it clearer that it's a procedure definition.
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_13.html">previous</A>, <A HREF="schintro_15.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

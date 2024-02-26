@@ -1,0 +1,1220 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Recursion in Scheme</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_126.html">previous</A>, <A HREF="schintro_128.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H1><A NAME="SEC167" HREF="schintro_toc.html#SEC167">Recursion in Scheme</A></H1>
+
+<P>
+In this chapter, I'll discuss procedure calling and recursion in more
+depth.  [ blah blah blah ]  Scheme's procedure-calling mechanism
+supports efficient tail-recursive programming, where recursion is used
+instead of iteration.
+
+</P>
+<P>
+After clarifying how recursion works, I'll give examples of how to
+program recursively in Scheme.
+
+</P>
+<P>
+(In a later chapter, I'll show how the mechanisms that support tail
+recursion also support a powerful control feature called
+<CODE>call-with-</CODE><CODE>current-</CODE><CODE>continuation</CODE> that lets
+you implement novel control structures like backtracking and coroutines.)
+
+</P>
+
+
+<H2><A NAME="SEC168" HREF="schintro_toc.html#SEC168">Subproblems and Reductions (non-tail and tail calls)</A></H2>
+
+<P>
+In most implementations of most programming languages, an activation
+stack is used to implement procedure calling.  At a call, the state
+of the "caller" (calling procedure) is saved on the stack, and then
+control is transferred to the callee.
+
+</P>
+<P>
+Because each procedure call requires saving state on the stack, 
+recursion is limited by the stack depth.  In many systems, deep
+recursions cause stack overflow and program crashes, or use up
+unnecessary virtual memory swap space.  In most systems, recursion
+is unnecessarily expensive in space and/or time.  This limits the
+usefulness of recursion.
+
+</P>
+<P>
+In Scheme, things are somewhat different.  As I noted earlier, recursive
+calls may be <EM>tail recursive</EM>, in which case the state of the caller
+needn't be saved before calling the callee.
+
+</P>
+<P>
+More generally, whether a procedure is recursive or not, the calls it
+makes can be classified as <EM>subproblems</EM> or <CODE>reductions</CODE>
+If the last thing a procedure does is to call another procedure, that's
+known as a reduction--the work being done by the caller is complete,
+because it "reduces to" the work being done by the callee.
+
+</P>
+<P>
+For example, consider the following procedures:
+
+</P>
+
+<PRE>
+(define (foo)
+   (bar)
+   (baz))
+</PRE>
+
+
+<PRE>
+(define (baz)
+   (bar)
+   (foo))
+</PRE>
+
+<P>
+Notice that when <CODE>foo</CODE> is called, it does two things: it calls <CODE>bar</CODE>
+and then calls <CODE>baz</CODE>.  After the call to <CODE>bar</CODE>, control must return
+to <CODE>foo</CODE>, so that it can continue and call <CODE>baz</CODE>.  The call to
+<CODE>bar</CODE> is therefore a subproblem--a step in the overall plan of
+executing <CODE>foo</CODE>.  When <CODE>foo</CODE> calls <CODE>baz</CODE>, however, that's
+<EM>all</EM> it needs to do--all of its other work is done.
+
+</P>
+<P>
+In a normal programming language implementation, <CODE>foo</CODE>'s state would
+be saved before the call to <CODE>baz</CODE>, as well as before the call to
+<CODE>bar</CODE>.  Each call would return control to <CODE>foo</CODE>.  In the case
+of the call to <CODE>baz</CODE>, all <CODE>foo</CODE> will do is return the result
+of the call to <EM>its</EM> caller.  That is, all <CODE>foo</CODE> does after the
+return from <CODE>baz</CODE> is to leave the result wherever its caller expects
+it, and return again to pop a stack frame off the activation stack.
+
+</P>
+<P>
+In Scheme, things are actually simpler.  If the last thing a procedure
+does is to call another procedure, the caller doesn't save its own state
+on the stack.  When the callee returns, it will return to its <EM>caller's</EM>
+caller directly, rather than to its caller.  After all, there's no reason
+to return to the caller if all the caller is going to do is pass the
+return value along to <EM>its</EM> caller.  
+
+</P>
+<P>
+In effect, this optimizes away the unnecessary state saving and returning
+at tail calls.
+
+</P>
+<P>
+Consider both <CODE>foo</CODE> and <CODE>baz</CODE> above.  Neither ever returns--each
+just calls the other.  In Scheme, these two procedures will repeatedly
+call each other, without saving their state on the stack, producing an
+infinite mutual recursion.  Will the stack overflow?  No.  Each will save
+its state before calling <CODE>bar</CODE>, but the return from <CODE>bar</CODE> will
+pop that information off of the stack.  The infinite tail-calling
+beetween <CODE>foo</CODE> and <CODE>baz</CODE> will not increase the stack height
+at all.
+
+</P>
+<P>
+Above I said that a callee may return to its caller's caller, but that
+doesn't really capture the extent of what's going on.  In general a
+procedure may return to its caller (if it was non-tail called), or
+it's caller's caller (if it was tail-called but its caller wasn't) or
+it's caller's caller's caller (if it and it's caller were both
+tail-called), and so on.  A procedure returns to the last caller that did
+a non-tail call.
+
+</P>
+<P>
+Because of this "tail call optimization," you can use recursion very
+freely in Scheme, which is a good thing--many problems have a natural
+recursive structure, and recursion is the easiest way to solve them.
+
+</P>
+<P>
+Notice that this tail call optimization is a feature of the language,
+not just some implementations--any implementation of standard Scheme is
+required to support it, so that you can count on it and write portable
+programs that rely on it.
+
+</P>
+<P>
+Also notice that the interpreter we presented earlier is tail-recursive.
+The recursive calls to <CODE>eval</CODE> are tail calls, and since it's implemented
+in Scheme, the interpreter relies on the underlying Scheme's tail-call
+optimization.  The evaluator thus snarfs the tail-call optimization from
+the underlying Scheme system.  If you implement a Scheme interpreter in
+another language, you have to be more careful, and implement the tail
+call optimization yourself.  This is not actually difficult, as I'll
+show in the next section.
+
+</P>
+<P>
+It's something of a misnomer to call Scheme's procedure calling
+mechanism an "optimization." What's really going on is that Scheme
+simply distinguishes between two things that most languages lump
+together--saving the caller's state, and actually calling the callee.
+Scheme notices that these things are distinct, and doesn't bother to
+do the former when only the latter is necessary.
+
+</P>
+<P>
+A procedure call is really rather like a (safe) goto that can pass
+arguments: control is transferred directly to the callee, and the caller
+has the option of saving its state beforehand.  (This is safer than
+unrestricted goto's, because when a procedure does return, it returns
+to the right ancestor in the dynamic calling pattern, just as though
+it had done a whole bunch of returns to get there.)
+
+</P>
+
+
+
+<H2><A NAME="SEC169" HREF="schintro_toc.html#SEC169">The Continuation Chain</A></H2>
+
+<P>
+In this section, I'll describe a straightforward implementation of
+Scheme's state-saving for procedure calling.  Readers uninterested
+in implementation issues may want to skip it.  It may clarify things
+that are discussed later, however, such as
+<CODE>call-</CODE><CODE>with-</CODE><CODE>current-</CODE><CODE>continuation</CODE>
+and our example compiler's code generation strategy.
+
+</P>
+<P>
+In most conventional language implementations, as noted above,
+calling a procedure allocates an activation record (or "stack frame")
+that holds the return address for the call <EM>and</EM> the variable bindings
+for the procedure being called.  The stack is a contiguous area of memory,
+and pushing an activation record onto the stack is done by incrementing a
+pointer into this contiguous area by the size of the stack frame.  Removing
+a stack frame is done by decrementing the pointer by the size
+of the stack frame.
+
+</P>
+<P>
+Scheme implementations are quite different.  As we've explained
+previously, variable bindings are <EM>not</EM> allocated in a stack, but
+instead in environment frames on the garbage-collected heap.  This
+is necessary so that closures can have indefinite extent, and can
+count on the environments they use living as long as is necessary.
+The garbage collector will eventually reclaim the space for
+variable bindings in frames that aren't captured by closures.
+
+</P>
+<P>
+(Actually, I'm oversimplifying a bit here.  Some implementations of
+Scheme do use a relatively conventional stack, often so that they
+can compile Scheme straightforwardly to C.  They must provide tail-call
+optimization somehow, though.  I won't go into alternative implementation
+strategies here.)
+
+</P>
+<P>
+Scheme implementations also differ from conventional language
+implementations in how they represent the saved state of
+callers.  (In a conventional language implementation, the callers'
+state is in two places: the variable bindings are in the callers'
+own stack frames, and the return address is stored in the callee's 
+stack frame.)
+
+</P>
+<P>
+In a Scheme implementation, the caller's state is saved in a record
+on the garbage-collected heap, called a <EM>partial continuation</EM>.  It's
+called a continuation because it says how to resume the caller when
+we return into it--i.e., how to continue the computation when control
+returns.  It's called a <EM>partial</EM> continuation because that
+record, by itself, it only tells us how to resume the caller, not
+the caller's caller or the caller's caller's caller.  On the other
+hand, each partial continuation holds a pointer to the partial
+continuation for <EM>its</EM> caller, so a chain of continuations represents
+how to continue the whole computation:  how to resume the caller,
+and when it returns, how to resume <EM>its</EM> caller, and so on until
+the computation is complete.  This chain is therefore called a
+<EM>full continuation</EM>.
+
+</P>
+
+<P>
+In most Scheme implementations, a special register called the
+<EM>continuation register</EM> is used to hold the pointer to the partial
+continuation for the caller of the currently-executing procedure.
+When we call a procedure, we can package up the state of the caller
+as a record on the heap (a partial continuation), and push that
+partial continuation onto the chain of continuations hanging off
+the continuation register.
+
+</P>
+
+<PRE>
+                        part. cont.  (saved state of caller's
+                            /|\       caller's caller)
+                             |
+                             |
+                        part. cont.  (saved state of caller's caller)
+                            /|\
+                             |
+        +-------+            |
+   CONT |   +---+-----&#62; part. cont.  (saved state of caller)
+        +-------+
+</PRE>
+
+<P>
+(It is often convenient to draw stacks and continuations as growing
+downward, which is our convention here--the newer elements are on
+the bottom.)
+        
+Note that the continuation register may be a register in the
+CPU, or it may just be a particular memory location that our
+implementation uses for this purpose.  The point is just that
+when we're executing a procedure, we always know where to find
+a pointer to the partial continuation that lets us resume its
+caller.  We will sometimes abbreviate this register's name as
+<CODE>CONT</CODE>.  A typical implementation of Scheme using a compiler
+has several important registers that encode the state of the
+currently-executing procedure:
+
+<UL>
+<LI>
+
+     The <EM>environment register</EM> (<CODE>ENVT</CODE>) holds the pointer
+     to the chain of environment frames that make up the environment
+     that the procedure is executing in.
+<LI>
+
+     The <EM>program counter</EM> register (<CODE>PC</CODE>) holds the pointer
+     to the next instruction to execute.  In a normal system that compiles
+     to normal machine code, this is the actual program counter of
+     the underlying hardware.
+<LI>
+
+     The <EM>continuation</EM> register (<CODE>CONT</CODE>), as we've said, holds
+     the pointer to the chain of partial continuations that lets us
+     resume callers.  This is very roughly the equivalent of
+     an activation stack pointer.
+</UL>
+
+<P>
+Before we call a procedure, we must save a continuation if we
+want to resume the current procedure after the callee returns.
+
+</P>
+<P>
+Since the important state of the currently-executing procedure
+is in the registers listed above, we will create a record that
+has fields to hold them, and push that on the continuation chain.
+We will save the value of the CONT, ENVT, and PC registers
+in the partial continuation, then put a pointer to this new
+partial continuation in the continuation registers.  We also
+need to save any other state that the caller will need when
+it resumes, as suggested by the ellipsis below.  (We'll discuss
+what else goes in a partial continuation when we talk about
+compilers in detail.)
+
+</P>
+
+<PRE>
+                                      old cont.
+                                        /|\
+                                         |
+                         +-------+       |
+        +-------+        |p.cont.|       |
+   CONT |   +---+-------&#62;+=======+       |
+        +-------+   cont |   +---+-------+
+                         +-------+
+                    envt |   +---+--------&#62;old envt
+                         +-------+
+                      pc |   +---+--------&#62;return address
+                         +-------+
+                                 |
+                         +  ...
+                         |       |
+                         +-------+
+</PRE>
+
+<P>
+                         
+Notice that since we saved the old value of the continuation
+register in the partial continuation, that serves as the "next"
+pointer in the linked list that makes up the full continuation.
+This is exactly as it should be.  The value of the continuation
+register is part of the caller's state, and saving it naturally
+constructs a linked list, because each procedure's state is
+fundamentally linked to the state of its caller.  Saving the
+return address is a little bit special--rather than just
+copying the program counter and saving it, we must save the
+address we want to resume at when we resume this procedure.
+
+</P>
+
+<P>
+Once a procedure has pushed a continuation, it has saved its
+state and can call another procedure.  The other procedure
+can use the <CODE>ENVT</CODE>, <CODE>CONT</CODE>, and <CODE>PC</CODE> registers
+without destroying the values of those registers needed by the caller.
+This is called a <EM>caller saves</EM> register usage convention;  the
+assumption is that the callee is allowed to freely clobber the values
+in the registers, so it's the caller's responsibility to save
+any values it will need when it resumes.
+
+</P>
+<P>
+To do a procedure return, it is only necessary to copy the
+register values out of the continuation that's pointed to
+by the <CODE>cont</CODE> register.  This will restore the caller's environment
+and its pointer to its caller's continuation, and setting the
+<CODE>PC</CODE> register will branch to the code in the caller where execution
+should resume.  We often call this "popping" a continuation,
+because it's a stacklike operation--saving a (partial) continuation
+pushes the values in registers onto the front of the "stack,"
+and restoring one pops the values back into the registers.  (As
+we will explain later, however, Scheme continuation chains don't
+always observe this simple stack discipline, which is why they
+can't be implemented efficiently as contiguous arrays.)
+
+</P>
+<P>
+If we save state and do a procedure call, and before returning
+our caller saves <EM>its</EM> state and does a procedure call, the
+chain of continuations gets longer.  For the most part, this
+is like pushing activation information on a stack.
+
+</P>
+
+<PRE>
+                                       /|\
+                                        |
+                      +---------+       |
+                      | p.cont. |       |
+                      +=========+       |
+                 cont |    +----+-------+
+                      +---------+
+                 envt |    +----+--------&#62;old envt
+                      +---------+
+                   pc |    +----+--------&#62;return address
+                      +---------+
+                                |
+                      +   ...
+                      |         |
+                      +---------+
+                                 _
+                                |\
+                                  \
+                                   \
+                                    \   
+                                     \
+                                      .
+                      +---------+     |
+     +-------+        | p.cont. |     |
+cont |   +---+-------&#62;+=========+    /
+     +-------+   cont |    +----+---'
+                      +---------+
+                 envt |    +----+--------&#62;old envt
+                      +---------+
+                   pc |    +----+--------&#62;return address
+                      +---------+
+                                |
+                      +   ...
+                      |         |
+                      +---------+
+</PRE>
+
+<P>
+ 
+Notice that when we say we save the "state" of the caller,
+we mean the values in our important registers, but we don't
+directly save particular variable values--when we save the
+environment pointer, we don't save the values in the
+bindings in the environment.  If other code then executes in
+that same environment and changes those values, the new values
+will be seen by this procedure when it returns and restores
+the environment pointer.  This policy has two important
+consequences:
+
+</P>
+
+<OL>
+<LI>
+
+     we can save an environment pointer into a continuation
+     very quickly, and restore it quickly, because we're
+     just saving and restoring one pointer, and
+<LI>
+
+     it ensures that environments have the right semantics:
+     closures that live in the same environment <EM>should</EM> see
+     each others' changes to variables.   This is one of the
+     ways that procedures are supposed to be able to communicate--by
+     operating on variables that they can see.
+</OL>
+
+<P>
+   Executing a return ("popping a continuation") does not modify
+the partial continuation being popped--it just involves getting
+values out of the continuation and putting them into registers.
+Continuations are thus created and used nondestructively, and
+the continuations on the heap form a graph that reflects the pattern
+of non-tail procedure calls.   Usually, that graph is just a tree,
+because of the tree-like pattern of call graphs, and the current
+"stack" of partial continuations is just the rightmost path
+through that graph, i.e., the path from the newest record all
+the way back to the root.
+
+</P>
+<P>
+Consider the following procedures, where <CODE>a</CODE> calls <CODE>b</CODE> twice,
+and each time <CODE>b</CODE> is called, it calls <CODE>c</CODE> twice:
+
+</P>
+
+<PRE>
+(define (a)
+   (b)
+   (b)
+   #t)
+</PRE>
+
+
+<PRE>
+(define (b)
+   (c)
+   (c)
+   #t)
+</PRE>
+
+
+<PRE>
+(define (c)
+   #f)
+</PRE>
+
+<P>
+   
+All of these calls are non-tail calls, because none of the
+procedures ever ends in a (tail) call.
+
+</P>
+
+<P>
+Suppose we call <CODE>a</CODE> after pushing a continuation for 
+<CODE>a</CODE>'s caller, then <CODE>a</CODE> calls <CODE>b</CODE> the first time.
+<CODE>a</CODE> will push a continuation to save its state, then call 
+<CODE>b</CODE>.  While executing <CODE>b</CODE>, <CODE>b</CODE>'s state will
+be in the registers, including a pointer to the continuation for
+<CODE>a</CODE> in the <CODE>CONT</CODE> register.
+
+</P>
+
+<PRE>
+               cont for a's caller
+                    /
+                  /
+          cont. for a
+              /|\
+      +---+    |
+ CONT | +-+----+
+      +---+ 
+</PRE>
+
+<P>
+<CODE>b</CODE> will then push a continuation and call <CODE>c</CODE>.
+
+</P>
+
+<PRE>
+               cont for a's caller
+                    /
+                  /
+          cont. for a
+              /
+            /
+    cont. for b
+       /|\
+        |
+      +-|-+ 
+ CONT | + |
+      +---+ 
+</PRE>
+
+<P>
+When <CODE>c</CODE> returns, it will restore <CODE>b</CODE>'s state by popping the partial
+continuation's values into registers.  At this point, the <CODE>CONT</CODE>
+register will point past the continuation for <CODE>b</CODE> to the continuation
+for <CODE>a</CODE>.
+
+</P>
+
+<PRE>
+               cont for a's caller
+                    /
+                  /
+           cont. for a
+              /  /|\
+            /     |
+    cont. for b   |
+                  |
+      +---+       |
+ CONT | +-+-------+
+      +---+
+</PRE>
+
+<P>
+      
+Then <CODE>b</CODE> will push another continuation and call <CODE>c</CODE> again.
+
+</P>
+
+<PRE>
+               cont for a's caller
+                    /
+                  /
+          cont. for a
+              /  \
+            /     \
+    cont. for b  cont for b
+                    /|\
+                     |
+      +---+          |
+ CONT | +-+----------+
+      +---+
+</PRE>
+
+<P>
+Again, <CODE>c</CODE> will return, restoring <CODE>b</CODE>'s state, and the 
+<CODE>CONT</CODE> register will point past the continuation for <CODE>b</CODE> to the
+continuation for <CODE>a</CODE>.
+
+</P>
+
+<PRE>
+               cont for a's caller
+                    /
+                  /
+          cont. for a &#60;-------+
+              /  \            |
+            /     \           |
+    cont. for b  cont for b   |
+                              |
+      +---+                   |
+ CONT | +-+-------------------+
+      +---+      
+</PRE>
+
+<P>
+      
+After returning to <CODE>a</CODE>, the <CODE>CONT</CODE> register will point past the
+continuation for <CODE>a</CODE> to the continuation for <CODE>a</CODE>'s caller.  Then
+before <CODE>a</CODE> calls <CODE>b</CODE> again, it will push another continuation to
+save its state.  
+
+</P>
+
+<PRE>
+               cont for a's caller
+                    /        \
+                  /            \
+          cont. for a        cont for a
+              /  \              /|\
+            /     \              |
+    cont. for b  cont for b      |
+                                 |
+      +---+                      |
+ CONT | +-+----------------------+
+      +---+      
+</PRE>
+
+<P>
+Then <CODE>a</CODE> will return and the <CODE>CONT</CODE> register will point past the
+continuation for <CODE>a</CODE> to the continuation for <CODE>a</CODE>'s caller.
+
+</P>
+
+<PRE>
+                cont for a's caller &#60;--+
+                    /                  |
+                  /                    |
+          cont. for a                  |
+              /  \                     |
+            /     \                    |
+    cont. for b  cont for a            |
+                                       |
+      +---+                            |
+ CONT | +-+----------------------------+
+      +---+    
+</PRE>
+
+<P>
+This continues in the obvious way, so that at the time of the fourth
+and last call to C, the continuations on the heap look like this:
+
+</P>
+
+<PRE>
+                cont for a's caller
+                    /           \    
+                  /               \  
+          cont. for a          cont. for a
+              /  \                 /  \      
+            /     \              /      \ 
+    cont for b  cont for b  cont for b  cont for b
+                                          /|\
+                                           |
+      +---+                                |
+ CONT | +-+--------------------------------+
+      +---+    
+</PRE>
+
+<P>
+Most of the time, the rest of this graph becomes garbage quickly--each
+continuation holds pointers back up the tree, but nothing holds
+pointers <EM>down</EM> the tree.  Partial continuations therefore usually
+become garbage the first time they're returned through.
+
+</P>
+<P>
+The fact that this graph is created on the heap will allow us to implement
+<CODE>call-</CODE><CODE>with-</CODE><CODE>current-</CODE><CODE>continuation</CODE>, a.k.a.
+<CODE>call/cc</CODE>, a very powerful control construct.  <CODE>call/cc</CODE>
+can capture the control state of a program at a particular point
+in its execution by pushing a partial continuation and saving
+a pointer to it.  Later, it can magically return control to that
+point by restoring that continuation, instead of the one in the
+continuation register.  (We will discuss <CODE>call/cc</CODE> in detail in
+Chapter XX.)
+
+</P>
+
+
+<H2><A NAME="SEC170" HREF="schintro_toc.html#SEC170">Exploiting Tail Recursion</A></H2>
+
+<P>
+In an earlier section, we presented example recursive implementations of
+several Scheme functions;  some of them were tail recursive, and some not.
+
+</P>
+<P>
+At first glance, many routines seem as though they can't conveniently be
+coded tail recursively.  On closer inspection, many of them can in
+fact be coded this way.
+
+</P>
+
+
+<H3><A NAME="SEC171" HREF="schintro_toc.html#SEC171">Passing Intermediate Values as Arguments</A></H3>
+
+
+
+<H4><A NAME="SEC172" HREF="schintro_toc.html#SEC172">Summing a List</A></H4>
+
+<P>
+Suppose we want to sum a list of numbers.  The most obvious way
+of doing it is the way we did it earlier, like this:
+
+</P>
+
+<PRE>
+(define (list-sum lis)
+   (if (null? lis)
+       0
+       (+ (car lis)
+          (list-sum (cdr lis)))))
+</PRE>
+
+<P>
+The problem with this code is that it's not particularly efficient,
+because it's not tail recursive.  After each recursive call to
+<CODE>list-sum</CODE>, we must return to do the addition that adds one
+element to the sum of the rest of the list.  We're adding the
+elements of the list back-to-front, on the way back up from nested
+recursion.  (This means that Scheme must push a partial continuation
+before every recursive call, and each one must be popped when we're
+finished, to return the sum back from each call to its caller.)
+
+</P>
+<P>
+We can write a tail-recursive version of <CODE>list-sum</CODE> that adds
+things in front-to-back order instead.  The trick is to do the
+addition before the tail call, and to <EM>pass the sum so
+far to the recursive call</EM>, i.e., to pass it <EM>forward</EM> as an
+argument until a non-tail call returns it.
+
+</P>
+<P>
+To do this, we have to keep a running sum, and each recursive call
+must pass it as an argument to the next.  To start it off, we have
+to have a "running sum" of 0.
+
+</P>
+<P>
+We can do this by defining two procedures.  The one that does the
+real work takes a list and a running sum, adds one element to
+the running sum, and tail-calls itself to add the rest of the
+elements to the running sum.  When it reaches the end of the list,
+it just returns the value.  (Scheme doesn't need to save a partial
+continuation before each call, since only the last call ever returns.)
+
+</P>
+<P>
+For convenience, we also wrap this procedure up in a friendlier procedure
+that will start off the recursion, by supplying an initial "running sum"
+of 0.
+
+</P>
+
+<PRE>
+; a tail-recursive list summing procedure
+(define (lsum lis sum-so-far)
+   (cond ((null? lis)
+          sum-so-far)
+         (else
+          (lsum (cdr lis)
+                (+ sum-so-far (car lis))))))
+
+; a friendly wrapper that supplies an initial running sum of 0
+(define (list-sum lis)
+   (l-s-aux lis 0))
+</PRE>
+
+<P>
+We can make this cleaner by encapsulating <CODE>lsum</CODE>, since
+it's only used by list-sum.  We make <CODE>lsum</CODE> a local procedure
+using <CODE>letrec</CODE> and <CODE>lambda</CODE>.
+
+</P>
+
+<PRE>
+(define (list-sum lis)
+   ; define a local, tail-recursive list summing procedure 
+   (letrec ((lsum (lambda (lis sum-so-far)
+                     (cond ((null? lis)
+                            sum-so-far)
+                           (else
+                            (lsum (cdr lis)
+                                  (+ sum-so-far (car lis))))))))
+      (lsum lis 0))) ;; start off recursive summing with a sum of 0
+</PRE>
+
+<P>
+We can write this more clearly using named <CODE>let</CODE>:
+
+</P>
+
+<PRE>
+(define (list-sum lis)
+   (let loop ((lis lis)
+              (sum-so-far 0))
+      (cond ((null? lis)
+             sum-so-far)
+            (else
+             (loop (cdr lis)
+                   (+ sum-so-far (car lis)))))))
+</PRE>
+
+<P>
+Notice that here we're using two loop variables, rebound at each
+iteration.  One keeps track of the remaining part of the original
+list, and the other the sum of the list items we've seen so far.
+
+</P>
+<P>
+Also notice that the version using named <CODE>let</CODE> is exactly equivalent
+to the version using explicit tail-recursion.
+
+</P>
+
+
+<H4><A NAME="SEC173" HREF="schintro_toc.html#SEC173">Implementing <CODE>length</CODE> tail-recursively</A></H4>
+
+<P>
+Recall that in [ Chapter whatever ] we implemented <CODE>length</CODE> this
+way:
+
+</P>
+
+<PRE>
+(define (length lis)
+   (if (null? lis)
+       0
+       (+ 1 (length (cdr lis)))))
+</PRE>
+
+<P>
+This definition looks a lot like the definition of <CODE>list-sum</CODE>,
+and has the same basic problem.  By using straightforward recursion
+(adding one to the length of the rest of the list), we're ensuring
+the addition happens back-to-front.  We can compute the list
+length front to back by passing the running sum <EM>forward</EM> through
+tail recursions, as an argument.  Each tail call will add to the
+running sum, and pass it forward.  When the last tail call returns
+to its caller, it just returns the sum.
+
+</P>
+<P>
+To do this, it's convenient to write the <CODE>length</CODE> procedure as a
+wrapper around a two-argument procedure that passes the running
+sum (as well as the remainder of list) to recursive calls to itself.
+
+</P>
+
+<PRE>
+(define (length lis)
+   (letrec ((len (lambda (lis length-so-far)
+                    (if (null? lis)
+                        length-so-far
+                        (len (cdr lis)
+                             (+ 1 length-so-far)))))))
+     (len lis 0))
+</PRE>
+
+<P>
+Or equivalently, using named <CODE>let</CODE>:
+
+</P>
+
+<PRE>
+(define (length lis)
+   (let loop ((lis lis)
+              (length-so-far 0))
+      (if (null? lis)
+          len-so-far
+          (loop (cdr lis)
+                (+ (car lis) length-so-far)))))
+</PRE>
+
+
+
+<H3><A NAME="SEC174" HREF="schintro_toc.html#SEC174"><CODE>reduce</CODE></A></H3>
+
+<P>
+In this section, I'll give an extended example of the use of higher-order
+functions to express patterns common to many functions, and customizing
+general procedures with procedural arguments and closure creation.
+
+</P>
+<P>
+Consider the following function to sum the elements of a list
+
+</P>
+
+<PRE>
+(define (list-sum lis)
+   (if (null? lis)
+       0
+       (+ (car lis)
+          (list-sum (cdr lis)))))
+</PRE>
+
+<P>
+            
+Given this definition,
+
+</P>
+
+<PRE>
+(list-sum '(10 15 20 25))
+</PRE>
+
+<P>
+       
+is equivalent to
+   
+
+<PRE>
+(+ 10 (+ 15 (+ 20 (+ 25 0)))).
+</PRE>
+
+<P>
+          
+[ the following couple of examples are now redundant with earlier
+  material... trim and refer back. ]
+
+</P>
+<P>
+Now consider a very similar function to multiply the elements of a
+list, where we've adopted the convention that the product of a null
+list is 1.  (1 is probably the right value to use, because if you
+multiply something by 1 you get back the same thing--just as if you
+add something to 0 you get back the same thing.)
+
+</P>
+
+<PRE>
+(define (list-prod lis)
+   (if (null? lis)
+       1
+       (+ (car lis)
+          (list-prod (cdr lis)))))
+</PRE>
+
+<P>
+            
+Given this definition,
+   
+
+<PRE>
+(list-prod '(2 3 4 5))
+</PRE>
+
+<P>
+is equivalent to
+
+</P>
+
+<PRE>
+(* 2 (* 3 (* 4 (* 5 1))))
+</PRE>
+
+<P>
+Given these definitions, you can probably imagine a very similar
+function to subtract the elements of a list, or to divide the
+elements of a list.  For subtraction, the base value for an empty
+list should probably be zero, because subtracting zero doesn't
+change anything.  For division it should probably be one.
+
+</P>
+<P>
+At any rate, what we want is a single function that captures
+the pattern
+
+</P>
+<P>
+<CODE>(</CODE><EM>op thing1</EM><CODE>(</CODE><EM>op thing2 ...</EM><CODE>(</CODE><EM>op thingn
+base-thing</EM><CODE>)</CODE><EM>...</EM><CODE>))</CODE>
+
+</P>
+<P>
+We can write a higher-order procedure <CODE>reduce</CODE> that implements this
+pattern in a general way, taking three arguments: any procedure you
+want successively applied to the elements of a list, an appropriate
+base value to use on reaching the end of the list, and the
+list to do it to.
+
+</P>
+
+<PRE>
+(define (reduce fn base-value lis)
+   (if (null? lis)
+       base-value
+       (fn (car lis)
+           (reduce fn base-value (cdr lis)))))
+</PRE>
+
+<P>
+              
+This is a very general procedure, that can be used for lots of things
+besides numerical operations on lists of numbers:  it can be used for
+any computation over successive items in a list.
+
+</P>
+<P>
+[ need to check the following couple of examples--they're off the
+  top of my head ]
+
+</P>
+<P>
+What does <CODE>(reduce cons '() '(a b c d))</CODE> do?  It's equivalent to
+<CODE>(cons 'a (cons 'b (cons 'c (cons 'd '())))</CODE>.  That is, 
+<CODE>(reduce cons '() </CODE><EM>list</EM><CODE>)</CODE> copies a list.  We could
+define <CODE>list-copy</CODE> that way:
+
+</P>
+
+<PRE>
+(define (list-copy lis)
+   (reduce cons '() lis))
+</PRE>
+
+<P>
+We could also define <CODE>append</CODE> that way, because <CODE>reduce</CODE>
+allows you to specify what goes at the end of a list--we don't
+have to end our list with <CODE>'()</CODE>.  Here's a two-argument
+version of <CODE>append</CODE>:
+
+</P>
+
+<PRE>
+(define (append list1 list2)
+   (reduce cons list2 list1))
+</PRE>
+
+<P>
+   
+The reduction of a list using (lambda (x rest) (cons (* x 2) rest))
+constructs a new list whose elements are twice the values of the
+corresponding elements in the original list. 
+
+</P>
+
+<PRE>
+Scheme&#62;(reduce (lambda (x rest)
+                  (cons (* x 2) rest))
+               '()
+               '(1 2 3 4))
+(2 4 6 8)
+</PRE>
+
+<P>
+The <CODE>reduce</CODE> procedure above is handy, because you can use it for
+many different kinds of computations over different kinds of
+lists values, as long as you can process the elements (and construct
+the result) front-to-back.  It's a little awkward, though, in that each
+time you use it, you have to remember the appropriate base value for
+the operation you're applying to a list.
+   
+Sometimes it would be preferable to come up with a single
+specialized procedure like <CODE>list-sum</CODE>, which implicitly remembers
+which function it should apply to the list elements (e.g., +)
+and what base value to return for an empty list (e.g., 0).
+   
+We can write a procedure <CODE>make-reducer</CODE> that will automatically
+construct a reducer procedure, given a function and a base value.  Here's
+an example usage:
+
+</P>
+
+<PRE>
+Scheme&#62; (define list-sum (make-reducer + 0))
+list-sum
+  
+Scheme&#62; (define list-product (make-reducer * 1))
+list-copy
+   
+Scheme&#62; (list-sum '(1 2 3 4))
+10
+   
+Scheme&#62; (list-product '(1 2 3 4))
+24
+</PRE>
+
+<P>
+Make sure you understand the expressions above.  The define forms
+are <CODE>not</CODE> using procedure definition syntax--they're using plain
+variable definition syntax, but the initial value expressions
+return procedures constructed by make-reducer.  If we hadn't
+wanted to define procedures named list-sum and list-product,
+and hang on to them, we could have just taken the procedures
+returned by make-reducer and called them immediately:
+
+</P>
+
+<PRE>
+Scheme&#62; ((make-reducer + 0) '(1 2 3 4))
+10
+ 
+Scheme&#62; ((make-reducer * 1) '(1 2 3 4))
+24
+</PRE>
+
+<P>
+   
+This is very much like calling our original <CODE>reduce</CODE> procedure,
+except that each time we're constructing a specialized procedure
+that's like <CODE>reduce</CODE> customized for particular values of its
+first two arguments;  then we call that new, specialized procedure
+to do the work on a particular list.                        
+
+</P>
+<P>
+   
+Here's a simple definition of <CODE>make-reducer</CODE> in terms of
+<CODE>reduce</CODE>:
+
+</P>
+
+<PRE>
+(define (make-reducer fn base-value)
+   (lambda (lis)
+      (reduce fn base-value lis)))
+</PRE>
+
+<P>
+         
+Notice that we <EM>are</EM> using procedure definition syntax here,
+so the <CODE>lambda</CODE> in the body will create and return a closure.
+   
+But suppose we don't already have a reduce procedure, and we don't
+want to leave one lying around.  A cleaner solution is to define
+the general <CODE>reduce</CODE> procedure as a local procedure, and create
+closures of it in different environments to customize it for
+different functions and base values.
+   
+
+<PRE>
+(define (make-reducer fn base-value)
+   (letrec ((reduce (lambda (lis)
+                       (if (null? lis)
+                           base-value
+                           (fn (car lis)
+                               (reduce (cdr lis)))))))
+       reduce)) ; return new closure of local procedure
+</PRE>
+
+<P>
+          
+This procedure uses closure creation to create a customized version
+of <CODE>reduce</CODE>  When <CODE>make-reducer</CODE> is entered, its arguments
+are bound and initialized to the argument values--i.e., the function and
+base value we want the custom reducer to use.  In this environment,
+we create a closure of the standard reducer procedure using lambda.
+We wrap the lambda in a letrec so that the reducer can see its own
+name.  Notice that since reduce is a local procedure, it can see
+the arguments to <CODE>make-reducer</CODE>, and we don't have to pass it those
+arguments explicitly.
+   
+By using local procedure definition syntax--which not all Schemes
+support--we can write this as:
+
+</P>
+
+<PRE>
+(define (make-reducer fn base-value)
+   (define (reduce lis)
+      (if (null? lis)
+          base-value
+          (fn (car lis)
+              (reduce (cdr lis)))))
+   reduce))  ;return new closure of local procedure
+</PRE>
+
+<P>
+      
+Make sure that you understand that these are equivalent--the
+local procedure <CODE>define</CODE> is equivalent to a <CODE>letrec</CODE> and a
+<CODE>lambda</CODE>, and in either case the closure created (by the <CODE>lambda</CODE>
+or the <CODE>define</CODE>) will capture the environment where the arguments
+to <CODE>make-reducer</CODE> are bound.   
+
+</P>
+
+
+<H2><A NAME="SEC175" HREF="schintro_toc.html#SEC175">Iteration as Recursion</A></H2>
+
+
+
+<H3><A NAME="SEC176" HREF="schintro_toc.html#SEC176">named <CODE>let</CODE></A></H3>
+
+<P>
+[ move earlier discussion here? ]
+
+</P>
+
+
+<H3><A NAME="SEC177" HREF="schintro_toc.html#SEC177"><CODE>do</CODE></A></H3>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_126.html">previous</A>, <A HREF="schintro_128.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

@@ -1,0 +1,43 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - reverse</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_43.html">previous</A>, <A HREF="schintro_45.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H4><A NAME="SEC45" HREF="schintro_toc.html#SEC45"><CODE>reverse</CODE></A></H4>
+
+<P>
+<A NAME="IDX37"></A>
+
+</P>
+<P>
+<CODE>reverse</CODE> takes one list, and returns a new list with the
+same elements in the opposite order.  For example,
+
+<PRE>
+(reverse '(1 2 3 4))
+</PRE>
+
+<P>
+returns a list <CODE>(4 3 2 1)</CODE>.
+Like <CODE>append</CODE> only reverses the top-level structure of
+the list it's given.
+
+<PRE>
+(reverse '((1 2) (3 4)))
+</PRE>
+
+<P>
+returns <CODE>((3 4) (1 2))</CODE>, not <CODE>((4 3) (2 1))</CODE> 
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_43.html">previous</A>, <A HREF="schintro_45.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

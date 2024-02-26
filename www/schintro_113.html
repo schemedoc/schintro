@@ -1,0 +1,48 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Implementing a Simple Interpreter</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_112.html">previous</A>, <A HREF="schintro_114.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H2><A NAME="SEC132" HREF="schintro_toc.html#SEC132">Implementing a Simple Interpreter</A></H2>
+
+<P>
+In this section, we'll use Scheme to implement an interpreter for
+a tiny subset of Scheme--just simple arithemetic expressions.
+The interpreter we'll show is simple, but it's a real interpreter--it
+works on the same principles as many real Scheme systems.  In
+the next chapter, we'll show how a slightly more complicated
+interpreter which implements most of Scheme's important features,
+and the skeleton of a compiler for Scheme.
+
+</P>
+<P>
+The interpreter is a good example for learning Scheme programming,
+because it makes heavy use of recursion--the processes of reading
+and evaluation are naturally recursive.  As you'll see, the code
+is also an example of mostly-functional programming (with very
+few side effects);  using recursion in the natural way avoids the 
+need for side effects, because data structures are generally 
+created at the right times, rather than being created too early
+and having to be updated later.
+
+</P>
+<P>
+Our interpreter will use Scheme's built-in <CODE>read</CODE> procedure
+to accept input in the form of <EM>s-expressions</EM>, i.e.,
+expressions represented as standard Scheme data structures such
+as symbols, numbers, and possibly nested lists of those consituents.
+[Recall that...] S-expressions can be simple, as in the case of symbols,
+or complex, as in the case of nested lists.
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_112.html">previous</A>, <A HREF="schintro_114.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

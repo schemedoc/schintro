@@ -1,0 +1,184 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - interpreting let</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_123.html">previous</A>, <A HREF="schintro_125.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC155" HREF="schintro_toc.html#SEC155">Interpreting <CODE>let</CODE></A></H3>
+
+<P>
+The procedure <CODE>eval-let</CODE> will be stored in the binding for the
+special form <CODE>let</CODE>.  In the case of a <CODE>let</CODE> expression,
+<CODE>eval-let</CODE> (above) will extract this procedure from the binding
+and call it to evaluate the expression.
+
+</P>
+
+<PRE>
+(define (eval-let let-form envt)
+
+   ; extract the relevant portions of the let form
+   (let ((binding-forms (cadr let-form))
+         (body-forms (cddr let-form)))
+         
+      ; break up the bindings part of the form
+      (let ((var-list (map car binding-forms))
+            (init-expr-list (map cadr binding-forms)))
+
+         ; evaluate initial value expressions in old envt, create a
+         ; new envt to bind values,
+         (let ((new-envt (make-envt var-list
+                                    (eval-multi init-expr-list envt)
+                                    envt)))
+            ; evaluate the body in new envt
+            (eval-sequence body-forms new-envt)))))
+</PRE>
+
+<P>
+The first thing <CODE>let</CODE> does is to extract the list of variable
+binding clauses and the list of body expressions from the overall
+<CODE>let</CODE> expression.  Then it further decomposes the variable
+binding clauses, extracting a list of names and a corresponding
+list of initial value expressions.  (Notice how easy this is using
+<CODE>map</CODE> to create lists of <CODE>car</CODE>'s and <CODE>cadr</CODE>'s of
+the original clause list.)
+
+</P>
+<P>
+<CODE>eval-let</CODE> then calls a helper procedure, <CODE>eval-multi</CODE>,
+to recursively evaluate the list of initial value expressions and return
+a list of the actual values.
+
+</P>
+<P>
+Then it calls <CODE>make-envt</CODE> to make the new environment.  This
+creates a new environment frame, scoped inside the old environment--i.e.,
+with a scope link to it--with variable bindings for each of the
+variables, initialized with the corresponding values.
+
+</P>
+<P>
+Then <CODE>eval-let</CODE> calls <CODE>eval-sequence</CODE> to recursively
+evaluate the body expressions in the new environment, in sequential
+order, and return the value of the last expression.  This value
+is returned from <CODE>eval-let</CODE> as the value of the <CODE>let</CODE>
+expression.
+
+</P>
+<P>
+Here's the code for <CODE>eval-multi</CODE>, which just uses <CODE>map</CODE> to
+evaluate each expression and accumulate a list of results.
+
+</P>
+
+<PRE>
+(define (eval-multi arg-forms envt)
+   (map (lambda (x)
+           (eval x envt))
+        arg-forms))
+</PRE>
+
+<P>
+<CODE>eval-multi</CODE> calls <CODE>eval</CODE> recursively to evaluate each
+subexpression in the given environment.  To do this, it must pass
+<CODE>two</CODE> arguments to <CODE>eval</CODE>.   It uses <CODE>map</CODE> to
+iterate over the list of expressions, but instead of calling
+<CODE>eval</CODE> directly, <CODE>map</CODE> calls a helper procedure that takes
+an expression as its argument, and then passes the expression
+<EM>and</EM> the environment to <CODE>eval</CODE>.
+
+</P>
+<P>
+Recall from section [ whatever ] that technique is known as <EM>currying</EM>.
+We use <CODE>lambda</CODE> to create a specialized version of a procedure (in this
+case <CODE>eval</CODE>), which automatically supplies one of the arguments.  In
+effect, we create a specialized, one-argument version of <CODE>eval</CODE> that
+evaluates expressions in a particular environment, and then map that procedure
+over the list of expressions.
+
+</P>
+<P>
+Here's the code for <CODE>eval-sequence</CODE>, which is very much like
+<CODE>eval-multi</CODE>---it just evaluates a list of expressions in a
+given environment.  It's different from <CODE>eval-multi</CODE> in that
+it returns only the value of the last expression in the list, rather
+than a list of all of the values. 
+
+</P>
+
+<PRE>
+(define (eval-sequence arg-forms envt)
+   (if (pair? arg-forms)
+       (cond ((pair? (cdr arg-forms))
+              (eval (car arg-forms) envt)
+              (eval-sequence (cdr arg-forms) envt))
+             (else
+              (eval (car arg-forms) envt)))
+       '*undefined-value*)) ; the value of an empty sequence
+</PRE>
+
+<P>
+(Notice that we've written <CODE>eval-sequence</CODE> tail-recursively,
+and we've been careful to evaluate the last expression
+using a tail-call to <CODE>eval</CODE>.  This ensures that we won't have
+to return to <CODE>eval-sequence</CODE>, so if the expression we're
+interpreting is a tail-call, we won't lose tail-recursiveness
+in the interpreter.)
+
+</P>
+
+
+<H3><A NAME="SEC156" HREF="schintro_toc.html#SEC156">Variable References and <CODE>set!</CODE></A></H3>
+
+<P>
+<CODE>eval-symbol</CODE> handles variable references.  It looks up the
+binding of the symbol, if there is one--if not, it's an unbound
+variable error--and checks to see that it's a variable reference
+and not a special form or macro.  If it is a normal variable,
+it fetches the value from the binding and returns it.
+
+</P>
+
+<PRE>
+(define (eval-symbol name-symbol envt)
+   (let ((binding-info (envt-lexical-lookup envt name-symbol)))
+      (cond ((not binding-info)
+             (run-time-error "Symbol does not have value"
+                             name-symbol))
+            ((eq? (binding-type binding-info) '&#60;variable&#62;)
+             (bdg-variable-ref binding info))
+            (else
+             (error "non-variable name referenced as variable"
+                    name-symbol)))))
+</PRE>
+
+<P>
+<CODE>eval-set!</CODE> handles the <CODE>set!</CODE> special form.  It will be
+stored in a special form binding of the name <CODE>set!</CODE>, and extracted
+and called (by <CODE>eval-list</CODE>) to evaluate <CODE>set!</CODE> expressions.
+
+</P>
+
+<PRE>
+(define (eval-set! set-form envt)
+   (let ((name (cadr set-form))
+         (value-expr (caddr set-form)))
+      (let ((binding-info (envt-lexical-lookup envt name)))
+         (cond ((not binding-info)
+                (run-time-error "Attempt to set! undeclared variable" name))
+               ((eq? (binding-type binding-info) '&#60;variable&#62;)
+                (bdg-variable-set! binding-info (eval value-expr envt)))
+               (else
+                (error "Attempt to set! a non-variable" name))))))
+</PRE>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_123.html">previous</A>, <A HREF="schintro_125.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

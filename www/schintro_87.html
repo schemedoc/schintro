@@ -1,0 +1,152 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Booleans and Conditionals</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_86.html">previous</A>, <A HREF="schintro_88.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC92" HREF="schintro_toc.html#SEC92">Booleans and Conditionals</A></H3>
+
+<P>
+In Scheme, falsity is represented by the value <EM>false</EM>, written
+<CODE>#f</CODE>.  Conceptually, <CODE>#f</CODE> is a pointer to a special object,
+the <EM>false</EM> object.
+
+</P>
+<P>
+<EM>Predicates</EM> are procedures that return either <CODE>#t</CODE> or <CODE>#f</CODE>,
+and don't have side effects.  Calling a predicate is like asking a
+true/false question--all you care about is a yes or no answer.
+
+</P>
+<P>
+Try out the "greater-than" predicate <CODE>&#62;</CODE>.  
+
+</P>
+
+<PRE>
+Scheme&#62;(&#62; 1 2)
+#f
+</PRE>
+
+<P>
+Here we told Scheme to apply the predicate procedure to 1 and 2; it
+returned <CODE>#f</CODE> and Scheme printed that.
+
+</P>
+<P>
+The important thing about <CODE>#f</CODE> is its use in conditionals.  If the
+first subexpression (the <EM>condition</EM>) of an <CODE>if</CODE> expression
+returns the value <CODE>#f</CODE>, the second subexpression is not evaluated, and
+the third one is;  that value is returned as the value of the if
+expression.
+
+</P>
+<P>
+Try just using the literal value <CODE>#f</CODE> as the first subexpression
+of an <CODE>if</CODE>, i.e., the "condition" that controls which branch
+is taken.
+
+</P>
+
+<PRE>
+Scheme&#62;(if #f 1 2)
+2
+</PRE>
+
+<P>
+Here the second subexpression was just the literal <CODE>2</CODE>, so 2
+was returned.
+
+</P>
+<P>
+Now try it using the predicate <CODE>&#62;</CODE>
+
+</P>
+
+<PRE>
+Scheme&#62;(if (&#62; 1 2) 1 2)
+2
+</PRE>
+
+<P>
+This is clearer if we indent it like this, lining up the "then"
+part (the <EM>consequent</EM>) and the "else" part (the <EM>alternative</EM>)
+under the condition.
+
+</P>
+
+<PRE>
+Scheme&#62;(if (&#62; 1 2)
+           1
+           2)
+2
+</PRE>
+
+<P>
+This is the right way to indent code when writing a Scheme program in an
+editor, and most Scheme systems will let you indent code this way when
+using the system interactively--the you can hit <CODE>&#60;RETURN&#62;</CODE>, and type
+in extra spaces.  Scheme won't try to evaluate the expression until you 
+write the last closing parenthesis and hit <CODE>&#60;RETURN&#62;</CODE>.  This helps
+you format your code readably even when typing interactively, so that
+you can see what you're doing.
+
+</P>
+<P>
+The false value makes a conditional expression (like an <CODE>if</CODE>) go
+one way, and a true value will make it go another.  In Scheme, <EM>any
+value except</EM> <CODE>#f</CODE> counts as true in conditionals.  Try this:
+
+</P>
+
+<PRE>
+Scheme&#62; (if 0 1 0)
+</PRE>
+
+<P>
+What result value does Scheme print?
+
+</P>
+<P>
+One special value is provided, called the <EM>true</EM> object, written
+<CODE>#t</CODE>.  There's nothing very special about it, though--it's just
+a handy value to use when you want to return a true value, making
+it clear that <EM>all</EM> you're doing is returning a true value.
+
+<PRE>
+Scheme&#62;(if #t 1 2)
+1
+</PRE>
+
+
+<PRE>
+Scheme&#62;(if (&#62; 2 1) 1 2)
+1
+</PRE>
+
+<P>
+Now let's interactively define the procedure <CODE>min</CODE>, and then call
+it:
+
+</P>
+
+<PRE>
+Scheme&#62; (define (min a b)
+           (if (&#60; a b)
+               a
+               b))
+#void
+Scheme&#62; (min 30 40)
+30
+</PRE>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_86.html">previous</A>, <A HREF="schintro_88.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

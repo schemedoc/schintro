@@ -1,0 +1,483 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - The Reader</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_114.html">previous</A>, <A HREF="schintro_116.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC134" HREF="schintro_toc.html#SEC134">The Reader</A></H3>
+
+<P>
+<A NAME="IDX124"></A>
+<A NAME="IDX125"></A>
+
+</P>
+<P>
+We won't write a whole reader for our interpreter, but I'll sketch how
+the reader works, and show a simplified reader.
+
+</P>
+<P>
+(Our interpreter will just "cheat" the reader from the underlying
+Scheme system we're implementing it in, but it's good to know how we
+could write a reader, and it's a nice example of recursive programming.)
+
+</P>
+<P>
+The reader is just the procedure <CODE>read</CODE>, which is written in terms
+of a few lower-level procedures that read individual characters and
+construct <EM>tokens</EM>, which <CODE>read</CODE> puts together into nested
+data structures.  A token is just a fairly simple item that doesn't
+have a nested structure.  For example, lists nest, but symbol names
+don't, strings don't, and numbers don't.
+
+</P>
+<P>
+The low-level routines that <CODE>read</CODE> uses just read individual
+tokens from the input (a stream of characters).  These tokens 
+include symbols, strings, numbers, and parentheses.  Parentheses
+are special, because they tell the reader when recursion is
+needed to read nested data structures.
+
+</P>
+<P>
+(I haven't explained about character I/O, but don't worry--there
+are Scheme procedures for reading a character of input at a time,
+testing characters for equality, etc.  For now, we'll ignore those
+details and I'll just sketch the overall structure of the reader.)
+
+</P>
+<P>
+Lets assume we have a simple reader that only reads symbols,
+integers, and strings, and (possibly nested) lists made up of those
+things.  It'll be pretty clear how to extend it to read other kinds
+of things.
+
+</P>
+
+
+<H4><A NAME="SEC135" HREF="schintro_toc.html#SEC135">Implementing <CODE>read</CODE></A></H4>
+
+<P>
+<CODE>read</CODE> uses recursion to construct nested data structures while
+reading through the character input from left to right. 
+
+</P>
+<P>
+For example, the input character sequence
+
+<PRE>
+(foo 20 (baz))
+</PRE>
+
+<P>
+will be read as a three-element list, whose first two elements
+are symbols <CODE>foo</CODE> and the number 20;  its third element
+is another list, whose single element is the symbol <CODE>bar</CODE>.
+
+</P>
+<P>
+<CODE>read</CODE> can also read simple things, like symbols and numbers,
+by themselves.
+
+</P>
+<P>
+The data structures that <CODE>read</CODE> constructs are called
+<EM>s-expressions</EM>.  An s-expression may be something simple
+like a string or a number, or a list of s-expressions.  (Notice
+that this recursive definition covers arbitrarily deeply nested
+lists.)
+
+</P>
+<P>
+The traditional term <EM>s-expression</EM> is very unfortunate.
+Technically an <EM>expression</EM> is a piece of a program,
+independent of how it's represented.  An <EM>s-expression</EM>
+isn't really an expression at all--it's just a <EM>data
+structure</EM>, which we can <EM>choose</EM> to use as a representation
+of an expression in a program, or
+not.<A NAME="FOOT6" HREF="schintro_foot.html#FOOT6">(6)</A> 
+ 
+Remember that the reader's job is <EM>only</EM> to convert textual
+expressions into handy data structures, <EM>not</EM> to interpret
+those data structures as programs.  It's the evaluator that actually
+interprets data structures as programs, not the reader.  That's why the
+read-eval-print loop hands the s-expressions returned from <CODE>read</CODE>
+to <CODE>eval</CODE> for evaluation.
+
+</P>
+<P>
+I'll show a slightly oversimplified version of <CODE>read</CODE>, called
+<CODE>micro-read</CODE>.  The main simplifications are that <CODE>micro-read</CODE>
+only handles a few basic types--symbols, positive integers, and
+lists--and we've left out most error-checking code.  We assume that
+what we're reading is a legal textual representation of a Scheme data
+structure.  We also haven't dealt with reading from files, instead of
+the standard input, or what to do when reaching the end of a file.
+
+</P>
+<P>
+<A NAME="IDX126"></A>
+<A NAME="IDX127"></A>
+
+</P>
+<P>
+To make it easier to implement <CODE>read</CODE>, we'll use a helper
+procedure that reads a single <EM>token</EM> at a time, called
+<CODE>read-token</CODE>.  Intuitively, calling <CODE>read-token</CODE>
+repeatedly will chop the input into "words."  Then <CODE>read</CODE>
+can group these "words" together to form "phrases," which
+may describe complex data structures.
+
+</P>
+<P>
+For example the following input character sequence
+
+<PRE>
+  (foo 1 (a "bar"))
+</PRE>
+
+<P>
+will be chopped into the following tokens, one at a time,
+in a left-to-right scan of the input by repeated calls
+to <CODE>read-token</CODE>
+
+<PRE>
+  (
+  foo
+  1
+  (
+  a
+  "bar"
+  )
+  )
+</PRE>
+
+<P>
+Notice that left and right parentheses are tokens, even though they're
+written as single characters.  You can think of them as special
+words that tell <EM>read</EM> where a new list starts and where it ends.
+
+</P>
+<P>
+Given <CODE>read-token</CODE>, <CODE>read</CODE> must recognize <EM>nested
+structures</EM>---intuitively, where <CODE>read-token</CODE> recognizes
+individual words, <EM>read</EM> must recognize <EM>phrases</EM>, which
+may be nested.  Each phrase corresponds to an s-expression that
+<CODE>read</CODE> must construct, and nested phrases correspond to
+nested s-expressions.
+
+</P>
+<P>
+Most of the work of reading is actually done by <CODE>read-token</CODE>, which
+reads a single input token--e.g., a symbol, a literal string, a number,
+or a left or right parenthesis.  That is, <CODE>read-token</CODE> performs
+<EM>lexical analysis</EM> (also known as <EM>scanning</EM>).  That
+is, <CODE>read-token</CODE> reads a sequence of characters from the
+input until it recognizes a "word."   
+
+</P>
+<P>
+(Our little scanner will use the standard Scheme procedure <CODE>read-char</CODE>
+to read one character of input at a time, and also the predicate
+procedures <CODE>char-alphabetic?</CODE> and <CODE>char-numeric?</CODE>; these tell
+whether a character represents a letter or a number.  We'll also use
+the Scheme character literal objects <CODE>#\"</CODE>, <CODE>#\(</CODE>, and
+<CODE>#\)</CODE>, which represent the double quote character, left
+parenthesis character, and right parenthesis character, respectively.)
+
+</P>
+<P>
+<A NAME="IDX128"></A>
+
+</P>
+
+<PRE>
+;;; a scanner for a simple subset of the lexical syntax of Scheme
+(define (read-token)
+   (let ((first-char (read-char)))
+      (cond ;; if first-char is a space or line break, just skip it
+            ;; by calling self recursively
+            ((whitespace? first-char)
+             (micro-read))
+            ;; else if it's a left paren, return the special
+            ;; object that represents left parenthesis tokens
+            ((eq? first-char #\( )
+             '*left-paren-token*)
+            ;; likewise for right parens
+            ((eq? first-char #\) )
+             '*right-paren-token*)
+            ;; else if it's a letter, we assume it's the first char
+            ;; of a symbol and call read-symbol to read the rest of
+            ;; the chars in the symbol and return a symbol object
+            ((char-alphabetic? first-char)
+             (read-symbol first-char))
+            ;; else if it's a digit, we assume it's the first digit
+            ;; of a number and call read-number to read the rest of
+            ;; the number and return a number object
+            ((char-numeric? first-char)
+             (read-number first-char))
+            ;; else it's something this little reader can't handle,
+            ;; so signal an error
+            (else
+             (error "illegal lexical syntax")))))
+</PRE>
+
+<P>
+<EM>[ see handout with discussion of lexical analysis, state
+        machines, etc. ]</EM>
+
+</P>
+<P>
+The basic operation of <CODE>read-token</CODE> is to read a character
+from the input, and use that to determine what kind of token
+is being read.  Then a specialized routine for that kind of
+token is called to read the rest of the characters that make up the
+token, and return a Scheme object to represent it.  We represent
+identifiers tokens like <CODE>foo</CODE> as Scheme symbols, and digit
+sequences like <CODE>122</CODE> as the obvious Scheme number objects.
+
+</P>
+<P>
+We represent left and right parenthesis tokens specially, because
+there's not an obvious Scheme object to represent them.  (We could
+use the Scheme left and right parenthesis <EM>character</EM> objects,
+but that could cause trouble if we add the ability to read
+character literals.  For now, we'll just use the Scheme symbol
+objects <CODE>*left-parenthesis-token*</CODE> and
+<CODE>*right-parenthesis-token*</CODE>, which is tacky but good enough
+for this example code.
+
+</P>
+<P>
+<EM>[ see handout with complete code for the little lexer and
+        reader ]</EM>
+        
+So that you can use any number of whitespace characters between
+tokens, <CODE>read-token</CODE> skips any whitespace that occurs
+at the beginning of the input.   
+
+</P>
+<P>
+The helper routines for reading particular kinds of tokens
+are <EM>[see handout for actual code]</EM>:
+
+</P>
+
+<UL>
+<LI><CODE>read-symbol</CODE>.
+
+If the character we read is a letter, we're reading a symbol, so we call
+<CODE>read-symbol</CODE> to finish reading it.  (We pass it the character we
+read, since it's the first character of the symbol's print name.)  
+<CODE>read-symbol</CODE> (not shown) just reads through more characters,
+saving them until it hits a character that can't be part of an
+identifier, e.g., whitespace or a parenthesis.
+
+Once it has read the characters that make up the symbol printname,
+<CODE>read-symbol</CODE> must obtain a pointer to the unique symbol
+object with that name;  if there isn't one, it must be created.
+
+<EM>[put code here]</EM>
+
+When it finishes reading the whole print name of the symbol, 
+<CODE>read-symbol</CODE> passes the list of characters to the built-in Scheme
+procedure <CODE>list-&#62;string</CODE> to create a Scheme string object with that
+sequence of characters.  Then it passes that string object to the built-in
+Scheme procedure <CODE>string-&#62;symbol</CODE>.
+
+<CODE>string-&#62;symbol</CODE> checks the table of existing symbols to see if there's
+already a symbol with that printname.  If so, it just returns a pointer to it.
+(This ensures that it never creates two symbol objects with the same name,
+and always returns the same symbol for a string with the same sequence of
+characters.)  If a symbol with that printname doesn't exist, it constructs
+a symbol by that name, adds it to the table, and returns a pointer to that.
+(<CODE>string-&#62;symbol</CODE> ensures that there is only ever one symbol with a given
+printname.)
+
+Either way, the pointer to the unique symbol with that name is returned as
+the value from <CODE>read-symbol</CODE>.
+
+<LI>
+
+<CODE>read-number</CODE>.
+If the character we read is a digit, we're reading a number, so we
+call <CODE>read-number</CODE>.  (We pass it the first character we read, since
+that's the first digit of the number.)  <CODE>read-number</CODE> just reads
+through successive characters, accumulating a list of character objects
+that represent digits.  It stops when it encounters a character that
+can't be part of a number.  (For our simple little subset, that's anything
+that's not a digit.)  
+
+Then it passes this list to the standard Scheme procedure <CODE>list-&#62;string</CODE>,
+which returns a Scheme string object with that sequence of characters.  That's
+passed in turn to <CODE>string-&#62;number</CODE>, which returns a Scheme number object
+that represents the corresponding number.
+</UL>
+
+<P>
+<EM>[put actual code from micrread.scm here?]</EM>
+
+</P>
+
+
+<H4><A NAME="SEC136" HREF="schintro_toc.html#SEC136">Implementing the <CODE>read</CODE> procedure</A></H4>
+
+<P>
+Given <CODE>read-token</CODE>, it's easy to implement <CODE>read</CODE>.
+<CODE>read</CODE> uses recursion to recognize nested data structures.
+It calls <CODE>read-token</CODE> to read the next token of input.
+If this is a normal token, e.g., a symbol or string, <CODE>read</CODE> just
+returns that.  If it's a left parenthesis token, however, read
+constructs a list, reading all of the elements of the list up
+to the matching right parenthesis.  This is done by another
+helper procedure, <CODE>read-list</CODE>.
+
+</P>
+<P>
+To avoid confusion with the standard Scheme <CODE>read</CODE> procedure,
+we'll call our simplified version <CODE>micro-read</CODE>.
+
+</P>
+
+<PRE>
+;;; Simplified version of read for subset of Scheme s-expression syntax
+(define (micro-read)
+   (let ((next-token (read-token))
+      (cond ((eq? next-token '*left-parenthesis-token*)
+             (read-list '()))
+            (else
+             next-token))))
+</PRE>
+
+<P>
+           
+Here's a slightly oversimplified version of <CODE>read-list</CODE>,
+(The main oversimplification is that we don't check for illegal
+syntax, like extra closing parentheses.)
+
+</P>
+<P>
+<EM>The following code is off the top of my head.  Zhu Qing has
+a nice working version... get it.</EM>
+
+</P>
+
+<PRE>
+(define (read-list list-so-far)
+   (let ((next-item (read-token)))
+      (cond ;; if we hit a right parenthesis, return the list we've read,
+            ;; reversing it into proper order
+            ((eq? next-token '*right-parenthesis-token*)                 
+             (reverse list-so-far))
+            ;; otherwise, read next item and call self recursively
+            ;; to read rest of list
+            (else                                                  
+             (read-list (cons next-token list-so-far))))))
+</PRE>
+
+<P>
+Here I've coded <CODE>read-list</CODE> recursively in two ways.
+
+</P>
+<P>
+The iteration that reads successive items in the list is implemented
+as tail recursion, passing the list so far as an argument to the
+recursive call.  Intuitively, this iterates "rightward" in the
+list structure we're creating.  Each list element is consed onto the
+list so far, and the new list is passed to a the tail-recursive call
+that performs iteration.  (At the first call to <CODE>read-list</CODE>,
+we pass the empty list, because we've read zero elements so far.) 
+
+</P>
+<P>
+This constructs a list that's
+backwards, because we push later elements onto the <EM>front</EM> of the
+list.   When we hit a right parenthesis and end a recursive call, we
+reverse the backwards list we've accumulated, to put it in the proper
+order, and return that. 
+
+</P>
+<P>
+Each list element is read by simply calling <CODE>micro-read</CODE>,
+which is what allows a list to contain arbitrary s-expressions,
+including other lists.  Intuitively, this recurses <EM>downward</EM>
+through the nested data structures we're creating.  The mutual
+recursion between <CODE>micro-read</CODE> and <CODE>read-list</CODE> is the
+key to the structure of the reader.
+
+</P>
+
+
+<H4><A NAME="SEC137" HREF="schintro_toc.html#SEC137">Comments on the Reader</A></H4>
+
+<P>
+<A NAME="IDX129"></A>
+
+</P>
+<P>
+The reader is a simple kind of <EM>recursive descent parser</EM>
+for normal Scheme data structures.
+  
+(A <EM>parser</EM> converts a sequence of tokens into a syntax tree that
+describes the nesting of expressions or statements.)  It is a "top-down"
+parser, because it recognizes high-level structures before lower-level
+ones--e.g., it recognizes the beginning of a list before reading and
+recognizing the items in the list.  (That is, on seeing a left parenthesis,
+it "predicts" that it will see sequence of list elements followed by
+a matching right parenthesis.)<A NAME="FOOT7" HREF="schintro_foot.html#FOOT7">(7)</A>
+  <A NAME="FOOT8" HREF="schintro_foot.html#FOOT8">(8)</A>
+
+</P>
+<P>
+The reader converts a linear sequence of characters into a simple
+<EM>parse tree</EM>.  
+
+</P>
+<P>
+(If you're familiar with standard compiler terminology, you should
+recognize that <CODE>read-token</CODE> performs <EM>lexical analysis</EM>
+(a.k.a. scanning or tokenization) using <CODE>read-string</CODE>,
+<CODE>read-symbol</CODE>, and <CODE>read-number</CODE>.  <CODE>read</CODE> performs simple
+<EM>predictive</EM> recursive-descent ("top down") parsing via the
+mutual recursion of <CODE>read</CODE> and <CODE>read-list</CODE>.)
+
+</P>
+<P>
+Unlike most parsers, the data structure <CODE>read</CODE> generates is a data
+structure in the Scheme language, rather than a data structure internal
+to a compiler or interpreter.  This is one of the nice things about
+Scheme--there's a simple but flexible parser you can use in your own
+programs.  You can use it for parsing normal data as well as to
+help parse programs.
+
+</P>
+<P>
+When implementing the Scheme language, that's not all there is to doing 
+parsing of Scheme programs.  The reader does the first part of parsing,
+translating input into s-expressions.  The rest of parsing is done during
+interpretation or compilation, in a very straightforward way.  The reader
+only recognizes nesting of expressions, and basic syntactic distinctions
+between tokens, e.g., whether they are parentheses, identifiers, or
+numeric literals.  Later parsing must detect what kind of Scheme
+expressions the s-expressions represent, e.g., that a particular list
+represents a procedure call or a special form, and if it's a special
+form, which kind of special form.
+
+</P>
+<P>
+The rest of the parsing isn't
+much more complicated than reading, and is also done 
+recursively.<A NAME="FOOT9" HREF="schintro_foot.html#FOOT9">(9)</A>
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_114.html">previous</A>, <A HREF="schintro_116.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

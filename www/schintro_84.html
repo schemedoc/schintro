@@ -1,0 +1,63 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Interrupting Scheme</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_83.html">previous</A>, <A HREF="schintro_85.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC89" HREF="schintro_toc.html#SEC89">Interrupting Scheme</A></H3>
+
+<P>
+<A NAME="IDX90"></A>
+<A NAME="IDX91"></A>
+<A NAME="IDX92"></A>
+
+</P>
+<P>
+Inevitably, you'll sometimes code routines that get stuck in infinite
+loops (or infinite recursion).  You need to know how to stop such loops
+and get back to the normal Scheme interaction prompt.  Scheme systems
+generally allow you to "interrupt" what the system is doing, and get
+a new prompt.
+
+</P>
+<P>
+In most UNIX-based Scheme systems, you can use <CODE>&#60;ctrl&#62;-C</CODE>, i.e.,
+hold down the CONTROL key and hit the <CODE>c</CODE> key, to send an
+interrupt.  In other systems, there will be another keyboard command
+or a button or menu item you can click.  Find out what the command is
+for your system.  You'll need it.
+
+</P>
+<P>
+<A NAME="IDX93"></A>
+
+</P>
+<P>
+In general, if the system hangs, you should check to see if you
+closed all of the parentheses you opened--it may just be waiting
+for you to finish your input.  If that doesn't work, and you think
+the program is stuck in an infinite loop, or some other computation
+you don't want to wait for, interrupt it with <CODE>&#60;CTRL&#62;-C</CODE> or
+the equivalent on your system.
+
+</P>
+<P>
+It's possible that even this won't work.  After all, Scheme systems
+can have bugs, too.  In very unusual circumstances, you may have
+to kill the Scheme program more brutally.  If you're using a window
+system, you may be able to just kill the window Scheme is running
+in.  Under UNIX, you can use the <CODE>ps</CODE> command to figure out
+the process ID of the Scheme process, and kill it with the <CODE>kill</CODE>
+command.  (This may require the <CODE>-9</CODE> option.)
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_83.html">previous</A>, <A HREF="schintro_85.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

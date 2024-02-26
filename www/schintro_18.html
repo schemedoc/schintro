@@ -1,0 +1,168 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Control Structures are Expressions</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_17.html">previous</A>, <A HREF="schintro_19.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H4><A NAME="SEC18" HREF="schintro_toc.html#SEC18">Control Structures are Expressions</A></H4>
+
+<P>
+<A NAME="IDX8"></A>
+<A NAME="IDX9"></A>
+<A NAME="IDX10"></A>
+
+</P>
+<P>
+Scheme control structures are expressions, and return values.
+An <CODE>if</CODE> expression is a lot like a C if-then statement, but the
+"then" branch and the "else" branch are also expressions that
+return values;  the <CODE>if</CODE> expression returns the value of whichever
+subexpression it evaluates.
+
+</P>
+<P>
+For example,
+
+</P>
+
+<PRE>
+(if (&#60; a b)
+    a
+    b)
+</PRE>
+
+<P>
+returns the value of either the variable <CODE>a</CODE>, or the variable <CODE>b</CODE>,
+whichever is less (or the value of <CODE>b</CODE> if they're equal).   If you're
+familiar with
+  ternary<A NAME="FOOT1" HREF="schintro_foot.html#FOOT1">(1)</A>
+expressions
+in C, this is like <CODE>(a &#60; b) ? a : b</CODE>.  In Scheme, there's no need
+for both an <CODE>if</CODE> statement and an if-like ternary expression operator,
+because <CODE>if</CODE> "statements" are expressions.
+
+</P>
+<P>
+Note that even though every expression returns a value, not
+all values are used--you can ignore the return value of an 
+if expression.  The <CODE>if</CODE> special form can therefore
+be used to control what gets executed, or to return a value, or
+both.  It's up to you.
+
+</P>
+<P>
+The uniformity of value returning means that we never have
+to explicitly use a return statement, so Scheme doesn't have them.
+Suppose we wanted to write a function <CODE>min</CODE> to return the
+minimum of two numbers.  In C, we might do it this way:
+
+</P>
+
+<PRE>
+int min(int a, int b)
+{
+   if (a &#60; b)
+      return a;
+   else
+      return b;
+}
+</PRE>
+
+<P>
+In Scheme, we can just do this:
+
+</P>
+
+<PRE>
+(define (min a b)
+   (if (&#60; a b)
+       a
+       b))
+</PRE>
+
+<P>
+Whichever branch is taken, the value of the appropriate variable (<CODE>a</CODE>
+or <CODE>b</CODE>) will be returned as the value of that branch of the <CODE>if</CODE>,
+which is returned as the value of the whole <CODE>if</CODE> expression, and that
+is returned as the return value of the procedure call.
+
+</P>
+<P>
+Of course, you can also write a one-branch if, with no "else" clause.
+
+</P>
+
+<PRE>
+(if (some-test)
+    (some-action))
+</PRE>
+
+<P>
+The return value of a one-branch <CODE>if</CODE> is unspecified in the case
+the condition is false, so if you're interested in the return value,
+you should use a two-branch <CODE>if</CODE>, and explicitly specify
+what should be returned in both cases.
+
+</P>
+<P>
+Notice that the flow of control is top-down, through the nesting of
+expressions---<CODE>if</CODE> controls which of its subexpressions is 
+evaluated, which is like the nesting of control statements in
+most languages.  Values flow back up from expressions to their callers,
+which is like the nesting of expressions in most languages.
+
+</P>
+<P>
+You can write an expression that is an ordered sequence of other
+expressions, using <CODE>begin</CODE>.  For example,
+
+</P>
+
+<PRE>
+(begin (foo)
+       (bar))
+</PRE>
+
+<P>
+calls <CODE>foo</CODE> and then calls <CODE>bar</CODE>.  In terms of control flow, a
+<CODE>(begin</CODE><EM> ... </EM><CODE>)</CODE> expression is rather like a
+<CODE>begin</CODE><EM> ... </EM><CODE>end</CODE> block in Pascal, or a
+<CODE>{</CODE><EM> ... </EM><CODE>}</CODE> block in C.  (We don't need an <CODE>end</CODE>
+keyword, because the closing parenthesis does the job.)
+
+</P>
+<P>
+Scheme <CODE>begin</CODE> expressions aren't just code blocks, though, because
+they are expressions that return a value.  A <CODE>begin</CODE> returns the
+value of the last expression in the sequence.  For example, the <CODE>begin</CODE>
+expression above returns the value returned by the call to <CODE>bar</CODE>.
+
+</P>
+<P>
+The bodies of procedures work like <CODE>begin</CODE>s as well.  If the
+body contains several expressions, they are evaluated in order, and
+the last value is returned as the value of the procedure call.
+
+</P>
+<P>
+Here's a procedure <CODE>baz</CODE> that calls <CODE>foo</CODE> and then calls
+<CODE>bar</CODE> and returns the result from the call to <CODE>bar</CODE>.
+
+</P>
+
+<PRE>
+(define (baz)
+   (foo)
+   (bar))
+</PRE>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_17.html">previous</A>, <A HREF="schintro_19.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

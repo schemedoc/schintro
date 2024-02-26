@@ -1,0 +1,46 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Most Operators are Procedures</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_14.html">previous</A>, <A HREF="schintro_16.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H4><A NAME="SEC15" HREF="schintro_toc.html#SEC15">Most Operators are Procedures</A></H4>
+
+<P>
+<A NAME="IDX6"></A>
+
+</P>
+<P>
+In conventional programming languages like C and Pascal, there's an
+awkward distinction between procedure calls and other kinds of expressions.
+In C, for example, <CODE>(a + b)</CODE> is an expression, but <CODE>foo(a,b)</CODE> is
+a procedure call.  In C, you can't do the same things with an operator like
+<CODE>+</CODE> that you can do with a procedure.
+
+</P>
+<P>
+In Scheme, things are much more uniform, both semantically and syntactically.
+Most basic operations such as addition are procedures, and there is a unified
+syntax for writing expressions--parenthesized prefix notation.  So rather 
+than writing <CODE>(a + b)</CODE> in Scheme, you write <CODE>(+ a b)</CODE>.  And rather 
+than writing <CODE>foo(a,b)</CODE>, you write <CODE>(foo a b)</CODE>.  Either way, it's 
+just an operation followed by its operands, all inside parentheses.
+
+</P>
+<P>
+For any procedure call expression (also called a <EM>combination</EM>), 
+all of the values to be passed are computed before the actual call to
+the procedure.  (This is no different from C or Pascal.)
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_14.html">previous</A>, <A HREF="schintro_16.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

@@ -1,0 +1,225 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Trying More Expressions</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_85.html">previous</A>, <A HREF="schintro_87.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC91" HREF="schintro_toc.html#SEC91">Trying Out More Expressions</A></H3>
+
+<P>
+Now that you're familiar with typing in erroneous expressions, let's get
+back to trying legal ones.
+
+</P>
+<P>
+If you've exited your Scheme system, fire it up again.
+
+</P>
+<P>
+Type in the addition expression <CODE>(+ 2 3)</CODE>, and hit <CODE>&#60;return&#62;</CODE>.
+(From now on, I'll skip saying "and hit <CODE>&#60;return&#62;</CODE>."  I'll also stop
+showing the prompt Scheme gives you after printing the result of
+an expression.)
+
+</P>
+
+<PRE>
+Scheme&#62;(+ 2 3)
+5
+</PRE>
+
+<P>
+Again, Scheme evaluated the expression, printed the result, which was
+(a pointer to) <CODE>5</CODE>, and gave you a prompt to type in something else. 
+Notice that it didn't save the value anywhere.  It just printed out the 
+result.
+
+</P>
+<P>
+The value we gave to <CODE>myvar</CODE> earlier is still there, though.  We can
+ask Scheme what it is, just by typing in a variable reference expression,
+i.e., just the variable name.
+
+</P>
+
+<PRE>
+Scheme&#62;myvar
+10
+</PRE>
+
+<P>
+Scheme has kept track of the storage named <CODE>myvar</CODE>, and it evaluates
+the expression <CODE>myvar</CODE> by looking up the value.  Then it prints out
+that result, and gives you another prompt, as it always does.
+
+</P>
+<P>
+To change the value stored in the binding of <CODE>myvar</CODE>, and look at the 
+new value, just type in a <CODE>set!</CODE> expression and then the name of the
+variable, like this:
+
+</P>
+
+<PRE>
+Scheme&#62;(set! myvar 32)
+#void
+Scheme&#62;myvar
+32
+</PRE>
+
+<P>
+You may see a different result for the <CODE>set!</CODE> expression.  Standard
+Scheme doesn't specify the return value of <CODE>set!</CODE>, because you
+generally use it for its side-effect, not its result.  As with
+<CODE>define</CODE>, your system may return something different.  It may
+also suppress the printing of this useless value, so you may not see
+anything at all.
+
+</P>
+<P>
+In some Scheme systems, the value of a <CODE>set!</CODE> expression is the
+name of the variable being set, so you may see somthing like this:
+
+</P>
+
+<PRE>
+Scheme&#62;(set! myvar 32)
+myvar
+Scheme&#62;myvar
+32
+</PRE>
+
+<P>
+(In other systems, it's something else,
+like the old value of the variable you're clobbering.)  You should not
+depend on the value returned by the <CODE>set!</CODE> if you want your program
+to be portable.  In the example above, it doesn't really matter what
+result the <CODE>set!</CODE> returns, except that that's what gets printed
+out before you get a new prompt.  What matters about <CODE>set!</CODE> is
+its <EM>effect</EM>, which is to update the value of the variable binding.
+As we can see, it had its effect--when we evaluate the expression
+<CODE>myvar</CODE>, it returns the new value, which is printed out: <CODE>32</CODE>.
+
+</P>
+<P>
+We can also use more complicated expressions--just about anything.
+Now we'll increment the variable by five, and again ask Scheme the
+value of the variable.
+
+</P>
+
+<PRE>
+Scheme&#62;(set! myvar (+ myvar 5))
+#void
+Scheme&#62;myvar
+37
+</PRE>
+
+<P>
+Now let's define a procedure that expects a number as its argument, and
+returns a number that's twice as big.  Then we'll call it with the argument
+<CODE>2</CODE>.
+
+</P>
+
+<PRE>
+Scheme&#62;(define (double x) (+ x x))
+#void
+Scheme&#62;(double 2)
+4
+</PRE>
+
+<P>
+After evaluating the first expression, Scheme keeps track of the
+definition of <CODE>double</CODE>.  When we type in the second expression,
+Scheme calls that procedure, which returns a result, which Scheme prints
+out.
+
+</P>
+<P>
+Since Scheme keeps track of the variables and values we typed in earlier,
+we can call <CODE>double</CODE> to double the value of myvar:
+
+</P>
+
+<PRE>
+Scheme&#62;(double myvar)
+74
+</PRE>
+
+<P>
+We can define new procedures in terms of old ones.  (Actually, we did
+this when we defined <CODE>double</CODE>---it's defined in terms of <CODE>+</CODE>,
+which is predefined, i.e., Scheme knows that definition when it starts
+up.)
+
+</P>
+
+<PRE>
+Scheme&#62;(define (quadruple x) (double (double x)))
+#void
+Scheme&#62;(quadruple 15)
+60
+</PRE>
+
+<P>
+Now try using the predefined Scheme procedure <CODE>display</CODE>.
+
+</P>
+
+<PRE>
+Scheme&#62;(display "Hello, world!")
+Hello, world!
+#void
+</PRE>
+
+<P>
+Here <CODE>display</CODE> had the side-effect of printing <CODE>Hello, world!</CODE>
+to the screen, and returned the value <CODE>void#</CODE>, which was printed.
+
+</P>
+<P>
+What you see on the screen may vary in a couple of ways, neither of
+which is worrisome.  Your system may have printed the return value
+on the same line as the (side-effect) output of <CODE>display</CODE>, without
+a linebreak.  Since the main use of <CODE>display</CODE> is for its effect,
+its return value is undefined, so you may see something other than
+<CODE>#void</CODE>, or nothing at all.  You might see this:
+
+</P>
+
+<PRE>
+Scheme&#62;(display "Hello, world!")
+Hello, world!
+"Hello, world"
+</PRE>
+
+<P>
+If you do, it means that in your system <CODE>display</CODE> returns the object
+you asked it to display.  Then Scheme prints out that return value, with
+double quotes to tell you it's a string object.  This shouldn't be too
+surprising--remember that Scheme prints out the return values of expressions
+after evaluating them.
+
+</P>
+<P>
+Now try <CODE>display</CODE>ing a number:
+
+</P>
+
+<PRE>
+Scheme&#62;(display 322)
+322
+#void
+</PRE>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_85.html">previous</A>, <A HREF="schintro_87.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

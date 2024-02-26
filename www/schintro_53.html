@@ -1,0 +1,47 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Local Variables and Lexical Scope</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_52.html">previous</A>, <A HREF="schintro_54.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H2><A NAME="SEC59" HREF="schintro_toc.html#SEC59">Local Variables and Lexical Scope</A></H2>
+
+<P>
+<A NAME="IDX55"></A>
+<A NAME="IDX56"></A>
+
+</P>
+<P>
+Scheme is a <EM>block-structured</EM> language with <EM>nested scopes</EM>.
+You can declare local variables whose scope is a block of code,
+and blocks can have blocks inside them with their own local variables.
+
+</P>
+<P>
+Scheme uses a <EM>lexical scope</EM> rule.  (We can also say that Scheme
+is <EM>statically scoped</EM>, rather than <EM>dynamically scoped</EM>, like
+some old Lisps.)   When you see a variable name in
+the code, you can tell what variable it refers just to by looking at the
+source code for the program.  A program consists of possibly nested
+blocks of code, and the meaning of the name is determined by which
+variable binding constructs it's used inside.
+
+</P>
+
+<UL>
+<LI><A HREF="schintro_54.html#SEC60">let</A>: let binds local variables
+<LI><A HREF="schintro_56.html#SEC62">Lexical Scope</A>: lexical scope
+<LI><A HREF="schintro_59.html#SEC65">let*</A>: let* binds variables sequentially,
+                                in nested scopes
+</UL>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_52.html">previous</A>, <A HREF="schintro_54.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

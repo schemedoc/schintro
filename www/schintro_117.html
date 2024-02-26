@@ -1,0 +1,358 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Improving the Simple Interpreter</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_116.html">previous</A>, <A HREF="schintro_118.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC142" HREF="schintro_toc.html#SEC142">Improving the Simple Interpreter</A></H3>
+
+<P>
+We can easily improve the little interpreter in lots of ways.
+<EM>[ We should put the code in a file minieval.scm so people can
+experiment with it.  Need to debug it first, of course. It's
+changed since the one I've used in class. ]</EM>
+
+</P>
+<P>
+First, we can add a toplevel binding environment, so we can
+have some variables.  (Local variables will be discussed in
+the next chapter.)  To make them useful, we need some special
+forms, like <CODE>define</CODE> and (while we're at it) <CODE>set!</CODE>.
+
+</P>
+<P>
+We can also add a few more data types;  for now, we'll just
+add booleans.
+
+</P>
+<P>
+Here's what our new main dispatch routine looks like:
+
+</P>
+
+<PRE>
+(define (eval expr)
+   (cond ;; variable reference
+         ((symbol? expr)
+          (eval-variable expr))
+         ;; combination OR special form
+         ((pair? expr)
+          (eval-list expr))
+         ;; any kind of self-evaluating object
+         ((self-evaluating? expr)
+          expr)
+         (else
+          (error "Illegal expression: " expr))))
+</PRE>
+
+<P>
+Since we're adding variables to our interpreter, symbols can be
+expressions by themselves now--references to top-level variable bindings.
+We've added a branch to our <CODE>cond</CODE> to handle that, and a helper
+procedure <CODE>eval-variable</CODE>.  (We'll discuss how the variable lookup
+is done shortly.)
+
+</P>
+<P>
+We need to recognize two kinds of self-evaluating types now (and may
+add more later), so we come up with a procedure <CODE>self-evaluating?</CODE>
+that covers both cases and can easily be extended.
+
+</P>
+
+<PRE>
+(define (self-evaluating? expr)
+   (or (number? expr) (boolean? expr)))
+</PRE>
+
+<P>
+We also need to recognize two basic types of compound expressions:
+combinations and special forms.  These (and only these) are represented
+as lists, so we can use <CODE>pair?</CODE> as a test, and dispatch to
+<CODE>eval-list</CODE>.
+
+</P>
+<P>
+(What we're really doing here is checking to see whether we're evaluating
+a parenthesized expression.  Since parenthesized expressions are read
+in as lists, we can just check to see whether the s-expression is
+a list.)
+
+</P>
+<P>
+Here's the code for <CODE>eval-list</CODE>, which just checks to see whether
+a compound expression is a special form.  It dispatches to
+<CODE>eval-special-form</CODE> if it is, or to <CODE>eval-combo</CODE> if it's not.
+
+</P>
+
+<PRE>
+(define (eval-list expr)
+   (if (and (symbol? (car expr))
+            (special-form-name? (car expr)))
+       (eval-special-form expr)
+       (eval-combo)))
+</PRE>
+
+<P>
+We could use a <CODE>cond</CODE> to check whether symbols are special form 
+names, but using <CODE>member</CODE> on a literal list is clearer and easily
+extensible--you can just add names to the list.
+
+</P>
+
+<PRE>
+(define (special-form-name? expr)
+   (member '(if define set!)))
+</PRE>
+
+<P>
+<CODE>eval-special-form</CODE> just dispatches again, calling a routine
+that handles whatever kind of special form it's faced with.
+(Later, we'll see prettier ways of doing this kind of dispatching,
+using first-class procedures.)  From here, we've done most of the
+analysis, and are dispatching to little procedures that actually
+do the work.
+
+</P>
+<P>
+[ need to come back to this after discussing backquote--this
+  would make a good example ]
+
+</P>
+
+<PRE>
+(define (eval-special-form expr)
+  (let ((name (car expr)))
+     (cond ((eq? name 'define)
+            (eval-define expr))
+           ((eq? name 'set!)
+            (eval-set! expr))
+           ((eq? name 'if)
+            (eval-if expr)))))
+</PRE>
+
+<P>
+Once the evaluator has recognized an <CODE>if</CODE> expression, it calls
+<CODE>eval-if</CODE> to do the work.  <CODE>eval-if</CODE> calls <CODE>eval</CODE>
+recursively, to evaluate the condition expression, and depending
+on the result, calls it again to evaluate the "then" branch or
+the "else" branch.  (One slight complication is that we may
+have a one-branch else, so <CODE>eval-if</CODE> has to check to see if
+the else branch is there.  If not, it just returns <CODE>#f</CODE>.)
+
+</P>
+
+<PRE>
+(define (eval-if expr)
+   (let ((expr-length (length expr)))
+      (if (eval (cadr expr))
+          (eval (caddr expr))
+          (if (= expr-length 4))
+              (eval (cadddr expr))
+              #f)))
+</PRE>
+
+<P>
+<EM>
+[ note that what we're doing includes parsing... one-branch vs.
+  two branch <CODE>if</CODE>.  Should actually be doing <EM>more</EM> parsing,
+  checking syntax and signaling errors gracefully.  E.g., should
+  check to see that <CODE>expr-length</CODE> is a legal length. ]
+
+</P>
+<P>
+[ Also note that we're snarfing booleans, and our <CODE>if</CODE> behaves like
+  a Scheme <CODE>if</CODE>... but we don't have to.  We could put a different 
+  interpretation on <CODE>if</CODE>, e.g., only interpreting <CODE>#t</CODE> as a
+  true value. ]
+</EM>
+
+</P>
+
+
+<H4><A NAME="SEC143" HREF="schintro_toc.html#SEC143">Implementing toplevel variable bindings</A></H4>
+
+<P>
+For a toplevel binding environment, we'll use an association list.
+(A more serious interpreter would probably use a hash table, but
+a association list will suffice to demonstrate the principles.)
+
+</P>
+<P>
+We start by declaring a variable to hold our interpreter's environment,
+and initializing it with an empty list.
+
+</P>
+
+<PRE>
+(define t-l-envt '())
+</PRE>
+
+<P>
+To add bindings, we can define a routine to add an association to
+the association list.
+
+</P>
+
+<PRE>
+(define (toplevel-bind! name value)
+   (let ((bdg (assoc name t-l-envt))) ;; search for association of name
+      ;; if binding already exists, put new value (in cadr) of association
+      ;; else create a new association with given value
+      (if bdg
+          (set-car! (cdr bdg) value)
+          (set! t-l-envt
+                (cons (list name value) t-l-envt)))))
+</PRE>
+
+<P>
+Recall that the elements of an association list are "associations,"
+which are just lists whose first value is used as a key.  We'll
+use the second element of the list as the actual storage for a variable.
+
+</P>
+<P>
+For example, an environment containing just bindings of <CODE>foo</CODE> and
+<CODE>bar</CODE> with values <CODE>2</CODE> and <CODE>3</CODE> (respectively) would look
+like <CODE>((foo 2)</CODE> <CODE>(bar 3))</CODE>.
+
+</P>
+<P>
+At the level of the little Scheme subset we're implementing, we'd
+draw this environment this way:
+
+</P>
+
+<PRE>
+         +-------+        [envt]
+t-l-envt |   *---+------&#62;+-------+
+         +-------+   foo |   *---+---&#62; 2
+                         +-------+
+                     bar |   *---+---&#62; 3
+                         +-------+
+</PRE>
+
+<P>
+This emphasizes the fact that these are variable bindings with values,
+i.e., named storage locations.  Notice that <CODE>t-l-envt</CODE> is a variable
+in the language we're using to implement our interpreter, but <CODE>foo</CODE>
+and <CODE>bar</CODE> are variables in the language the interpreter
+implements.
+
+</P>
+<P>
+If we want to show how it's implemented at the level of the Scheme we're
+writing our interpreter in, we can draw it more like this:
+
+</P>
+
+<PRE>
+         +-------+
+t-l-envt |   *---+----&#62;+---+---+                   +---+---+
+         +-------+     | * | *-+------------------&#62;| * | * +
+                       +-|-+---+                   +-+-+---+
+                         |                           |
+                       +---+---+   +---+---+       +---+---+   +---+---+
+                       | * | +-+--&#62;| * | * |       | * | *-+--&#62;| * | * |
+                       +-|-+---+   +-|-+---+       +-|-+---+   +-+-+---+
+                         |           |               |           |
+                        foo          2              bar          3
+</PRE>
+
+<P>
+Now we can add the four procedures we had in the math evaluator:
+
+</P>
+
+<PRE>
+(toplevel-bind! '+ +)
+(toplevel-bind! '- -)
+(toplevel-bind! '* *)
+(toplevel-bind! '/ /)
+</PRE>
+
+<P>
+Again, we're just snarfing procedures straight from the Scheme we're
+implementing our interpreter in.  We put them in our binding environment
+under the same names.  
+
+</P>
+<P>
+Now we need accessor routines to get and set values of bindings
+for variable lookups and <CODE>set!</CODE>
+
+</P>
+
+<PRE>
+(define (toplevel-get name)
+   (cadr (assoc name t-l-envt)))
+</PRE>
+
+
+<PRE>
+(define (toplevel-set! name value)
+   (set-car! (cdr (assoc name t-l-envt))
+             value))
+</PRE>
+
+<P>
+[ of course, these really should have some error checking--give
+  examples that signal unbound variable errors? ]
+
+</P>
+<P>
+Given this machinery, we can now write <CODE>eval-variable</CODE>.
+(Recall that when <CODE>eval</CODE> encounters an expression that's
+just a symbol, it interprets it as a reference to a variable
+by calling <CODE>eval-variable</CODE>.)  
+
+</P>
+
+<PRE>
+(define (eval-variable symbol)
+   (toplevel-get symbol))
+</PRE>
+
+<P>
+We can also define <CODE>eval-define</CODE> and <CODE>eval-set!</CODE>.  All they do is
+extract a variable name from the <CODE>define</CODE> or <CODE>set!</CODE> expression,
+and create binding for that name or update its value.
+(Recall that <CODE>eval-define!</CODE> and <CODE>eval-set!</CODE> are called
+from <CODE>eval-special-form</CODE> to interpret expressions of the
+forms <CODE>(define ...)</CODE> or <CODE>(set! ...)</CODE>, respectively.)
+
+</P>
+
+<PRE>
+(define (eval-define! expr)
+   (toplevel-bind! (cadr expr)
+                   (eval (caddr expr))))
+</PRE>
+
+
+<PRE>
+(define (eval-set! expr)
+   (toplevel-set! (cadr expr)
+                  (eval (caddr expr))))
+</PRE>
+
+
+
+<H4><A NAME="SEC144" HREF="schintro_toc.html#SEC144">Running the improved interpreter</A></H4>
+
+<P>
+<EM>[ need some example uses ]</EM>
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_116.html">previous</A>, <A HREF="schintro_118.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

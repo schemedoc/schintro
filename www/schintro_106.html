@@ -1,0 +1,435 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Basic Programming Examples</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_105.html">previous</A>, <A HREF="schintro_107.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H2><A NAME="SEC117" HREF="schintro_toc.html#SEC117">Basic Programming Examples (Hunk P)</A></H2>
+
+<P>
+[ From here on, the text is not structured as a type-along tutorial interleaved
+  with Chapter 2.  However, it's a good idea to experiment with the examples
+  interactively in a running Scheme system . ]
+  
+In this section, I'll give a few simple examples of Scheme programming,
+mostly using recursion to manipulate lists without side effects.
+(Later, I'll revisit some of these examples, and show how to implement
+them more efficiently, using tail recursion, but still without side
+effects.)
+
+</P>
+<P>
+I'll show how to implement simple versions of some standard
+Scheme procedures; this may help you understand what those procedures
+do, and how to use them.  (Later, I'll return to some of these examples
+and show how to implement more general versions.)  I'll also give
+some examples that aren't standard Scheme procedures, but illustrate
+common idioms.
+
+</P>
+<P>
+Some of these examples use higher-order procedures--procedures which
+operate on procedures--and toward the end of the section, I'll
+discuss <EM>currying</EM>, a technique for creating specialized
+versions of procedures in a particular context.
+
+</P>
+<P>
+You should get used to thinking recursively, and avoiding side effects
+most of the time.  It's often easier to write things recursively than
+using normal loops and side effects.
+
+</P>
+
+
+<H3><A NAME="SEC118" HREF="schintro_toc.html#SEC118">An Error Signaling Routine</A></H3>
+
+<P>
+It's often useful to put error-checking code in your procedures,
+to make sure that their arguments satisfy whatever preconditions
+they need to operate correctly.
+
+</P>
+<P>
+In a dynamically-typed language, this is often good for making sure
+that you detect errors where pass values to a procedure that can't
+handle arguments of those types.  Usually when you do that, you'll
+find out soon enough, because you'll perform an illegal operation
+(like taking the <CODE>car</CODE> of a number), and Scheme will detect the
+error and tell you.
+
+</P>
+<P>
+Scheme doesn't yet have a standard error signaling routine, but we
+will use one that many systems provide, called <CODE>error</CODE>.
+<CODE>error</CODE> takes any number of arguments, <CODE>display</CODE>s them to
+tell the user what went wrong, and signals an error.  (In most interactive
+Scheme systems, you'll get a break prompt like the one you get when
+Scheme itself detects an error.)
+
+</P>
+<P>
+[ If your system doesn't have <CODE>error</CODE>, you'll get an error signaled
+  anyway, in the form of an unbound variable exception when you try
+  to call <CODE>error</CODE>! ]
+
+</P>
+
+<P>
+<EM>[ moved example code for length, append, reverse from
+        here to an earlier section ]</EM>
+
+</P>
+
+
+<H3><A NAME="SEC119" HREF="schintro_toc.html#SEC119"><CODE>map</CODE> and <CODE>for-each</CODE></A></H3>
+
+<P>
+<A NAME="IDX111"></A>
+<A NAME="IDX112"></A>
+
+</P>
+<P>
+<CODE>map</CODE> and <CODE>for-each</CODE> are used to apply a procedure to
+elements of lists.  They're good for coding repetitive operations
+over sets of objects.
+
+</P>
+
+
+<H4><A NAME="SEC120" HREF="schintro_toc.html#SEC120"><CODE>map</CODE></A></H4>
+
+<P>
+<CODE>map</CODE> takes a procedure and applies it to the elements of a
+list (or corresponding elements of a set of lists), returning a list
+of results.
+
+</P>
+<P>
+For example, if we want to double
+the elements of a list, we can use <CODE>map</CODE> and the <CODE>double</CODE>
+procedure we defined earlier:
+
+</P>
+
+<PRE>
+Scheme&#62;(map double '(1 2 3))
+(2 4 6)
+</PRE>
+
+<P>
+If the procedure we're calling takes more than one argument, we
+can pass two lists of arguments to <CODE>map</CODE>.  For example, if we want
+to add corresponding elements of two lists, and get back a corresponding
+list of their sums, we can do this:
+
+</P>
+
+<PRE>
+Scheme&#62;(map + '(1 2 3) '(4 5 6))
+(5 7 9)
+</PRE>
+
+<P>
+Right now, we'll just write a simplified version of <CODE>map</CODE>, which
+takes one list of values and applies a one-argument procedure to them.
+
+</P>
+
+<PRE>
+(define (map proc lis)
+   (cond ((null? lis)
+          '())
+         ((pair? lis)
+          (cons (proc (car lis))
+                (map proc (cdr lis))))))
+</PRE>
+
+<P>
+Notice that <CODE>map</CODE> may construct a list of results front-to-back, or
+back-to-front, depending on the order of the evaluation of the arguments
+to <CODE>cons</CODE>.   That is, it may apply the <CODE>map</CODE>ped procedure
+on the way down during recursion, or on the way back up.  (This is allowed
+by the Scheme standard--the order of the results in the resulting list
+corresponds to the ordering of the argument list(s), but the dynamic order
+of applications is not specified.)
+
+</P>
+
+
+<H4><A NAME="SEC121" HREF="schintro_toc.html#SEC121"><CODE>for-each</CODE></A></H4>
+
+<P>
+Like <CODE>map</CODE>, <CODE>for-each</CODE> applies a procedure to each element of 
+a list, or to corresponding elements of a set of lists.  Unlike <CODE>map</CODE>,
+<CODE>for-each</CODE> discards the values returned by all of the applications
+except the last, and returns the last value.  (The applications are
+also guaranteed to occur in front-to-back list order.)  This is sort of like
+what a <CODE>begin</CODE> expression does, except that the "subexpressions"
+are not textually written out--they're applications of a first-class
+procedure to list items.
+
+</P>
+<P>
+Like <CODE>begin</CODE>, <CODE>for-each</CODE> is used to execute expressions in
+sequence, for effect rather than value, except that the last value
+may be useful.
+
+</P>
+<P>
+Here's a simplified version of <CODE>for-each</CODE>, which we'll call
+<CODE>for-each1</CODE>.  It takes exactly one procedure, assumed to be
+a procedure of one argument, and one list.  It applies the procedure
+to each of the elements of the list in turn, and returns the result
+of the last application.
+
+</P>
+
+<PRE>
+(define (for-each1 proc lis)
+   (cond ((null? (cdr lis))  ; one-element list?
+          (proc (car lis)))
+         (else
+          (proc (car lis))
+          (for-each1 proc (cdr lis)))))  
+</PRE>
+
+<P>
+Notice that this is a little different from our usual recursive list
+traversal, where the first thing we do is check whether the list is
+empty.  <CODE>for-each</CODE> makes no sense for an empty list, since it
+must return the value of the last application.
+
+</P>
+<P>
+Since <CODE>for-each</CODE> must take a list of one or more items, the
+base case for the recursion is when we hit a <EM>one-element</EM>
+list, rather than an empty list.  The recursive case is when
+we have a list that's got <EM>more than one</EM> element.  Anything else
+is an error due to bad input.
+
+</P>
+<P>
+We can characterize this kind of data structure recursively,
+almost the same way as the normal definition of a proper list:
+
+</P>
+<P>
+A list-of-one-or-more-elements is
+
+</P>
+
+<UL>
+<LI>
+
+  a list of one element, i.e., a pair whose cdr is null, or
+<LI>
+
+  a list of more than one element, i.e., a pair whose cdr is
+  a list-of-one-or-more-elements.
+</UL>
+
+<P>
+The code for <CODE>for-each1</CODE> directly reflects this
+characterization of the data it's expected to handle.  The
+base case comes first, and then the recursive case.
+
+</P>
+<P>
+If <CODE>for-each1</CODE> encounters a nonlist or an
+empty list, it will signal an error immediately, because both
+branches assume that they're operating on a pair, and attept
+to take the car of it, which is an error for anything but
+a pair.  If <CODE>for-each1</CODE> encounters an improper list, it will
+likewise signal an error at the first <CODE>cdr</CODE> that doesn't refer
+to pair.
+
+</P>
+<P>
+As usual, this is what we want--the recursive structure of the
+data structure we're operating on is reflected directly in the
+structure of the recursive code, and unexpected data cause errors
+to be signaled immediately.
+
+</P>
+
+
+
+<H3><A NAME="SEC122" HREF="schintro_toc.html#SEC122"><CODE>member</CODE> and <CODE>assoc</CODE>, and friends</A></H3>
+
+<P>
+<A NAME="IDX113"></A>
+<A NAME="IDX114"></A>
+
+</P>
+<P>
+The standard Scheme procedures <CODE>member</CODE> and <CODE>assoc</CODE> are used
+for searching lists.   I'll show how they can be implemented in
+Scheme, even though every Scheme system includes them.
+
+</P>
+<P>
+Each of these procedures has two alternative versions, which use
+different equality tests (<CODE>eq?</CODE> or <CODE>eqv?</CODE>) when searching
+for an item in list.
+
+</P>
+
+
+<H4><A NAME="SEC123" HREF="schintro_toc.html#SEC123"><CODE>member</CODE>, <CODE>memq</CODE>, and <CODE>memv</CODE></A></H4>
+
+<P>
+<A NAME="IDX115"></A>
+
+</P>
+<P>
+<CODE>member</CODE> searches a list for an item, and returns the remainder
+of the list starting at the point where that item is found.  (That is,
+it returns the pair whose <CODE>car</CODE> refers to the item.)  It returns
+<CODE>#f</CODE> if the item is not in the list.
+
+</P>
+<P>
+For example, <CODE>(member 3 '(1 4 3 2))</CODE> returns <CODE>(3 2)</CODE>,
+and <CODE>(member 'foo '(bar baz quux))</CODE> returns <CODE>#f</CODE>.
+
+</P>
+<P>
+Lists are often used as an implementation of sets, and <CODE>member</CODE> serves
+nicely as a test of set membership.  If an item is not found, it returns
+<CODE>#f</CODE>, and if it is, it returns a pair.  Since a pair is a true
+value, the result of <CODE>member</CODE> can be used like a boolean
+in a conditional.
+
+</P>
+<P>
+Since member returns the "rest" of a list, starting with the point
+where the item is found, it can also be particularly useful with ordered
+lists, by skipping past all of the elements up to some desired point,
+and returning the rest.
+
+</P>
+
+<PRE>
+(define (member thing lis)
+   (if (null? lis)
+       #f
+       (if (equal? (car lis) thing)
+           lis
+           (member thing (cdr lis)))))
+</PRE>
+
+<P>
+Note that <CODE>member</CODE> uses the <CODE>equal?</CODE> test (data structure
+equivalence) when searching.   This makes sense in situations where
+you want same-structured data structures to count as "the same."
+(For example, if you're searching a list of lists, and you want
+a sublist that has the same structure as the target list to count
+as "the same.")  Note that if the elements of the list are
+circular data structures, <CODE>member</CODE> may loop infinitely.
+
+</P>
+<P>
+If you want to search for a particular object, you should use
+<CODE>memq?</CODE>, which is like <CODE>member</CODE> except that it uses the
+<CODE>eq?</CODE> test, and may be much faster.
+
+</P>
+<P>
+If the list may include numbers, and you want copies of the same number
+to count as "the same", you should use <CODE>memv</CODE>.
+
+</P>
+
+
+
+<H4><A NAME="SEC124" HREF="schintro_toc.html#SEC124"><CODE>assoc</CODE>, <CODE>assq</CODE>, and <CODE>assv</CODE></A></H4>
+
+<P>
+<A NAME="IDX116"></A>
+<A NAME="IDX117"></A>
+
+</P>
+<P>
+<CODE>assoc</CODE> is used to search a special kind of nested list called an
+<EM>association</EM> list.  Association lists are often used to represent
+small tables.
+
+</P>
+<P>
+An association list is a list of lists.  Each sublist represents an
+association between a key and a list of values.  The car of the list
+is taken as the key field, but the whole list of values is returned.
+
+</P>
+<P>
+(Typically, an association list is used as a simple table to map
+keys to single values.  In that case, you must remember to take the
+<CODE>cadr</CODE> of the sublist that <CODE>assoc</CODE> returns.)
+
+</P>
+<P>
+Some example uses:
+
+</P>
+
+<PRE>
+Scheme&#62;(assoc 'julie '((paul august 22) (julie feb 9) (veronique march 28)))
+(julie february 9)
+
+Scheme&#62;(assoc 'key2 '((key1 val1) (key2 val2) (key0 val0)))
+(key2 val2)
+
+Scheme&#62;(cadr (assoc 'key2 '((key1 val1) (key2 val2) (key0 val0))))
+val2
+
+Scheme&#62;(assoc '(feb 9)
+              '(((aug 1) maggie phil) ((feb 9) jim heloise) ((jan 6) declan)))
+((feb 9) jim heloise)
+</PRE>
+
+<P>
+And the code:
+
+<PRE>
+(define (assoc thing alist)
+   (if (null? alist)
+       #f
+       (if (equal? (car (car alist)) thing)
+           (car alist)
+           (assoc thing (cdr alist)))))
+</PRE>
+
+<P>
+Notice that the basic pattern of recursion here is the same as for
+traversing other proper lists.  The 
+Like <CODE>member</CODE>, <CODE>assoc</CODE> uses the <CODE>equal?</CODE> test when searching
+a list.  This is what you want if (and only if) you want same-structured
+data structures to count as "the same."
+
+</P>
+<P>
+<CODE>assq</CODE> is like <CODE>assoc</CODE>, but uses the <CODE>eq?</CODE> test.  This
+is the most commonly-used routine for searching association lists,
+because symbols are commonly used as keys for association lists.  (The name
+<CODE>assq</CODE> suggests "associate using the <CODE>eq?</CODE> test.")
+
+</P>
+<P>
+If the keys may be numbers, <CODE>assv?</CODE> should probably be used instead.
+It considers <CODE>=</CODE> numbers the same, but otherwise tests object identity,
+like <CODE>eq?</CODE>.  (The name <CODE>assv</CODE> suggests "associate using the
+<CODE>eqv?</CODE> test.")
+ 
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_105.html">previous</A>, <A HREF="schintro_107.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

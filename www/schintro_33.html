@@ -1,0 +1,75 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Automatic Memory Management</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_32.html">previous</A>, <A HREF="schintro_34.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC33" HREF="schintro_toc.html#SEC33">Scheme Reclaims Memory Automatically</A></H3>
+
+<P>
+<A NAME="IDX22"></A>
+
+</P>
+<P>
+In languages like C or Pascal, data objects may be allocated in several
+ways.  (Recall that by "objects" I just mean data objects like records.)
+They may be allocated statically (as in the case of global variables), or
+on an activation stack as part of a procedure activation record (as in the
+case of local variables), or dynamically allocated on the heap at run time
+using an alloction routine like <CODE>malloc</CODE> or <CODE>new</CODE>.
+
+</P>
+<P>
+Scheme is simpler--all objects are allocated on the heap, and referred
+to via pointers.  The Scheme heap is <EM>garbage collected</EM>, meaning
+that the Scheme system automatically cleans up after you.  Every now and
+then, the system figures out which objects aren't in use anymore, and
+reclaims their storage.  (This determination is very conservative and
+safe--the collector will never take back any object that your program
+holds a pointer to, or might reach via any path of pointer traversals.
+Don't be afraid that the collector will eat objects you still care
+about while you're not looking!)
+
+</P>
+<P>
+<A NAME="IDX23"></A>
+
+</P>
+<P>
+The use of garbage collection supports the abstraction of <EM>indefinite
+extent</EM>.  That means that all objects conceptually live forever, or at
+least as long as they might matter to the program--there's no concept (at
+the language level) of reusing memory.  From the point
+of view of a running program, memory is infinite--it can keep allocating
+objects indefinitely, without ever reusing their space.
+
+</P>
+<P>
+Of course, this abstraction breaks down if there really isn't enough
+memory for what you're trying to do.  If you really try to create data 
+structures that are bigger than the available memory, you'll run out.
+Garbage collection can't give you memory you don't have.
+
+</P>
+<P>
+Some people think that garbage collection is expensive in time and/or
+space.  While garbage collection is not free, it is much cheaper than is
+generally believed.  Some people have also had bad experiences with systems
+that stop for significant periods to collect garbage, but modern GC's
+can solve this problem, too.   (If you're interested in how efficient
+and nondisruptive garbage collectors are implemented, a good place
+to start is my GC survey paper, available from my research group's web
+site at <CODE>http://www.cs.utexas.edu/users/oops</CODE>.)
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_32.html">previous</A>, <A HREF="schintro_34.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

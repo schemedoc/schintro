@@ -1,0 +1,49 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - list</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_41.html">previous</A>, <A HREF="schintro_43.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H4><A NAME="SEC43" HREF="schintro_toc.html#SEC43"><CODE>list</CODE></A></H4>
+
+<P>
+<A NAME="IDX35"></A>
+
+</P>
+<P>
+<CODE>list</CODE> takes one or more arguments and constructs a list of
+those items.   That is, a cdr-linked, null-terminated sequence
+of pairs is created, where each pair's <CODE>car</CODE> fields holds
+one of the values passed to <CODE>list</CODE>.
+
+</P>
+<P>
+Notice that this is different from <CODE>cons</CODE>, in that the arguments
+are not lists in general--they're just any items that should be put
+into a list.
+
+</P>
+<P>
+Intuitively, we often use <CODE>cons</CODE> to push one item onto a list that
+already exists, but we use <CODE>list</CODE> to create a list from
+scratch.
+
+</P>
+<P>
+Notice that if we hand list just one argument, e.g., <CODE>(list 1)</CODE>,
+that creates one pair whose <CODE>cdr</CODE> is null and whose car is the
+given argument.  In contrast, if we use <CODE>cons</CODE> to create a
+one-element list, we must pass it that element <EM>and</EM> an empty
+list to serve as the <CODE>cdr</CODE> value: <CODE>(cons 1 '())</CODE>.
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_41.html">previous</A>, <A HREF="schintro_43.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

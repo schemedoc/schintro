@@ -1,0 +1,96 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Variable Binding Again</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_69.html">previous</A>, <A HREF="schintro_71.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H2><A NAME="SEC76" HREF="schintro_toc.html#SEC76">Variable Binding Again</A></H2>
+
+<P>
+<A NAME="IDX81"></A>
+<A NAME="IDX82"></A>
+<A NAME="IDX83"></A>
+
+</P>
+
+<UL>
+<LI><A HREF="schintro_71.html#SEC77">Identifiers and Variables</A>
+<LI><A HREF="schintro_72.html#SEC78">Variables vs. Bindings vs. Values</A>
+</UL>
+
+<P>
+So far, I've sometimes casually talked about variables holding values, but
+that's not quite right.  Variables are bound to storage, and storage
+holds values.
+
+</P>
+<P>
+I've also sometimes casually talked about fetching "the value of a
+variable," but that's really just a shorthand for fetching the value
+of the <EM>current binding</EM> of a variable, from the <EM>current
+environment</EM>.
+
+</P>
+<P>
+Consider what happens when we define a variable <CODE>foo</CODE> with the
+definition <CODE>(define foo 10)</CODE>.  We can draw the binding of the
+variable in this way:
+
+</P>
+
+<PRE>
+     +-----+
+ foo |  *--+---&#62; 10
+     +-----+
+</PRE>
+
+<P>
+When speaking precisely, we say that the variable <CODE>foo</CODE> is
+<EM>bound</EM> to the memory location represented by the box on the left.
+<EM>Binding</EM> just means making an association between a name and something.
+(There are several senses of "binding"---it's a very general word--but 
+in this book, I'm generally talking about associating program variables
+with actual storage.)
+
+</P>
+<P>
+For brevity, we refer to the location as the variable's <EM>binding</EM>,
+but binding is really the relationship between the name and the storage
+it names.
+
+</P>
+<P>
+In Scheme terminology, we talk about "bindings" as distinct from
+variables, because they are two different things.  This is true in
+most other languages as well (e.g., C and Pascal), but usually
+people don't make the distinction explicit.  They'll refer to a
+program variable as a variable, but they'll also call the storage
+allocated for a particular instance of that variable a "variable."
+Usually, experienced programmers aren't confused by this.
+
+</P>
+<P>
+In this book, I try to be a little more precise, because the 
+distinction between variables and bindings is especially important in
+discussing advanced topics that will come up later.  For now, rest assured
+that there's nothing really unusual here--when I distinguish between
+variables and bindings, that's applicable to most programming languages,
+not just Scheme.  I'm just giving a name to something you probably
+already know.
+
+</P>
+<P>
+(So far, we haven't seen anything really special about Scheme variables
+and bindings, except that the values in bindings are always pointers.)
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_69.html">previous</A>, <A HREF="schintro_71.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

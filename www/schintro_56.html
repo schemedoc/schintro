@@ -1,0 +1,95 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Lexical Scope</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_55.html">previous</A>, <A HREF="schintro_57.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC62" HREF="schintro_toc.html#SEC62">Lexical Scope</A></H3>
+
+<P>
+<A NAME="IDX58"></A>
+
+</P>
+<P>
+If nested <CODE>let</CODE>s define variables by the same name, then the
+uses of that name in the body of the inner <CODE>let</CODE> will refer to the
+bindings created by the inner <CODE>let</CODE>.
+
+</P>
+<P>
+Consider the following code fragment:
+
+</P>
+
+<PRE>
+(let ((x 10)    ; outer binding of x
+      (a 20))   ; binding of a
+   (foo x)
+   (let ((x (bar))       ; inner binding of x
+         (b (baz x x)))  ; binding of b
+      (quux x a)
+      (quux y b))
+   (baz x a)  ; refers to outer x (and a)
+   (baz x b)) ; illegal?
+</PRE>
+
+<P>
+When control enters the outer <CODE>let</CODE>, the inital values for the 
+variables are computed.  In this case, that's just the literal values
+<CODE>10</CODE> and <CODE>20</CODE>.  Then storage is allocated for the variables,
+and initialized with those values.  Once that's done, the meaning of
+the names <CODE>x</CODE> and <CODE>a</CODE> changes--they now refer to the new
+storage for (bindings of) the <CODE>let</CODE> variables <CODE>x</CODE> and
+<CODE>a</CODE>---and then the body expressions are evaluated.
+
+</P>
+<P>
+Similarly, when control enters the inner <CODE>let</CODE>, the inital values
+are computed by the calls to <CODE>bar</CODE> and <CODE>baz</CODE>, and then
+storage for <CODE>x</CODE> and <CODE>b</CODE> is allocated and initialized with
+those values.  Then the meanings of the names <CODE>x</CODE> and <CODE>b</CODE>
+change, to refer to the new storage (bindings) of those variables.
+(For example, the value of <CODE>x</CODE> when <CODE>(baz x x)</CODE> is evaluated
+is still 10, because <CODE>x</CODE> still refers to the outer <CODE>x</CODE>.)
+
+</P>
+<P>
+In this example, the meaning of the identifier <CODE>x</CODE> changes when
+we enter the inner <CODE>let</CODE>.  We say that the inner let variable
+<CODE>x</CODE> <EM>shadows</EM> the outer one, within the body of the <CODE>let</CODE>.
+The outer <CODE>x</CODE> is no longer visible, because the inner one is.
+
+</P>
+<P>
+When we exit a <CODE>let</CODE> (after evaluating its body expressions), the
+bindings introduced by the <CODE>let</CODE> "go out of scope," i.e., aren't visible
+anymore.  (For example, when we evaluate the expression <CODE>(baz x a)</CODE>
+in the body of the outer <CODE>let</CODE>, <CODE>x</CODE> refers to the binding
+introduced by the outer <CODE>let</CODE>---the <CODE>x</CODE> introduced by the
+inner let is no longer visible.
+
+</P>
+<P>
+Likewise, in the example code fragment, the <CODE>b</CODE> in the last
+expression, <CODE>(baz x b)</CODE>, does not refer to the inner <CODE>let</CODE>'s
+binding of <CODE>b</CODE>.  Unless there is a binding of <CODE>b</CODE> in some
+outer scope we haven't shown (such as a top-level binding), then
+this will be an error.
+
+</P>
+
+<UL>
+<LI><A HREF="schintro_57.html#SEC63">Binding Environments and Binding Contours</A>
+<LI><A HREF="schintro_58.html#SEC64">Block Structure Diagrams</A>: Visualizing scope
+</UL>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_55.html">previous</A>, <A HREF="schintro_57.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

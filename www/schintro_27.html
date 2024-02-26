@@ -1,0 +1,75 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Indenting cond</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_26.html">previous</A>, <A HREF="schintro_28.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H4><A NAME="SEC27" HREF="schintro_toc.html#SEC27">Indenting <CODE>cond</CODE></A></H4>
+
+<P>
+Be careful about parentheses and indenting with <CODE>cond</CODE>.  Notice
+that the expressions within a test-action clause are indented by only one
+character, but that's very significant.  Without that indenting, a
+<CODE>cond</CODE> is very hard to read.
+
+</P>
+<P>
+Suppose we replace the following awkward if expression with a <EM>cond</EM>.
+
+</P>
+
+<PRE>
+;; awkward if expression requiring begins to sequence actions in branches
+(if (a)
+    (begin (b)
+           (c))
+    (begin (e)
+           (f)))
+</PRE>
+
+<P>
+We could write it like this:
+
+</P>
+
+<PRE>
+(cond ((a)
+       (b)
+       (c))
+      (else
+       (e)
+       (f)))
+</PRE>
+
+<P>
+Sometimes, when the clauses of a cond are small, a whole clause will
+be written out horizontally.  The above example is likely to be
+written like this:
+
+</P>
+
+<PRE>
+(cond ((a) (b) (c))
+      (else (d) (e)))
+</PRE>
+
+<P>
+Also be careful about the parentheses around condition expressions.
+Notice that the parentheses around <CODE>(a)</CODE> are there because
+the condition is call to <CODE>a</CODE> with zero arguments, not because
+you always put parentheses around the condition expression.  (Notice
+that there are no parentheses around <CODE>#t</CODE>, and there wouldn't
+be parentheses around <CODE>a</CODE> if we just wanted to test the value
+of the variable <CODE>a</CODE>, rather than call it and test the result.)
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_26.html">previous</A>, <A HREF="schintro_28.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

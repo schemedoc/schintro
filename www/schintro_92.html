@@ -1,0 +1,391 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Making Some Objects</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_91.html">previous</A>, <A HREF="schintro_93.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC97" HREF="schintro_toc.html#SEC97">Making Some Objects (Hunk D)</A></H3>
+
+
+<PRE>
+==================================================================
+Hunk D starts here:
+==================================================================
+</PRE>
+
+<P>
+I've been talking about "objects," but most of the objects we've
+seen don't have interesting structure.
+
+</P>
+<P>
+One of the most important kinds object in Scheme is the <EM>pair</EM>,
+which you can create with the built-in procedure <CODE>cons</CODE>.
+A pair is a simple kind of structured object, like a Pascal
+record or a C struct.  It has two fields, called the <EM>car</EM> and
+the <EM>cdr</EM>, and you can extract their values with the standard
+procedures <CODE>car</CODE> and <CODE>cdr</CODE>.
+
+</P>
+<P>
+<CODE>cons</CODE> takes two arguments, which it uses as the initial values
+of the car and cdr fields of the pair it creates.  (<CODE>cons</CODE> is
+called that because it <CODE>cons</CODE>tructs a pair;  the name is short
+because it's a common operation.  In Lisp, pairs are called "cons cells"
+because you make them with <CODE>cons</CODE>.)
+
+</P>
+<P>
+I'll show you some simple examples of playing with pairs, just to show
+you what they are.  Be warned that these are <EM>bad</EM> examples, in
+that there are usually cleaner ways to do things, which we'll discuss
+later when we get to lists.  (Lists are made of pairs.)
+
+</P>
+
+<PRE>
+Scheme&#62;(cons 1 2)
+(1 . 2)
+</PRE>
+
+<P>
+What happened here was that the call to <CODE>cons</CODE> created a pair,
+and returned (a pointer to) it.  Scheme printed out a textual
+representation of the pair, showing the values of its car and cdr
+fields, separated by a dot and enclosed in parentheses.
+
+</P>
+<P>
+(The printed representation looks sort of like a Scheme expression,
+because of the parentheses, but it's not--it's just the way Scheme
+prints this kind of data structure.  We're looking at the <EM>value</EM>
+returned by the expression <CODE>(cons 1 2)</CODE>.  Don't be confused
+by the similarity between written Scheme expressions and the textual
+representation of data structures--they're very different things.) 
+
+</P>
+<P>
+We didn't do anything with the pair except let Scheme print it, so
+we've lost it--we didn't save a pointer to it, so we can't refer to
+it.  (The garbage collector will take back its space, so we don't have
+to worry that we've lost storage space.)
+
+</P>
+<P>
+Let's try again, defining (and binding) a variable, and initializing it
+with the pointer that <CODE>cons</CODE> returns.
+
+</P>
+
+<PRE>
+Scheme&#62;(define my-pair (cons 1 2))
+#void
+
+Scheme&#62;my-pair
+(1 . 2)
+</PRE>
+
+<P>
+Now try extracting the values of the pair's fields, using <CODE>car</CODE> and
+<CODE>cdr</CODE>.
+
+</P>
+<P>
+(In Scheme, <CODE>(car foo)</CODE> is equivalent to C's <CODE>foo-&#62;car</CODE>,
+dereferencing a pointer to an object and extracting the value of the
+<CODE>car</CODE> field.  Likewise, <CODE>(cdr foo)</CODE> is like <CODE>foo-&#62;cdr</CODE>.
+The operators that access fields of a pair are just procedures.)
+
+</P>
+
+<PRE>
+Scheme&#62;(car my-pair)
+1
+
+Scheme&#62;(cdr my-pair)
+2
+</PRE>
+
+<P>
+We don't need to use any special pointer syntax to dereference the
+pointer to the pair---<EM>car</EM> and <EM>cdr</EM> <EM>expect</EM> a pointer,
+and return the field values of the pair it points to.
+
+</P>
+<P>
+<CODE>car</CODE> and <CODE>cdr</CODE> only work on pairs.  If you try to take the
+car or cdr of anything else, you'll get a runtime type error.
+
+</P>
+<P>
+Try it:
+
+</P>
+
+<PRE>
+Scheme&#62;(car #t)
+ERROR: attempt to take the car of a non-pair #t
+break&#62;,top
+Scheme&#62;
+</PRE>
+
+<P>
+The messages you'll see vary from system to system, but the basic idea
+is the same.  We tried to take the <CODE>car</CODE> of the boolean <CODE>#f</CODE>,
+which makes no sense because it has no car field--it doesn't have
+<EM>any</EM> fields.  Scheme told is it didn't work, and gave us a break
+prompt for sorting it out.  Then we just used the <CODE>,top</CODE> command
+(or whatever works on your system) to tell Scheme to give up on
+evaluating that expression and go back to normal interaction.
+
+</P>
+<P>
+<CODE>car</CODE> and <CODE>cdr</CODE> don't work on the empty list.  The empty
+list doesn't have car and cdr fields.  (This may be surprising to
+Lisp programmers, who expect the empty list to behave like Lisp's
+<CODE>nil</CODE>.  It doesn't, in this respect.)
+
+</P>
+<P>
+Scheme also supplies procedures to change the values of a pair's fields,
+called <CODE>set-car!</CODE> and <CODE>set-cdr!</CODE>.  They take two arguments,
+a pair and a value for the field being set.
+
+</P>
+
+<PRE>
+Scheme&#62;(set-car! my-pair 4)
+#void
+
+Scheme&#62;my-pair
+(4 . 2)
+
+Scheme&#62;(set-cdr! my-pair 5)
+#void
+
+Scheme&#62;my-pair
+(4 . 5)
+</PRE>
+
+<P>
+The value of the variable <CODE>my-pair</CODE> hasn't actually changed, even 
+though it prints differently.  <CODE>my-pair</CODE> still holds a pointer to the
+same object, the pair we created with <CODE>cons</CODE>.  What <EM>has</EM>
+changed is the <EM>contents of</EM> that object.  Its fields are like
+variable bindings, in that they can hold (pointers to) any kind of
+object, and we've assigned new values to them.  (They're <EM>value cells</EM>.)
+
+</P>
+<P>
+We can refer to the same object by another name if we just define
+another variable and initialize it with <CODE>my-pair</CODE>'s value.
+
+</P>
+
+<PRE>
+Scheme&#62; (define same-pair my-pair)
+#void
+
+Scheme&#62;same-pair
+(4 . 5)
+</PRE>
+
+<P>
+Now suppose we assign a new value to the car of the pair, referring
+to it via <CODE>my-pair</CODE>
+
+<PRE>
+Scheme&#62;(set-car! my-pair 6)
+#void
+
+Scheme&#62;my-pair
+(6 . 5)
+
+Scheme&#62;same-pair
+(6 . 5)
+</PRE>
+
+<P>
+Notice that the change is visible through <CODE>same-pair</CODE> as well as
+<CODE>my-pair</CODE>, because we've changed the object that both of them
+point to.
+
+</P>
+<P>
+Now let's make another pair with the same field values.
+
+<PRE>
+Scheme&#62;(define different-pair (cons 6 5))
+different-pair
+
+Scheme&#62;different-pair
+(6 . 5)
+
+Scheme&#62;my-pair
+(6 . 5)
+
+Scheme&#62;same-pair
+(6 . 5)
+</PRE>
+
+<P>
+Notice that we have two different pairs, but Scheme prints them out
+the same way, because it just shows us the <EM>structure</EM> of
+data structures.  We can't tell that they're different just by
+looking at the printed output.  From the printed representation,
+we can't tell whether or not <CODE>my-pair</CODE>, <CODE>same-pair</CODE>, and
+<CODE>different-pair</CODE> hold the same values.
+
+</P>
+<P>
+Scheme provides a predicate procedure, <CODE>eq?</CODE>, to tell whether
+two objects are the exact same object.
+
+</P>
+
+<PRE>
+Scheme&#62;(eq? my-pair same-pair)
+#t
+Scheme&#62;(eq? my-pair different-pair)
+#f
+Scheme&#62;(eq? same-pair different-pair)
+#f
+</PRE>
+
+<P>
+<CODE>eq?</CODE> tests object <EM>identity</EM>, like pointer comparisons
+in C (using <CODE>==</CODE>) or Pascal (using <CODE>=</CODE>).
+
+</P>
+<P>
+<A NAME="IDX96"></A>
+
+</P>
+<P>
+It may be confusing, but in programming language terminology, two objects
+are called <EM>identical</EM> only if they are the very same object, not
+just two objects that look alike, like "identical" twins.  When
+the government issues "identity" cards, this is the kind of "identity"
+we're talking about.  Two so-called identical twins have different identities, 
+because they're actually different people.  A pointer is like a
+a social security number, because it uniquely identifies a particular
+individual object.
+
+</P>
+<P>
+<A NAME="IDX97"></A>
+
+</P>
+<P>
+Scheme also has a test to see whether objects "look the same,"
+that is, have the same structure.  It's called <CODE>equal?</CODE>.
+We call this a <EM>structural equivalence</EM> test.
+
+</P>
+
+<PRE>
+Scheme&#62;(equal? my-pair same-pair)
+#t
+Scheme&#62;(equal? my-pair different-pair)
+#t
+Scheme&#62;(equal? same-pair different-pair)
+#t
+</PRE>
+
+<P>
+<CODE>different-pair</CODE> is <CODE>equal?</CODE> to <CODE>my-pair</CODE> and <CODE>same-pair</CODE>
+because it refers to the same kind of object, and its field values
+are <CODE>equal?</CODE>.  Notice that that's a recursive definition, which
+we'll discuss more when we get to lists.
+
+</P>
+<P>
+If we didn't have <CODE>eq?</CODE>, we could still figure out whether two
+objects were exactly the same object, by changing one and seeing if
+the other changed, too.
+
+</P>
+
+<PRE>
+Scheme&#62;(set-car! my-pair 4)
+#void
+
+Scheme&#62;my-pair
+(4 . 5)
+
+Scheme&#62;same-pair
+(4 . 5)
+
+Scheme&#62;different-pair
+(6 . 5) 
+</PRE>
+
+<P>
+Now I should warn you about <CODE>set-car!</CODE> and <CODE>set-cdr!</CODE>.  The
+reason we put an exclamation point in the name of a procedure that
+side-effects data is because it's dangerous.  If you have two
+pointers to the same data from different places, i.e., different
+variable bindings or data structures, it's hard to reason about how
+changes from one of those places affect things at the other place.
+
+</P>
+<P>
+In normal Scheme programming style, it is very common to create
+new data structures that have pointers to other data structures,
+or parts of data structures.  If you modify a shared part of
+one data structure, it will affect the other data structure that
+shares that part.  This can be very confusing, and leads to
+subtle bugs.                                           
+
+</P>
+<P>
+You should only use side effects when you have a very good reason
+to, and make it clear that that's what you're doing.  Later
+examples will show how to program in a style that uses very
+few side effects, and only where they make sense.
+
+</P>
+<P>
+<A NAME="IDX98"></A>
+
+</P>
+<P>
+Notice that <CODE>cons</CODE> is <EM>not</EM> considered a side-effecting
+operation, because it returns a <EM>new</EM> object that has never
+been seen before.  Somewhere in the implementation of the language,
+<CODE>cons</CODE> side-effects memory to initialize it, but you don't
+see that--from your program's point of view, you're getting
+a <EM>new</EM> piece of memory that magically has values in place.
+
+</P>
+<P>
+Creating a pair doesn't modify any data structure that already
+exists, so the installation of its initial values is not considered
+a side-effect.
+
+</P>
+
+<PRE>
+==================================================================
+This is the end of Hunk D.
+
+At this point, you should go back to the previous chapter and
+read Hunk E before returning here and continuing this tutorial.
+==================================================================
+</PRE>
+
+<P>
+(Go BACK to read Hunk E, which starts at section <A HREF="schintro_35.html#SEC36">The Empty List (Hunk E)</A>.)
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_91.html">previous</A>, <A HREF="schintro_93.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

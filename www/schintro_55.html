@@ -1,0 +1,48 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Indenting let Expressions</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_54.html">previous</A>, <A HREF="schintro_56.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H4><A NAME="SEC61" HREF="schintro_toc.html#SEC61">Indenting <CODE>let</CODE> Expressions</A></H4>
+
+<P>
+In general, we indent <CODE>let</CODE> expressions in a way that shows
+the block structure of the program.  The binding forms (variable
+names and initial values) are lined up vertically after the keyword
+<CODE>let</CODE>, and the body expressions are indented a few characters
+and lined up vertically, like so:
+
+</P>
+
+<PRE>
+(let ((x 10)    ; bindings of x
+      (y 20))   ; and y
+   (foo x)
+   (let ((a (bar))   ; bindings of a
+         (b (baz)))  ; and b
+      (quux x a)
+      (quux y b))
+   (baz))
+</PRE>
+
+<P>
+Notice that the binding forms of each <CODE>let</CODE> are lined up vertically,
+and the <CODE>body</CODE> expressions are <EM>not</EM> indented as far.  This
+is important for making it obvious where the binding forms stop and
+the body expressions start.  (In this example, the body of the outer
+<CODE>let</CODE> consists of a call to <CODE>foo</CODE>, another <CODE>let</CODE>, and
+a call to <CODE>baz</CODE>.  The body of the inner let consists of two
+calls to <CODE>quux</CODE>.)
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_54.html">previous</A>, <A HREF="schintro_56.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

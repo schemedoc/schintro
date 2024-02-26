@@ -1,0 +1,117 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Interpretation and Compilation</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_111.html">previous</A>, <A HREF="schintro_113.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H2><A NAME="SEC131" HREF="schintro_toc.html#SEC131">Interpretation and Compilation</A></H2>
+
+<P>
+Programming languages are usually implemented by interpreters or
+compilers, or some mix of both.  In reality, almost all language
+implementations are a mix of both, to at least a small degree, and
+the line between them is surprisingly fuzzy.
+
+</P>
+<P>
+A pure interpreter reads the source text of a program, analyzes it, and 
+executes it as it goes.  This is usually very slow--the interpreter
+spends a lot of time analyzing strings of characters to figure out
+what they mean.  A pure interpreter must recognize and analyze each
+expression in the source text each time it is encountered, so that
+it knows what to do next.  This is pretty much how most command shell
+languages work, including UNIX shells and Tcl.
+
+</P>
+<P>
+A pure compiler reads the source text of a program, and translates it into
+machine code that will have the effect of executing the program when it
+is run.  A big advantage of compilers is that they can read through and
+analyze the source program <EM>once</EM>, and generate code that you can run to
+give the same effect as interpreting the program.  Rather than analyzing
+each expression each time they encounter it, compilers do the analysis
+once, but record the actions an interpreter <EM>would</EM> take at that
+point in the program.
+
+</P>
+<P>
+In effect, a compiler is a weird kind of interpreter, which "pretends" 
+to interpret the program, and records what an interpreter would do.  It
+then goes through its record of actions the interpreter would take,
+and spits out instructions whose effect is the same as what the
+interpreter would have done.  Most of the decision-making that the
+interpreter does--like figuring out that an expression is an
+assignment expression, or a procedure call--can be done at compile
+time, because the expression is the same each time it's encountered
+in running the program. 
+
+</P>
+<P>
+The compiler's job is to do the work that's always the same, and spit
+out instructions that will do the "real work" that can only be done at
+runtime, because it depends on the actual data that the program is
+manipulating.  For example, an <CODE>if</CODE> statement is always an
+<CODE>if</CODE> statement each time it's encountered, so that analysis can be 
+done once.  But which branch will be taken depends on the runtime value
+of an expression, so the compiler must emit code to test the value of
+the expression, and take the appropriate branch.
+
+</P>
+<P>
+Most real interpreters are somewhere in between pure interpreters and
+compilers.  They read through the source code for a program once, and
+translate it into an "intermediate representation" that's easier to
+work with--a data structure of some kind--and then interpret that. 
+Rather than stepping through strings of source text, they step through
+a data structure that represents that source text in a more convenient
+form, which is much faster to operate on.  That is, they do some analysis
+once, while converting the source text into a data structure, and the
+rest as they execute the program by stepping through the data structure.
+
+</P>
+<P>
+There are
+four good reasons for using a Scheme interpreter as an example
+Scheme program:
+
+</P>
+
+<OL>
+<LI>
+
+A simple interpreter really is simple, but it can show off some of the
+handy features of Scheme.  It's a good example of Scheme programming.
+<LI>
+
+Most serious programs include some kind of command interpreter, so
+every programmer should know how to write a decent one.  Often, the
+command interpreter has a tremendous impact on the usability and power
+of a system, and too many programs have bad ones.
+<LI>
+
+Understanding how a Scheme interpreter works
+may clarify language issues.  It gives you a nice, concrete understanding
+of what Scheme does when it encounters an expression, so you know what
+your programs will do--it'll be obvious when you need a quote, or
+parentheses, and when you don't.
+<LI>
+
+Every programmer should understand the basics of how a compiler works.
+Understanding a Scheme interpreter gets you half-way to understanding a
+Scheme compiler.  A Scheme compiler is really very much like a Scheme
+interpreter--it analyzes Scheme expressions and figures out what to do.
+The main difference between an interpreter and a compiler is just that
+when an interpreter figures out what to do, it does it immediately, while
+a compiler records what to do when you run the program later.
+</OL>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_111.html">previous</A>, <A HREF="schintro_113.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

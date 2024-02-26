@@ -1,0 +1,436 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - call-with-current-continuation</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_140.html">previous</A>, <A HREF="schintro_142.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H1><A NAME="SEC262" HREF="schintro_toc.html#SEC262"><CODE>call-with-current-continuation</CODE></A></H1>
+
+<P>
+<CODE>call-with-current-continuation</CODE> is a very powerful control
+construct, which can be used to create more conventional
+control constructs, like <CODE>catch</CODE> and <CODE>throw</CODE> in Lisp
+(or <CODE>setjmp</CODE> and <CODE>longjmp</CODE> in C), or coroutines, and many
+more.  It is extremely powerful because it allows a
+program to manipulate its own control "stack" so
+that procedure calls and returns needn't follow the
+normal depth-first textual call ordering.
+
+</P>
+<P>
+Recall that we said [ WHERE? ] that Scheme's equivalent
+of an activation stack is really a chain of partial
+continuations (suspension records), and this chain
+is known as a full continuation.  And since continuations
+are immutable, they usually form a tree reflecting
+the call graph (actually, only the non-tail calls).
+Normally, the parts of this tree that are not in the
+current continuation chain are garbage, and can be
+garbage collected.
+
+</P>
+<P>
+If you take a pointer to the current continuation, and
+put it in a live variable or data structure, however,
+then that continuation chain will remain live and not
+be garbage collected.  That is, you can "capture"
+the current state of the stack.
+
+</P>
+<P>
+If you keep a captured state of the stack around, and
+later install the pointer to it in the system's
+continuation register, then you can return through
+that continuation chain, just as though it were
+a normal continuation.  That is, rather than returning
+to your caller in the normal way, you can take some
+old saved continuation and return into that instead!
+
+</P>
+
+<P>
+You might wonder why anybody would want to do such a
+weird thing to their "stack," but there are some
+useful applications.  One is <EM>coroutines</EM>.  It is often
+convenient to structure a computation as an alternation
+between two different processes, perhaps one that
+produces items and another that consumes them.  It
+may not be convenient to either of those processes
+into a subroutine that can be called once to get
+an item, because each process may have complex state
+encoded into its control structure.
+
+</P>
+<P>
+(You probably wouldn't want to have to structure your
+program as a bunch of incremental operations that were
+called by successive calls to a do-next-increment routine.
+It may be that the program it gets its data from can't
+easily be structured that way, either.  Each program
+should probably be written with its own natural
+control structure, each suspending its operation when
+it needs the other to do its thing.)
+
+</P>
+<P>
+<EM>Coroutines</EM> allow you to structure cooperating subprograms
+this way, without making one subservient to (and callable
+piecemeal from) another.
+
+</P>
+<P>
+Coroutines can be implmemented as operations on continuations.
+When a coroutine wants to suspend itself and activate another
+(co-)routine, it simply pushes a partial continuation to
+save its state, then captures the value of the continuation
+register in some way, so that it can be restored later.
+To resume a suspended routine, the continuation chain is
+restored and the top partial continuation is popped into
+the system state registers.  Alternation between coroutines
+is thus accomplished by saving and restoring the routines'
+continuations.
+
+</P>
+<P>
+Note that in this case, we can have two (or more) trees of
+continuations that represent the course of the computation,
+and that control flow can alternate back and forth between
+trees.  Usually, computations are structured so that most
+of the work is done in the usual depth-first procedure
+calling and returning, with occasional jumps from one routine's
+depth-first activity to another's.
+
+</P>
+
+<P>
+Another use of continuations is to implement <CODE>catch</CODE> and <CODE>throw</CODE>,
+which are roughly like setjmp and longjmp in C.  The idea is
+that you may want to abort a computation without going through
+the normal nested procedure returns.  In a normal stack-based
+lagnuage (without continuations), this is usually accomplished
+by storing a pointer into the stack before starting the abortable
+computation.  If it is necessary to abort the computation, all
+of the activation records above the point of call can be ignored,
+and the stack pointer can be restored to that point, just as
+though all of the invocations above it had returned normally.
+
+</P>
+<P>
+This can be implemented with <CODE>call-with-current-continuation</CODE>
+by saving the continuation at the point where an abortable
+computation is begun.  Anywhere within that computation, that
+continuation may be restored (clobbering the "normal" value
+of the continuation register, etc.) to resume from that point.
+
+</P>
+
+<P>
+But <CODE>call-with-current-continuation</CODE> is more powerful than
+coroutines or catch and throw.  Not only can we escape "downward"
+from a computation (by popping multiple partial continuatons
+at once without actually returning through them), we can also
+escape "upwards" <EM>back into</EM> a computation that we bailed out
+of before.  This can be useful in implementing <EM>exception
+handling</EM>, where we may want to transfer control to a special
+coroutine that may "fix up" an error that was detected,
+but then resume the procedure that encountered the error,
+after the problem is fixed.
+
+</P>
+
+<P>
+<CODE>call-with-current-continuation</CODE> can also be used to implement
+<EM>backtracking</EM>, where the control flow backs up and re-executes
+from some saved continuation.  In this case, we may save the
+continuation for some computation, but go ahead and return
+through it normally.  Later, we may restore the saved continuation
+and return through it again.
+
+</P>
+<P>
+Note that in general, continuations in Scheme can be used
+<EM>multiple</EM> times.  The essential idea is that rather than using
+a stack, which dictates a depth-first call graph, Scheme allows
+you to view the call graph AS A GRAPH, which may contain cycles,
+even directed cycles (which represent bactracking).
+
+</P>
+
+<P>
+The syntax of <CODE>call-with-current-continuation</CODE> is fairly ugly,
+but for some good reasons; in its raw form, it is very
+powerful, but correspondingly hard to use.  Typically, it
+is encapsulated in macros or other procedures to implement
+other, higher-level control constructs.
+
+</P>
+<P>
+<CODE>call-with-current-continuation</CODE> is itself a normal first-class
+procedure, which encapsulates the very low-level continuation
+munging abilities in something like a civilized package.
+Since it's a first-class procedure, you can write higher-order
+procedures that treat it like data, or call it, or both.
+
+</P>
+<P>
+<CODE>call-with-current-continuation</CODE> is a procedure of exactly one
+argument, which is another procedure to execute after the
+current continuation has been captured.  The current continuation
+will be passed to that procedure, which can use it (or not)
+as it pleases.
+
+</P>
+<P>
+The captured continuation is itself packaged up as a procedure,
+also of one argument.  That's so that you can't muck around
+with the continuation itself in any data-structure-like way.
+There are only two things you can do with captured
+continuations--capture them and resume them.  Continuations
+are captured by executing <CODE>call-with-current-continuation</CODE>,
+which creates an <EM>escape procedure</EM>.  They are resumed by
+calling the escape procedure.  When called, the escape procedure
+abandons whatever computation is going on, restores the saved
+continuation, and resumes executing the saved computation at
+the point where <CODE>call-with-current-continuation</CODE> occurred.
+
+</P>
+<P>
+Note that <CODE>call-with-current-continuation</CODE> is a procedure of
+one argument.  We'll call that procedure the <EM>abortable</EM>
+procedure.  The abortable procedure must <EM>also</EM> be a procedure
+of exactly one argument.  (If you want to call a procedure that
+takes a bunch of arguments, and still make it abortable
+using <CODE>call-with-current-continuation</CODE>, you have to use a trick
+I'll describe below.)
+
+</P>
+<P>
+The abortable procedure's argument is the escape procedure that
+encapsulates the captured continuation.
+
+</P>
+<P>
+<CODE>call-with-current-continuation</CODE> does the following:
+
+</P>
+
+<UL>
+
+<LI>
+
+  Creates an escape procedure that captures the current continuation.
+  If called, this procedure will restore the continuation at the
+  point of call to <CODE>call-with-current-continuation</CODE>. 
+<LI>
+
+  Calls the procedure passed as its (call-with-current-continuation's)
+  argument, handing it the escape procedure as <EM>its</EM> argument.
+</UL>
+
+<P>
+If and when the escape procedure is called, it restores the continuation
+captured at the point of call to <CODE>call-with-current-continuation</CODE>.
+We refer to this as a <EM>nonlocal return</EM>---from the point of view
+of the caller of <CODE>call-with-current-continuation</CODE>, it looks as
+though <CODE>call-with-current-continuation</CODE> had returned normally.
+
+</P>
+<P>
+The (abortable) procedure we want to call must take one argument, which
+is the escape procedure that can resume the computation just beyond the
+call to <CODE>call-with-current-continuation</CODE>.
+
+</P>
+<P>
+As if this weren't cryptic enough, the escape procedure is <EM>also</EM>
+a procedure of exactly one argument.  When the escape procedure
+is used to perform a nonlocal return, it returns a value as the
+result of the call to <CODE>call-with-current-continuation</CODE>.
+
+</P>
+<P>
+The argument to the escape procedure is the value that will be returned
+as the value of the call.  Note that if the escape procedure is
+<EM>not</EM> called, and the abortable procedure returns normally,
+the value it returns is returned as the value of the call
+to <CODE>call-with-current-continuation</CODE>.
+
+</P>
+<P>
+A call to <CODE>call-with-current-continuation</CODE> therefore can return
+in two ways.  Either the abortable procedure returns normally, and
+<CODE>call-with-current-continuation</CODE> simply returns that value, <EM>or</EM>
+the escape procedure can be called, and its argument is returned as
+the value of the call to <CODE>call-with-current-continuation</CODE>.
+
+</P>
+<P>
+Consider the following example, where I've given line numbers to
+refer to later:
+
+</P>
+
+<PRE>
+ 0: (define some-flag #f)
+
+ 1: (define (my-abortable-proc escape-proc)
+ 2:   (display "in my-abortable-proc")
+ 3:   (if some-flag
+ 4:       (escape-proc "ABORTED"))
+ 5:   (display "still in my-abortable-proc")
+ 6:   "NOT ABORTED")
+
+ 7: (define (my-resumable-proc)
+ 8:   (do-something)
+ 9:   (display (call-with-current-continuation my-abortable-proc))
+10:   (do-some-more))
+
+11: (my-resumable-procedure)
+</PRE>
+
+<P>
+At line 11, we call <CODE>my-resumable-procedure</CODE>.  It calls
+<CODE>do-something</CODE>, and then calls display.  But before it calls
+display it has to evaluate its argument, which is the call
+to <CODE>call-with-current-continuation</CODE>.
+
+</P>
+<P>
+<CODE>call-with-current-continuation</CODE> saves the continuation at that
+point, and packages it up as an escape procedure. (Line 9) The escape
+procedure, if called, will return its argument as the value
+of the <CODE>call-with-current-continuation</CODE> form. 
+
+</P>
+<P>
+That is, if the escape procedure is called, it will resume
+execution of the display procedure, which prints that value,
+and then execution will continue, calling do-some-more.
+
+</P>
+<P>
+Once <CODE>call-with-current-continuation</CODE> has created the escape procedure,
+it calls its argument, <CODE>my-abortable-proc</CODE>, with the escape procedure as
+<EM>its</EM> argument.
+
+</P>
+<P>
+<CODE>my-abortable-proc</CODE> then displays (prints) <CODE>"in my-abortable-proc."</CODE>
+Then it checks <CODE>some-flag</CODE>, which is false, and does <EM>not</EM> execute
+the consequent of the <CODE>if</CODE>---that is, it doesn't execute the escape
+procedure.  It continues executing, displaying 
+<CODE>"still in</CODE><CODE>my-abortable-proc."</CODE>  It then evaluates its last
+body form, the string <CODE>"NOT ABORTED"</CODE>, which evaluates to itself, and
+returns that as the normal return value of the procedure call.
+
+</P>
+<P>
+At this point, the value returned from my-abortable-proc
+is printed by the call to <CODE>display</CODE> in line 9.
+
+</P>
+
+<P>
+But suppose we set <CODE>some-flag</CODE> to <CODE>#t</CODE>, instead of <CODE>#f</CODE>.
+
+</P>
+<P>
+Then when control reaches line 3, the <CODE>if</CODE> <EM>does</EM> evaluate
+its consequent.  This calls the escape procedure, handing
+it the string <CODE>"ABORTED"</CODE> as its argument.  The escape
+procedure resumes the captured continuation, returning
+control to the caller of <CODE>call-with-current-continuation</CODE>,
+without executing lines 5 and 6.
+
+</P>
+<P>
+The escape procedure returns its argument, the string
+<CODE>"ABORTED"</CODE> as the value of the <CODE>call-with-current-continuation</CODE>
+form.  It restores the execution of my-resumable-proc at
+line 9, handing display the string <CODE>"ABORTED"</CODE> (as the
+value of its argument form).  At this point <CODE>"ABORTED"</CODE>
+is displayed, and execution continues at line 10.
+
+</P>
+
+<P>
+Often we want to use call-with-current-continuation to
+call some procedure that takes arguments other than
+an escape procedure.  For example, we might have a
+procedure that takes two arguments besides the
+escape procedure, thus:
+
+</P>
+
+<PRE>
+(define (foo x y escape)
+   ...
+   (if (= x 0)
+       (escape 'ERROR))
+   ...))
+</PRE>
+
+<P>
+We can fix this by <EM>currying</EM> the procedure, making it a procedure
+of one argument. 
+
+</P>
+<P>
+[ An earlier chapter should have a discussion of currying! ]
+
+</P>
+<P>
+Suppose we want to pass 0 and 1 as the values of x and y,
+as well as handing foo the escape procedure.  Rather than saying
+
+<PRE>
+   (call-with-current-continuation foo)
+</PRE>
+
+<P>
+which doesn't pass enough arguments to the call to foo, we say
+
+<PRE>
+   (call-with-current-continuation (lambda (escape) (foo 0 1 escape)))
+</PRE>
+
+<P>
+The lambda expression creates a closure that does exactly what
+we want.  It will call foo with arguments 0, 1, and the escape
+procedure created by <CODE>call-with-current-continuation</CODE>.
+
+</P>
+
+
+<H2><A NAME="SEC263" HREF="schintro_toc.html#SEC263">Implementing a Better Read-Eval-Print Loop</A></H2>
+
+
+
+<H2><A NAME="SEC264" HREF="schintro_toc.html#SEC264">Implementing Catch and Throw</A></H2>
+
+
+
+<H2><A NAME="SEC265" HREF="schintro_toc.html#SEC265">Implementing Backtracking</A></H2>
+
+
+
+<H2><A NAME="SEC266" HREF="schintro_toc.html#SEC266">Implementing Coroutines</A></H2>
+
+
+
+<H2><A NAME="SEC267" HREF="schintro_toc.html#SEC267">Implementing Cooperative Multitasking</A></H2>
+
+
+
+<H2><A NAME="SEC268" HREF="schintro_toc.html#SEC268">Caveats about <CODE>call-with-current-continuation</CODE></A></H2>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_140.html">previous</A>, <A HREF="schintro_142.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

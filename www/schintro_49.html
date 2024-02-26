@@ -1,0 +1,114 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Equality Predicates</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_48.html">previous</A>, <A HREF="schintro_50.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC55" HREF="schintro_toc.html#SEC55">Equality Predicates</A></H3>
+
+<P>
+<A NAME="IDX48"></A>
+<A NAME="IDX49"></A>
+<A NAME="IDX50"></A>
+
+</P>
+<P>
+Equality predicates tell whether one value is "the same as" another.
+There are actually several important senses of "the same as," so
+Scheme provides four equality predicates.
+
+</P>
+<P>
+Sometimes you want to know whether two data structures are structurally
+the same, with the same values in the same places.  For example, you
+may want to know whether a list has the same structure and elements
+as another list.  For this, you can use <CODE>equal?</CODE>, which does
+a deep, element-by-element structural comparison.
+
+</P>
+<P>
+For example <CODE>(equal? '(1 2 3) '(1 2 3))</CODE> returns <CODE>#t</CODE>, because
+the arguments are both lists containing <CODE>1</CODE>, <CODE>2</CODE>, <CODE>3</CODE>,
+in that order.  <CODE>equal?</CODE> does a deep traversal of the data structure,
+so you can hand it nested lists and other fairly complicated data
+structures as well.  (Don't hand it structures with directed cycles
+of pointers, though, because it may loop forever without finding 
+the end.)
+
+</P>
+<P>
+<CODE>equal?</CODE> works to compare simple things, too.  For example,
+<CODE>(equal? 22 22)</CODE> returns <CODE>#t</CODE>, and <CODE>(equal? #t 15)</CODE>
+returns <CODE>#f</CODE>.  (Note that <CODE>equal?</CODE> can be used to compare things 
+that may or may not be of the same type, but if they're not, the answer
+will always be <CODE>#f</CODE>.  Objects of different types are never
+<CODE>equal?</CODE>.)
+
+</P>
+<P>
+Often you don't want to structurally compare two whole data structures--you
+just want to know if they're the <EM>exact same object</EM>.  For example,
+given two pointers to lists, you may want to know if they're pointers
+to the very same list, not just two lists with the same elements.
+
+</P>
+<P>
+For this, you use <CODE>eq?</CODE>.  <CODE>eq?</CODE> compares two values to see
+if they refer to the same object.  Since all values in Scheme are
+(conceptually) pointers, this is just a pointer comparison, so
+<CODE>eq?</CODE> is always fast.
+
+</P>
+<P>
+(You might think that tagged immediate representations would require
+<CODE>eq?</CODE> to be slower than a simple pointer comparision, because it
+would have to check whether things were really pointers.  This isn't
+actually true---<CODE>eq?</CODE> just compares the bit patterns without
+worrying whether they represent pointers or immediates.)
+
+</P>
+<P>
+Equality tests for numbers are treated specially. 
+When comparing two values that are supposed to be numbers, <CODE>=</CODE>
+is the appropriate predicate.  Using <CODE>=</CODE> has the advantage that
+using it on non-numbers is an error, and Scheme will complain when
+it happens.  If you make a mistake and have a non-number where you
+intend to have a number, this will often show you the problem. 
+(You could also use <CODE>equal?</CODE>, but it won't signal an error
+when applied to non-numbers, and may be a little bit slower.)
+
+</P>
+<P>
+There is another equality predicate, <CODE>eqv?</CODE>, which does numeric
+comparisons on numbers (like <CODE>=</CODE>), and identity comparisons
+(like <CODE>eq?</CODE>) on anything else. 
+
+</P>
+
+<PRE>
+==================================================================
+This is the end of Hunk G
+
+TIME TO TRY IT OUT
+
+At this point, you should go read Hunk H of the next chapter
+and work through the examples using a running Scheme system.
+Then return here and resume this chapter.
+==================================================================
+</PRE>
+
+<P>
+(Go to Hunk H, which starts at section <A HREF="schintro_94.html#SEC99">Using Predicates (Hunk H)</A>.)
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_48.html">previous</A>, <A HREF="schintro_50.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

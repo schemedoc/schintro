@@ -1,0 +1,143 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Lists and Quoting</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_37.html">previous</A>, <A HREF="schintro_39.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC39" HREF="schintro_toc.html#SEC39">Lists and Quoting</A></H3>
+
+<P>
+<A NAME="IDX32"></A>
+<A NAME="IDX33"></A>
+
+</P>
+<P>
+Scheme allows you to write lists as literals using <EM>quoting</EM>.
+Just as you can write a literal boolean or number in your program,
+you can write a literal list if you use the special form <CODE>quote</CODE>.
+
+</P>
+<P>
+Quote is a special form, not a procedure, because it doesn't evaluate
+its argument in the usual way.  (Its argument is really just a 
+literal representation of a data structure, which may look like
+a Scheme expression, but it isn't.)
+
+</P>
+<P>
+For example, the expression <CODE>(quote (1 2 3))</CODE> returns a pointer
+to a list <CODE>(1 2 3)</CODE>, i.e., a sequence of cdr linked pairs whose
+car values are (pointers to) to 1, 2, and 3.
+
+</P>
+<P>
+You can use <CODE>quote</CODE> expressions as subexpressions of other
+expressions, because they just return pointer values like anything
+else.
+
+</P>
+<P>
+For example, the expression <CODE>(define foo (quote (1 2 3)))</CODE>
+defines (and binds) a variable <CODE>foo</CODE>, and initializes its binding
+with (a pointer to) a three-element list.
+
+</P>
+<P>
+We can draw the resulting situation this way:
+
+</P>
+
+<PRE>
+     +---+    +---+---+      +---+---+      +---+---+
+ foo | *-+---&#62;| * | *-+-----&#62;| * | *-+-----&#62;| * | * |
+     +---+    +-+-+---+      +-+-+---+      +-+-+---+
+                |              |              |
+               \|/            \|/            \|/
+                1              2              3
+</PRE>
+
+<P>
+<CODE>quote</CODE> takes exactly one argument, and returns a data structure
+whose printed representation is the same as what you typed in as the
+argument to <CODE>quote</CODE>.  Scheme does <EM>not</EM> evaluate the argument
+to <CODE>quote</CODE> as an expression--it just gives you a pointer to a
+data structure.
+
+</P>
+<P>
+Note that <CODE>quote</CODE> does not generally construct a character string--it
+constructs a data structure that may be a list or tree or even an 
+array.  It's a very general quoting facility, much more powerful than
+the double quotes around character strings, which only construct string
+objects.
+
+</P>
+<P>
+Scheme provides a cleaner way of writing <CODE>quote</CODE>d expressions,
+using the special single-quote character <CODE>'</CODE>.  Rather than writing
+out <CODE>(quote</CODE> <EM>some-expression</EM><CODE>)</CODE>, you can just precede
+the quoted expression with the single-quote character.  For example,
+we can write the same definition of <CODE>foo</CODE> as
+<CODE>(define foo '(1 2 3))</CODE>.  You don't need a closing quote, because
+of Scheme's parenthesized prefix syntax--it can figure out where the
+quoted data structure ends.
+
+</P>
+<P>
+One subtlety about <CODE>quote</CODE> is that a <CODE>quote</CODE> expression
+doesn't create a data structure every time it's called--evaluating
+the same expression many times may return many pointers to the
+same structure.
+
+</P>
+<P>
+Consider the procedure definition
+
+</P>
+
+<PRE>
+(define (foo)
+   '(1 2 3))
+</PRE>
+
+<P>
+The list <CODE>(1 2 3)</CODE> may be created when we <EM>define</EM> the
+procedure <CODE>foo</CODE>, and each time we call it, it may return a
+pointer to that same list.  (Exactly what happens depends on the
+particular implementation of Scheme, but most work this way, for
+efficiency reasons.  Evaluating the <CODE>quote</CODE> expression just
+fetches a pointer to a data structure that was created beforehand.)
+
+</P>
+<P>
+For this reason, it's an error to modify a data structure returned
+from a <CODE>quote</CODE> form.  Unfortunately, many Scheme systems don't
+detect this error, and will let you do it.  If you want a new data
+structure each time, you should use a procedure like <CODE>list</CODE>, which
+always creates a new data structure.   (<CODE>list</CODE>, which we'll
+discuss more later, is a standard Scheme procedure that takes any
+number of arguments, and creates a list of those items.)
+
+</P>
+<P>
+For example, if we want the
+procedure <CODE>foo</CODE> to return a new list <CODE>(1 2 3)</CODE> every time, we
+can write
+
+</P>
+
+<PRE>
+(define (foo)
+   (list 1 2 3))
+</PRE>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_37.html">previous</A>, <A HREF="schintro_39.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

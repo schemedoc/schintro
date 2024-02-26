@@ -1,0 +1,98 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Anonymous Procedures and lambda</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_62.html">previous</A>, <A HREF="schintro_64.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC69" HREF="schintro_toc.html#SEC69">Anonymous Procedures and <CODE>lambda</CODE></A></H3>
+
+<P>
+<A NAME="IDX69"></A>
+<A NAME="IDX70"></A>
+<A NAME="IDX71"></A>
+
+</P>
+<P>
+Scheme has a special form that is very special, called <CODE>lambda</CODE>.
+It creates a first-class procedure and returns a pointer to it.
+
+</P>
+<P>
+For example, you can create a procedure that doubles its argument
+by evaluating the expression <CODE>(lambda (x) (+ x x))</CODE>.  The
+second subform of the expression is a list of formal arguments,
+and the third subform is the body of the procedure.
+
+</P>
+<P>
+<CODE>lambda</CODE> doesn't give a name to the procedure it creates--it just
+returns a pointer to the procedure object.
+
+</P>
+<P>
+Actually, the procedure-defining variant of <CODE>define</CODE> is exactly
+equivalent to a variable-defining <CODE>define</CODE>, with a <CODE>lambda</CODE>
+expression as its initial value form.
+
+</P>
+<P>
+For example, 
+
+</P>
+
+<PRE>
+(define (double x)
+   (+ x x))
+</PRE>
+
+<P>
+is <EM>exactly</EM> equivalent to 
+
+</P>
+
+<PRE>
+(define double (lambda (x)
+                  (+ x x)))
+</PRE>
+
+<P>
+In either case, we're creating a one-argument procedure, and we're also
+defining and binding a variable named <CODE>double</CODE>, and initializing
+its storage with a pointer to the procedure.
+
+</P>
+<P>
+The procedure-defining syntax for <CODE>define</CODE> is just syntactic
+sugar--there's nothing you can do with it that you can't do with
+local variables and <CODE>lambda</CODE>.  It's just a more convenient
+notation for the same thing.
+
+</P>
+
+<PRE>
+==================================================================
+This is the end of Hunk K.
+
+TIME TO TRY IT OUT
+
+At this point, you should go read Hunk L of the next chapter
+and work through the examples using a running Scheme system.
+Then return here and resume this chapter.
+==================================================================
+</PRE>
+
+<P>
+(Go to Hunk L, which starts at section <A HREF="schintro_98.html#SEC103">Using First-Class, Higher-Order, and Anonymous Procedures (Hunk L)</A>.)
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_62.html">previous</A>, <A HREF="schintro_64.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

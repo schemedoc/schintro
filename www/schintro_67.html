@@ -1,0 +1,166 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Multiple defines are Like a letrec</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_66.html">previous</A>, <A HREF="schintro_68.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC73" HREF="schintro_toc.html#SEC73">Multiple <CODE>define</CODE>s are like a <CODE>letrec</CODE></A></H3>
+
+<P>
+Now that you understand <CODE>letrec</CODE>, I can explain what <CODE>define</CODE>
+really does.
+
+</P>
+<P>
+Notice that when you <CODE>define</CODE> top-level variables and procedures,
+the procedures you create can refer to other variables in the same
+top-level environment.
+
+</P>
+<P>
+It is as though all of the top-level bindings were created by a single
+big <CODE>letrec</CODE>, so that the initial value expressions create procedures
+that can "see" each others' name bindings.  Expressions that aren't
+definitions make up the "body" of this imaginary <CODE>letrec</CODE>.
+
+</P>
+<P>
+Recall that a procedure-defining <CODE>define</CODE> is equivalent to
+a variable-defining <CODE>define</CODE> with a <CODE>lambda</CODE> expression
+to compute its initial value.
+
+</P>
+<P>
+The following top-level forms
+
+</P>
+
+<PRE>
+...
+
+(define (foo)
+   (... (bar) ...))
+
+(define (bar)
+   (... (baz) ...))
+
+(define (baz)
+   (... (quux) ...))
+...
+(foo)
+...
+</PRE>
+
+<P>
+are therefore equivalent to
+
+</P>
+
+<PRE>
+...
+
+(define foo
+        (lambda ()
+           (... (bar) ...)))
+
+(define bar
+        (lambda ()
+           (... (baz) ...)))
+
+(define baz
+        (lambda ()
+           (... (foo) ...)))
+...
+(foo)
+...
+</PRE>
+
+<P>
+When we view top-level <CODE>define</CODE>s as being implicitly like parts of a
+<CODE>letrec</CODE>, the program takes the equivalent form
+
+</P>
+
+<PRE>
+(letrec (... 
+
+         (foo (lambda ()
+                 (... (bar) ...)))
+         (bar (lambda ()
+                 (... (baz) ...)))
+         (baz (lambda ()
+                 (... (foo) ...)))
+         ...)
+ ...
+ (foo)
+ ...)
+</PRE>
+
+<P>
+(Actually, things are scoped like this, but the initial value
+expressions of <CODE>define</CODE>s and the non-definition expressions
+are evaluated in the order they occurred in the source program. For
+top-level expressions, you can depend on Scheme executing the
+executable parts of definitions in the order written.)
+
+</P>
+<P>
+Local <CODE>define</CODE>s work pretty this way, too.  A Scheme interpreter
+or compiler recognizes any <CODE>define</CODE>s that occur at the
+beginning of a body as being parts of an implicit <CODE>letrec</CODE>;
+the subsequent expressions in the same body are treated as
+the body of the implicit <CODE>letrec</CODE>.
+
+</P>
+<P>
+So the following procedure
+
+</P>
+
+<PRE>
+(define (my-proc)
+   (define (local-proc-1)
+      ...)
+   (define (local-proc-2)
+      ...)
+   (local-proc-1)
+   (local-proc-1))
+</PRE>
+
+<P>
+is equivalent to
+
+</P>
+
+<PRE>
+(define (my-proc)
+   (letrec ((local-proc-1 (lambda () ...))
+            (local-proc-2 (lambda () ...)))
+      (local-proc-1)
+      (local-proc-2)))
+</PRE>
+
+<P>
+If we "desugar" the outer <CODE>define</CODE>, too, we get
+
+</P>
+
+<PRE>
+(define my-proc
+        (lambda ()
+           (letrec ((local-proc-1 (lambda () ...))
+                    (local-proc-2 (lambda () ...)))
+             (local-proc-1)
+             (local-proc-2)))
+</PRE>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_66.html">previous</A>, <A HREF="schintro_68.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

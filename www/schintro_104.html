@@ -1,0 +1,133 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Identifiers</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_103.html">previous</A>, <A HREF="schintro_105.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H4><A NAME="SEC113" HREF="schintro_toc.html#SEC113">A Note on Identifiers</A></H4>
+
+<P>
+<A NAME="IDX105"></A>
+
+</P>
+<P>
+When you type in a string, e.g., <CODE>"This here is a string, you know."</CODE>,
+you can type in pretty much whatever you want, as long as it's between double
+quotes and doesn't have double quotes or nonprinting characters in the middle.
+(You can have strings with double quotes in them, but you have to use a special
+escape sequence trick.)
+
+</P>
+<P>
+When you type in a symbol, on the other hand, you have to
+be a little more careful--some character sequences count as symbol
+names, but others don't.  For example, the character sequence
+<CODE>1</CODE> <CODE>2</CODE> <CODE>3</CODE> doesn't count as a symbol <CODE>123</CODE>,
+because it's a number.  Character sequences with spaces, parentheses,
+and single quotes in them are also a no-no, because those characters
+have special meaning when reading and writing the printed representations
+of Scheme data structures.
+
+</P>
+<P>
+A symbol name has to start with an "extended alphabatic" character--that
+a letter or any of a fairly large set of printing characters, followed by a
+string of other extended alphabetic characters or digits.
+(The extended alphabetic characters are <CODE>a</CODE>-<CODE>z</CODE>, <CODE>A</CODE>-<CODE>Z</CODE>,
+and these: <CODE>+ - . * / &#60; = &#62; ! ? : $ % _ &#38; ~ ^</CODE>.)
+
+</P>
+
+<P>
+For example, the following are all symbols:
+
+</P>
+
+<UL>
+<LI>
+
+  <CODE>x</CODE>
+<LI>
+
+  <CODE>thursdays-total*3</CODE>
+<LI>
+
+  <CODE>am_is_are_was_were_be_being_been</CODE>
+<LI>
+
+  <CODE>able-was-I-ere-I-saw-elba</CODE>
+<LI>
+
+  <CODE>floppy_drive-3.5</CODE>
+<LI>
+
+  <CODE>fourscore-and-7-years-ago</CODE>
+<LI>
+
+  <CODE>x-15+three-times-thirty-seven</CODE>
+<LI>
+
+  <CODE>=1</CODE>
+<LI>
+
+  <CODE>lhs=&#62;rhs</CODE>
+<LI>
+
+  <CODE>x+/-3%</CODE>
+</UL>
+
+<P>
+There is a slight restriction that you can't use a symbol name
+that starts with a character that could begin a literal number.
+This includes not only digits, but <CODE>+</CODE>, <CODE>-</CODE>, <CODE>.</CODE>
+and <CODE>#</CODE>.  A special exception to this is that <CODE>+</CODE>, and
+<CODE>-</CODE>, by themselves, are symbols, and so is <CODE>...</CODE>
+(the ellipsis identifier used in macros).
+
+</P>
+<P>
+Scheme identifiers (variable names and special form names and
+keywords) have almost the same restrictions as Scheme symbol object
+character sequences, and it's no coincidence.  Most implementations
+of Scheme happen to be written in Scheme, and symbol objects are used in
+the interpreter or compiler to represent variable names.
+
+</P>
+<P>
+Don't read too much into this, however: it's easy to write a Scheme
+interpreter or compiler in Scheme, and that <EM>is</EM> why the rules
+for symbol names are the same as the rules for variable names, but
+symbols and variables are very, very different things.  A symbol is
+just a data object, like a string, that has the special property
+of being unique.  You can use symbols like any other data object,
+as part of any data structure. 
+
+</P>
+<P>
+It just happens that interpreters and compilers generally use symbol
+objects to represent the names of variables and whatnot, so it's
+<EM>convenient</EM> that the rules for symbol object names are the
+same as the rules for identifiers in the language--but there
+is no other connection.
+
+</P>
+<P>
+Symbols are <EM>not</EM> necessarily variable names, they're just a kind of
+data object (like strings) that happen to get used that way, by <EM>some</EM>
+programs (interpreters and compilers).  <EM>Your</EM> programs can use them
+any way you choose.  (Sorry to be repetitive on this point, but
+confusing symbols and variables is one of the most common and avoidable
+problems in learning Scheme.  It's worse in Lisp, where symbols and
+variables do have a deep connection, but not an obvious one.)
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_103.html">previous</A>, <A HREF="schintro_105.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

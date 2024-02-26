@@ -1,0 +1,147 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Values and Side Effects</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_12.html">previous</A>, <A HREF="schintro_14.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H4><A NAME="SEC13" HREF="schintro_toc.html#SEC13">Expressions Return Values, But May Have Side-Effects</A></H4>
+
+<P>
+<A NAME="IDX1"></A>
+
+</P>
+<P>
+Scheme expressions combine the features of expressions and statements.
+They return values, but they can also have <EM>side effects</EM>---i.e.,
+they can change the state of variables or objects by assignment.
+
+</P>
+<P>
+The variable assignment operation in Scheme is <CODE>set!</CODE>, pronounced
+"set-bang." If we want to assign the value 3 to the variable <CODE>foo</CODE>,
+we write
+
+</P>
+
+<PRE>
+(set! foo 3)
+</PRE>
+
+<P>
+which is pretty much equivalent to C's
+
+</P>
+
+<PRE>
+foo = 3;
+</PRE>
+
+<P>
+Note that <CODE>(set! foo 3)</CODE> looks like a function call, because
+everything uses prefix notation, but it's not really a call;  it's
+a different kind of expression.
+
+</P>
+<P>
+You should not use assignments a lot in Scheme programs.  It's usually
+a sign of bad style, as I'll explain later.  I'll also show
+how to program in a style that doesn't need side effects much.
+They're there if you need them, though.
+
+</P>
+<P>
+When you write a procedure that modifies its arguments, rather
+than just just returning a value, it's good style to give it a name
+that ends with an exclamation mark.  This reminds you and anybody
+reading your code that the procedure changes something that already
+exists, rather than just returning a value such as a new data structure.
+Most of the standard Scheme procedures that change state are named
+this way.
+
+</P>
+<P>
+Most Scheme procedures don't modify anything, however.  For example,
+the standard procedure <CODE>reverse</CODE> takes a list as its argument and 
+returns a list of the same elements in the opposite order.  That is
+it returns a kind of reversed <EM>copy</EM> of the original list, without
+modifying the original at all.  If you wrote a procedure that returned
+the <EM>same</EM> list, but modified so that its elements were in the
+opposite order, you'd probably call it <CODE>reverse!</CODE>.  This warns
+people that a list that is passed to <CODE>reverse!</CODE> may be changed.
+
+</P>
+<P>
+One side-effecting procedure we'll use in examples is <CODE>display</CODE>.
+<CODE>display</CODE> takes a value and writes a printed representation to
+the screen or a file.  If you give it one argument, it writes to the
+"standard output";  by default, that's the terminal or other display.
+
+</P>
+<P>
+For example, if you want to show the user the printed representation
+of the number 1022, you can use the expression
+
+</P>
+
+<PRE>
+(display 1022)
+</PRE>
+
+<P>
+The side effect of executing this expression is to write the <CODE>1022</CODE> on
+the user's screen.  (<CODE>display</CODE> automatically converts the number
+to a string of characters so that you can read it.)
+
+</P>
+<P>
+Note that <CODE>display</CODE> doesn't have an exclamation point at the end
+of its name, because it doesn't side-effect the argument you give it
+to print.  You can give it a data structure and be sure that it won't
+modify it; display <EM>does</EM> have a side-effect, though--it changes
+the state of the screen (or file) that it writes to.
+
+</P>
+<P>
+<CODE>display</CODE> is fairly flexible, and can write the printed representations
+of many common Scheme objects, and even fairly complex data structures.
+
+</P>
+<P>
+Among many other things, display can print character strings.  (Strings
+are another kind of Scheme object.  You can write a literal string in
+double quotes, <CODE>"like this"</CODE>, and Scheme constructs a string object
+to hold that character sequence.
+
+</P>
+<P>
+The expression <CODE>(display "Hello, world!)</CODE> has the side effect
+of writing <CODE>Hello, world!</CODE> to the standard output, which is usually
+the user's screen.
+
+</P>
+<P>
+This makes <CODE>display</CODE> very useful for debugging, and for little examples,
+as well as for writing interactive programs.  A similar procedure, <CODE>write</CODE>
+is used for saving data structures to files; they can then be copied back
+into memory using <CODE>read</CODE>.
+
+</P>
+<P>
+In a later chapter, I'll show how to write to files by passing a second
+argument to <CODE>display</CODE> that tells it where to send the output.  For now,
+you should just use <CODE>display</CODE> with <EM>exactly one</EM> argument.
+<EM>Don't</EM> try to pass <CODE>display</CODE> several things and expect it to
+print them all. 
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_12.html">previous</A>, <A HREF="schintro_14.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

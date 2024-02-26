@@ -1,0 +1,140 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - let*</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_58.html">previous</A>, <A HREF="schintro_60.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC65" HREF="schintro_toc.html#SEC65"><CODE>let*</CODE></A></H3>
+
+<P>
+<A NAME="IDX62"></A>
+
+</P>
+<P>
+<CODE>let</CODE> is useful for most local variables, but sometimes you want
+to create several local variables in sequence, with each variable's
+value available to compute the next variable's value.
+
+</P>
+<P>
+For example, it is common to "destructure" a data structure, extracting
+part of the structure, then a part of that part, and so on.  We could
+do this by simply nesting expressions that extract parts, but then
+we don't have understandable names for the intermediate results of
+the nested expressions.
+
+</P>
+<P>
+(In other cases, we may want to do more
+than one thing with the results of one of the nested expressions,
+so we need to create a variable so that we can refer to it in
+more than one body expression.)
+
+</P>
+<P>
+Consider the code fragment:
+
+</P>
+
+<PRE>
+(let ((a-structure (some-procedure)))
+   (let ((a-substructure (get-some-subpart a-structure)))
+      (let ((a-subsubstructure (get-another-subpart a-substructure)))
+         (foo a-substructure))))
+</PRE>
+
+<P>
+Scheme provides a convenient syntax for this sort of nested let;
+can be written as a single <CODE>let*</CODE>
+
+</P>
+
+<PRE>
+(let* ((a-structure (some-procedure))
+       (a-substructure (get-some-subpart a-structure))
+       (a-subsubstructure (get-another-subpart a-substructure)))
+   (foo a-substructure))))
+</PRE>
+
+<P>
+Notice that this wouldn't work if we wrote it as a normal <CODE>let</CODE>
+that binds three variables.  A block structure diagram shows why:
+
+</P>
+
+<PRE>
+(let ((a-structure (some-procedure))
+      (a-substructure (get-some-subpart a-structure))
+      (a-subsubstructure (get-another-subpart a-substructure)))
+ +---------------------------------------------------------------+
+ | (foo a-substructure)           ; scope of all three variables | )))
+ +---------------------------------------------------------------+
+</PRE>
+
+<P>
+Now we see that all of the initial value expressions for the <CODE>let</CODE> variables
+are outside the scope of any of the variables.  <CODE>a-substructure</CODE> and
+<CODE>a-substructure</CODE> will not refer to the bindings introduced by this
+<CODE>let</CODE>, but to whatever bindings (if any) are visible outside the
+<CODE>let</CODE>.
+
+</P>
+<P>
+With <CODE>let*</CODE>, it's different:
+
+</P>
+
+
+<PRE>
+(let* ((a-structure (some-procedure))
+ +-------------------------------------------------------------------+
+ |     (a-substructure (get-some-subpart a-structure))               |
+ +----------------------------------------------------------------+  |
+ |     (a-subsubstructure (get-another-subpart a-substructure)))  |  |
+ +-------------------------------------------------------------+  |  |
+ | (foo a-subsubtructure)                                      |  |  | )))
+ +-------------------------------------------------------------+--+--+
+</PRE>
+
+<P>
+Each initial value clause is in the scope of the previous variable in
+the <CODE>let*</CODE>.  From the nesting of the boxes, we can see that bindings
+become visible one at a time, so that the value of a binding can be
+used in computing the initial value of the next binding.
+
+</P>
+<P>
+There's another local binding construct in Scheme, <CODE>letrec</CODE>, which
+is used when creating mutually recursive local procedures.  I'll discuss
+that later, when I describe how local procedures work in Scheme.
+
+</P>
+
+
+<PRE>
+==================================================================
+This is the end of Hunk I
+
+TIME TO TRY IT OUT
+
+At this point, you should go read Hunk J of the next chapter
+and work through the examples using a running Scheme system.
+Then return here and resume this chapter.
+==================================================================
+</PRE>
+
+<P>
+Go to Hunk J, which starts at section <A HREF="schintro_97.html#SEC102">Local Variables, <CODE>let</CODE>, and Lexical Scope (Hunk J)</A>.
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_58.html">previous</A>, <A HREF="schintro_60.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

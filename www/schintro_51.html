@@ -1,0 +1,123 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Quoting and Literals</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_50.html">previous</A>, <A HREF="schintro_52.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H2><A NAME="SEC57" HREF="schintro_toc.html#SEC57">Quoting and Literals</A></H2>
+
+<P>
+<A NAME="IDX52"></A>
+<A NAME="IDX53"></A>
+<A NAME="IDX54"></A>
+
+</P>
+<P>
+Programs often need to refer to literal data values--data that
+you type directly into the program.  In many languages, the only
+literals are fairly simple values like integers and strings.  In Scheme,
+you can use simple literals or complicated ones that represent
+(pointers to) data structures like nested lists.  Earlier, I showed
+how using quoting to create list literals.
+
+</P>
+<P>
+You've probably noticed that the syntax of Scheme code and the
+textual representation of Scheme data are very similar.  So,
+for example, <CODE>(min 1 2)</CODE> is a combination if it's viewed as code,
+but it's also the standard textual representation of a list containing
+the symbol <CODE>min</CODE> and the integers <CODE>1</CODE> and <CODE>2</CODE>.
+
+</P>
+<P>
+(A symbol is a data object that's sort of like a string, but with some
+special properties, which will be explained in the next chapter.)
+
+</P>
+<P>
+The resemblance between code and data is no accident, and it can
+be very convenient, as later examples will show.  It can be confusing,
+too, however, so it's important to know when you're looking at a
+piece of code and when you're looking at a piece of data.
+
+</P>
+<P>
+The first thing to understand is <EM>quoting</EM>.  In Scheme, the
+expression <CODE>(min 1 2)</CODE> is a procedure call to <CODE>min</CODE>
+with the arguments <CODE>1</CODE> and <CODE>2</CODE>.
+
+</P>
+<P>
+As I explained earlier, we can quote it by wrapping it in the special
+form <CODE>(quote</CODE>...<CODE>)</CODE>, however, and get a literal list
+<CODE>(min 1 2)</CODE>.
+
+</P>
+<P>
+For example, the definition
+
+</P>
+
+<PRE>
+(define foo (quote (min 1 2)))
+</PRE>
+
+<P>
+defines and binds <CODE>foo</CODE>, initializing the binding with (a pointer
+to) the list <CODE>(min 1 2)</CODE>.
+
+</P>
+<P>
+We can draw this situation this way:
+
+</P>
+
+<PRE>
+     +---+    +---+---+      +---+---+      +---+---+
+ foo | *-+---&#62;| * | *-+-----&#62;| * | *-+-----&#62;| * | * |
+     +---+    +-+-+---+      +-+-+---+      +-+-+---+
+                |              |              |
+               \|/            \|/            \|/
+               min             1              2
+</PRE>
+
+<P>
+Of course, as I explained earlier, we can use <CODE>'</CODE> as a euphemism
+for <CODE>(quote</CODE> <EM> ... </EM><CODE>)</CODE>
+
+</P>
+<P>
+We can define very complicated literals this way, if we want to.  Here's
+a procedure that returns a nested list of nested lists of integers and
+booleans and symbols:
+
+</P>
+
+<PRE>
+(define (fubar)
+   '(((1 two #f) (#t 3 four))
+     ((five #f 6) (seven 8 #t))
+     ((#f 9 10)) ((11 12 #f))))
+</PRE>
+
+<P>
+that's a pretty useless procedure, but it's very convenient to just
+be able to type in printed representations of nested data structures
+and have Scheme construct them automatically for you.  In most languages
+you'd have to do some fairly tedious hacking to construct a list like
+that.  As we'll see in a later chapter, Scheme also supports
+<EM>quasiquotation</EM>, which lets you construct <EM>mostly</EM>-literal
+data structures, and create customized variations on them easily;
+quasiquotation will be discussed a later chapter.
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_50.html">previous</A>, <A HREF="schintro_52.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

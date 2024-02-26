@@ -1,0 +1,119 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Using Predicates</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_93.html">previous</A>, <A HREF="schintro_95.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H2><A NAME="SEC99" HREF="schintro_toc.html#SEC99">Using Predicates (Hunk H)</A></H2>
+
+
+<PRE>
+==================================================================
+Hunk H starts here:
+==================================================================
+</PRE>
+
+<P>
+Suppose we want to sum a list of numbers.
+
+</P>
+<P>
+We can write a procedure <CODE>list-sum</CODE> to do that, like this:
+
+</P>
+
+<PRE>
+Scheme&#62; (define (list-sum lis)
+           (if (null? lis)   ; if empty list?
+               0             ; then sum is zero
+               (+ (car lis)  ; else sum is car plus the
+                  (list-sum (cdr lis))))) ; sum of rest of list
+#void
+</PRE>
+
+<P>
+Try typing in this example, or cutting and pasting it from this
+file into your running Scheme system.  (If you're reading this in
+a web browser, that should be easy--just cut the text from the
+browser window, and paste it into your Scheme window at the
+prompt.)  Cutting and pasting is a lot easier than typing in
+the whole thing!
+
+</P>
+<P>
+This procedure accepts one argument, <CODE>lis</CODE>, which should
+be a list.  It checks to see whether the list is empty, i.e.,
+a null pointer, using the predicate <CODE>null?</CODE>.  If so, it
+returns <CODE>0</CODE> as the sum of the elements in the list.
+
+</P>
+<P>
+If the list is not empty, the sum of the elements is the sum
+of the <CODE>car</CODE> value, plus the sum of the elements in
+the rest of the list.  In that case, <CODE>list-sum</CODE> takes 
+the car of the list and the <CODE>list-sum</CODE> of the rest of
+the list, adds them together, and returns the result.
+
+</P>
+<P>
+Try calling this procedure with some lists of numbers, e.g.,
+
+</P>
+
+<PRE>
+Scheme&#62;(list-sum '(1 2 3))
+6
+Scheme&#62;(list-sum '(4 5 6))
+15
+Scheme&#62;(list-sum (cons 1 (cons 2 (cons 3 '()))))
+6
+</PRE>
+
+<P>
+The addition procedure <CODE>+</CODE> works with floating-point numbers, not
+just integers, so we can call list-sum with a list of floats as well
+as integers.  (As in most languages, floating point numbers are written
+with a period to represent the decimal point.  Note that there is
+<EM>no space</EM> between the digits and the decimal point, so that
+Scheme won't confuse this with dot notation for lists.)
+
+</P>
+
+<PRE>
+Scheme&#62;(list-sum '(1 2.2 3.3))
+</PRE>
+
+<P>
+We can modify <CODE>list-sum</CODE> to print out its argument at
+each call.  Then we can watch the recursion:
+
+</P>
+
+<PRE>
+Scheme&#62; (define (list-sum lis)
+           (display "in list-sum, lis is: ")
+           (display lis)
+           (newline)      ; write a linebreak 
+           (if (null? lis)   ; if empty list?
+               0             ; then sum is zero
+               (+ (car lis)  ; else it's car plus the
+                  (list-sum (cdr lis))))) ; sum of rest of list
+#void
+</PRE>
+
+
+<UL>
+<LI><A HREF="schintro_95.html#SEC100">Using Type Predicates</A>: Checking an object's type
+<LI><A HREF="schintro_96.html#SEC101">Using Equality Predicates</A>: Checking whether objects are "the same"
+</UL>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_93.html">previous</A>, <A HREF="schintro_95.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

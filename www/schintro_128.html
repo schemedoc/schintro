@@ -1,0 +1,55 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Quasiquotation and Macros</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_127.html">previous</A>, <A HREF="schintro_129.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H1><A NAME="SEC178" HREF="schintro_toc.html#SEC178">Quasiquotation and Macros</A></H1>
+
+<P>
+Scheme provides facilities for transforming expressions automatically
+to create new expressions.  These facilities are called <EM>quasiquotation</EM>
+and <EM>syntax extension</EM> (or "macros").  Transformational programming
+is one of the most powerful features of Scheme. 
+
+</P>
+<P>
+Quasiquotation allows you to specify patterns that can be used to construct
+data structures, and also specify how to fill in "holes" in the patterns.
+In effect, you can define a template for a data structure, much like a
+quoted data structure, but also specify how to fill in holes to create
+variations on the data structure.
+
+</P>
+<P>
+Syntax extension allows you to do something very similar for code.  You
+can write "macros" that specify most of an expression, and you can
+fill in the holes in these templates to create particular expressions.
+With macros, you can write "templates" for programs, which you
+can customize by filling in the holes.  This lets you create both
+code-structuring and data-structuring facilities that express
+stereotyped patterns with variations.
+
+</P>
+<P>
+[ Scheme macros are actually more powerful than this, however, because you
+can use them to analyze code before transforming it... sort of... ]
+
+</P>
+<P>
+With Scheme macros, you can define new control constructs, data
+structuring facilities, full-blown object systems with inheritance,
+parameterized coding facilities (like C++ templates), and other
+more application-specific facilities to make your life easier.
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_127.html">previous</A>, <A HREF="schintro_129.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

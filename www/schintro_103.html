@@ -1,0 +1,217 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Symbols</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_102.html">previous</A>, <A HREF="schintro_104.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC112" HREF="schintro_toc.html#SEC112">Symbols</A></H3>
+
+<P>
+<A NAME="IDX104"></A>
+
+</P>
+<P>
+Symbols are like strings, in that they have a character sequence.
+Symbols are different, however, in that <EM>only one</EM> symbol object
+can have any given character sequence.  The character sequence is called
+the symbol's <EM>print name</EM>.  A print name is <EM>not</EM> the
+same thing as a variable name, however--it's just the character
+sequence that identifies a particular unique symbol.  It's called the
+print name because that's what's printed out when you <CODE>display</CODE>
+the object (or <CODE>write</CODE> it).
+
+</P>
+<P>
+Unlike strings, booleans, and numbers, symbols are <EM>not</EM> self-evaluating.
+To refer to a literal symbol, you have to <EM>quote</EM> it.  Since print names
+of symbols look just like variable names, you have to
+tell Scheme which you mean.
+
+</P>
+<P>
+If we type in the character sequence <CODE>f</CODE> <CODE>o</CODE> <CODE>o</CODE> <EM>without</EM>
+double quotes around it, Scheme assumes we mean to refer to a <EM>variable</EM>
+named <CODE>foo</CODE>, not the unique symbol whose print name is <CODE>foo</CODE>.
+
+</P>
+<P>
+In interpreters and compilers, symbol objects are often used as variable
+names, and Scheme treats them specially.  If we just type in a character 
+string that's a symbol print name, and hit return, Scheme assumes that we
+are asking for the value of the binding of the variable with that
+name--if there is one.
+
+</P>
+
+<PRE>
+Scheme&#62;(define foo 10)
+#void
+
+Scheme&#62;foo
+10
+</PRE>
+
+<P>
+If we quote the symbol name with the single quote character, Scheme interprets
+that as meaning we want the <EM>symbol object</EM> <CODE>foo</CODE>.
+
+</P>
+
+<PRE>
+Scheme&#62;'foo
+foo
+</PRE>
+
+<P>
+Since we've already defined (and bound) the variables <CODE>foo1</CODE> and
+<CODE>foo2</CODE>, we can ask Scheme to look up their values.
+
+</P>
+
+<PRE>
+Scheme&#62;foo1
+"foo"
+Scheme&#62;foo2
+"foo"
+</PRE>
+
+<P>
+Here we've typed in the names that we gave to variables earlier, and
+Scheme looked up the values of the variables.
+
+</P>
+<P>
+As we've seen before, this doesn't work if there isn't a bound variable
+by that name.  Symbols can be used as variable names, if you define
+the variable, but by default a symbol is just an object with a
+particular print name that identifies it.
+
+</P>
+<P>
+If we want to refer to the <EM>symbol object</EM> <CODE>foo</CODE>, rather than
+using foo as a variable name, we can <EM>quote</EM> it, using the special 
+quote character <CODE>'</CODE>.  This tells Scheme <EM>not</EM> to evaluate
+the following expression, but to treat it as literal data.
+
+</P>
+
+<PRE>
+Scheme&#62; 'foo
+foo
+</PRE>
+
+<P>
+When you type <CODE>'foo</CODE>, you're telling Scheme you want a pointer
+to the symbol whose print name is <CODE>foo</CODE>.  It doesn't matter
+whether there's a variable named <CODE>foo</CODE> or what its current
+value is---<CODE>'foo</CODE> means a pointer to the unique symbol object whose
+print name is <CODE>foo</CODE>, which has nothing to do with any variable
+<CODE>foo</CODE>.
+
+</P>
+<P>
+The first time you type in a symbol name, Scheme
+constructs a symbol object with that character sequence, and puts it
+in a special table.  If you later type in a symbol name with the same 
+character sequence, Scheme notices that it's the same sequence.  Instead of
+constructing a new object, as it would for a string, it just finds the old
+one in the table, and uses that--it gives you a pointer to the same
+object, instead of a pointer to a new one.
+
+</P>
+<P>
+Try this:
+
+</P>
+
+<PRE>
+Scheme&#62;(define bar1 'bar)
+#void
+Scheme&#62;(define bar2 'bar)
+#void
+Scheme&#62;(eq? bar1 bar2)
+#t
+</PRE>
+
+<P>
+Here, when we typed in the first definition, Scheme created a symbol
+object with the character sequence <CODE>b</CODE> <CODE>a</CODE> <CODE>r</CODE>, and added
+it to its table of existing symbols, as well as putting a pointer to
+it in the new variable binding <CODE>bar1</CODE>.  When we typed in the
+second definition, Scheme noticed that there was already a symbol object
+named <CODE>bar</CODE>, and put a pointer to that same object in <CODE>bar2</CODE> as
+well.
+
+</P>
+<P>
+When we asked Scheme if the values of <CODE>bar1</CODE> and <CODE>bar2</CODE> referred
+to the same object, the answer was yes (<CODE>#t</CODE>)---they both referred to 
+the unique symbol <CODE>bar</CODE>;  there is only one symbol by that name.
+
+</P>
+<P>
+The big advantage of symbols over strings is that comparing them is
+very fast.  If you want to know if two strings have the same
+character sequence, you can use <CODE>equal?</CODE>, which will compare
+their characters until it either finds a mismatch or reaches the ends
+of both strings.
+
+</P>
+<P>
+With symbols, you can use <CODE>equal?</CODE>, but you can get the same results
+using <CODE>eq?</CODE>, which is faster.  Recall that <CODE>eq?</CODE> just compares the
+pointers to two objects, to see if they're actually the same object.  For
+symbols, this works to compare the print names, too, because two symbols
+can have the same name only if they're the same object.  You don't have
+to worry about symbols being <CODE>equal?</CODE> but not <CODE>eq?</CODE>.
+
+</P>
+<P>
+This makes symbols good for use as keys in data structures.  For example,
+you can zip through a list looking for a symbol, using <CODE>eq?</CODE>, and
+all it has to do is compare pointers, not character sequences.
+
+</P>
+<P>
+Another advantage
+of symbols is that only one copy of its character sequence is actually stored,
+and all occurrences of the same symbol are represented as pointers to the same
+object.  Each additional occurrence of symbol thus only costs storage for
+a pointer.
+
+</P>
+<P>
+If you're doing text processing in Scheme, e.g., writing a word processor,
+you probably want to use strings, not symbols.  Strings support more
+operations that make it convenient to concatenate them, modify them,
+etc.
+
+</P>
+<P>
+Symbols are mainly used as key values in data structures, which happen
+to have a convenient human-readable printed representation.
+
+</P>
+<P>
+If you need to convert between strings and symbols, you can use
+<CODE>string-&#62;symbol</CODE> and <CODE>symbol-&#62;string</CODE>.  <CODE>string-&#62;symbol</CODE>
+takes a string and returns the unique symbol with that print name,
+if there is one.  (If there's not, and the string is a legal symbol
+print name, it creates one and returns it.)  <CODE>symbol-&#62;string</CODE>
+takes a symbol and returns a string representing its print name.
+(There is no guarantee as to whether it always returns the same string
+object for a given symbol, or a copy with the same sequence of
+characters.)
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_102.html">previous</A>, <A HREF="schintro_104.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

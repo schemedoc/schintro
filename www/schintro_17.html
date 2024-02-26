@@ -1,0 +1,94 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Special Forms</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_16.html">previous</A>, <A HREF="schintro_18.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H4><A NAME="SEC17" HREF="schintro_toc.html#SEC17">Special Forms</A></H4>
+
+<P>
+<A NAME="IDX7"></A>
+
+</P>
+<P>
+While most operations in Scheme are procedure calls, there are a few other
+kinds of expressions you need to know about, which behave differently.
+They are called <EM>special forms</EM>.
+
+</P>
+<P>
+Procedure calls and special forms are syntactically similar--both
+are a sequence of syntactic units between parentheses, e.g.,
+<CODE>(foo bar baz)</CODE>.  They are semantically very different, however,
+which is why you need to know the special forms, and not mistake
+them for procedures.
+
+</P>
+<P>
+If the first thing after the left parentheses is a keyword that
+names a special form, like <CODE>define</CODE> or <CODE>set!</CODE>, Scheme
+does something special for that kind of expression.  If it's
+not, Scheme recognizes the expression in parentheses as a procedure
+call, and evaluates it in the usual way for procedure calls.
+
+</P>
+<P>
+(This is why special forms are called "special forms"---Scheme
+recognizes some kinds of compound expressions as needing special
+treatment, rather than just being procedure calls.)
+
+</P>
+<P>
+You've already seen two of the five or six important special forms,
+<CODE>define</CODE> and the assignment operator <CODE>set!</CODE>.
+
+</P>
+<P>
+Notice that <CODE>set!</CODE> isn't a procedure, because
+its first argument is not really an expression to be evaluated in the
+normal way, to get a value to pass as an argument.  It's the name of a place
+to <EM>put</EM> a value.  (e.g., if we say <CODE>(set! a b)</CODE>, we get the 
+value of <CODE>b</CODE>, and put it into the <EM>storage named by</EM> <CODE>a</CODE>.)
+
+</P>
+<P>
+Likewise, <CODE>define</CODE> treats its first argument specially--the name
+of a variable or procedure isn't an expression that is evaluated and
+passed to <CODE>define</CODE>---it's just a name, and you're telling <CODE>define</CODE>
+to allocate some storage and use that name for it.
+
+</P>
+<P>
+Other special forms we'll see include
+
+</P>
+
+<UL>
+<LI>control constructs, like <CODE>if</CODE> <CODE>do</CODE>
+
+<LI>forms for defining local variables, like <CODE>let</CODE>,
+
+<LI><CODE>quote</CODE> and <CODE>quasiquote</CODE>, which let you write complex
+
+      data structures as textual literals in your code, and 
+<LI><CODE>lambda</CODE>, which creates new procedures in a very
+
+      useful way.
+</UL>
+
+<P>
+There are also a few very special special forms, <CODE>define-syntax</CODE>, 
+which let you define your own special forms as "macros."
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_16.html">previous</A>, <A HREF="schintro_18.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

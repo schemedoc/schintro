@@ -1,0 +1,175 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - let</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_53.html">previous</A>, <A HREF="schintro_55.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC60" HREF="schintro_toc.html#SEC60"><CODE>let</CODE></A></H3>
+
+<P>
+<A NAME="IDX57"></A>
+
+</P>
+<P>
+You can create code blocks that have local variables using the <CODE>let</CODE>
+special form.
+
+</P>
+<P>
+You've seen local binding environments in other languages before.
+In C or Pascal you've probably seen blocks with local variables of
+their own, e.g., in C:
+
+</P>
+
+<PRE>
+...
+{  int x = 10;
+   int y = 20;
+
+   foo(x,y);
+}
+...
+</PRE>
+
+<P>
+Here we've got a block (inside curly braces) where local
+variables named <CODE>x</CODE> and <CODE>y</CODE> are visible.  (The same thing
+can be done with <CODE>begin</CODE>...<CODE>end</CODE> blocks in Pascal.)
+
+</P>
+<P>
+When we enter the block, storage is allocated for the local variables,
+and the storage is initialized with the appropriate initial values.  We
+say that the variables are <EM>bound</EM> when we enter the block--the
+names <CODE>x</CODE> and <CODE>y</CODE> refer to something, namely the storage 
+allocated for them.  (In C, the storage for local variables may be
+allocated on an activation stack.)
+
+</P>
+<P>
+This is a simple but important idea--when you enter a scope, you
+"bind" a name to storage, creating an association (naming) between
+a name and a place you can put a value.  (In later chapters, we'll
+see how interpreters and compilers keep track of the association
+between names and storage.)
+
+</P>
+<P>
+Sometimes, we refer to the storage allocated for a variable as
+"its binding," but really that's a shorthand for "the storage
+named by the variable," or "the storage that the variable is
+bound to."
+
+</P>
+<P>
+Inside the block, all references to the variables <CODE>x</CODE> and <CODE>y</CODE> refer
+to these new local variable bindings.  When execution reaches the end of the
+block, these variable bindings cease to exist and references to <CODE>x</CODE>
+or <CODE>y</CODE> will again refer to whatever they did outside the block (perhaps
+global variables, or block variables of some intermediate-level block, or
+nothing at all).
+
+</P>
+<P>
+In this example, all that happens inside the block is a call to the procedure
+<CODE>foo</CODE>, using the values of the block variables, i.e., <CODE>10</CODE> and 
+<CODE>20</CODE>.  In C or Pascal, these temporary variables might be allocated
+by growing the stack when the block is entered, and shrinking it again
+when the block is exited.
+
+</P>
+<P>
+In Scheme, things are pretty similar.  Blocks can be created
+with <CODE>let</CODE> expressions, like so:
+
+</P>
+
+<PRE>
+...
+(let ((x 10)
+      (y 20))
+   (foo x y))
+...
+</PRE>
+
+<P>
+The first part of the <CODE>let</CODE> is the variable binding
+clause, which in this case two subclauses, <CODE>(x 10)</CODE> and
+<CODE>(y 20)</CODE>.  This
+says that the <CODE>let</CODE> will create a variable named <CODE>x</CODE>
+whose initial value is <CODE>10</CODE>, and another variable <CODE>y</CODE>
+whose initial value is <CODE>20</CODE>.  A <CODE>let</CODE>'s variable binding
+clause can contain any number of clauses, creating any number of
+<CODE>let</CODE> variables.  Each subclause is very much like the name
+and initial value parts of a <CODE>define</CODE> form.
+
+</P>
+<P>
+The rest of the <CODE>let</CODE> is a sequence of expressions, called
+the <EM>let body</EM>.  The expressions are simply evaluated
+in order, and the value of the last expression is returned
+as the value of the whole <CODE>let</CODE> expression.  (The fact that
+this value is returned is very handy, and will be important
+in examples we use later.)
+
+</P>
+<P>
+A <CODE>let</CODE> may only bind one variable, but it still needs parentheses
+around the whole variable binding clause, as well as around the
+(one) subclause for a particular binding.  For example:
+
+</P>
+
+<PRE>
+...
+(let ((x 10))
+   (foo x))
+...
+</PRE>
+
+<P>
+(Don't forget the "extra" parentheses around the one variable binding
+clause--they're not really extra, because they're what tells Scheme
+where the variable binding clause starts and stops.  In this case,
+before and after the subclause that defines the one variable.)
+
+</P>
+<P>
+In Scheme, you can use local variables pretty much the way you do in
+most languages.  When you enter a <CODE>let</CODE> expression, the <CODE>let</CODE>
+variables will be bound and initialized with values.  When you exit the
+<CODE>let</CODE> expression, those bindings will disappear.
+
+</P>
+<P>
+You can also use local variables differently, however, as we'll explain
+in later chapters.  In general, the bindings for Scheme variables aren't
+allocated on an activation stack, but on the heap.  This lets you keep
+bindings around after the procedure that creates them returns, which will
+turn out to be useful.
+
+</P>
+<P>
+(You might think that this is inefficient, and it could be, but goodScheme compilers can almost always determine that it's not really necessary
+to put most variables on the heap, and avoid the cost of heap-allocating
+them.  As with good compilers for most languages, most variables are
+actually in registers when it matters, so that the generated code
+is fast.)
+
+</P>
+
+<UL>
+<LI><A HREF="schintro_55.html#SEC61">Indenting let Expressions</A>
+</UL>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_53.html">previous</A>, <A HREF="schintro_55.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

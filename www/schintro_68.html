@@ -1,0 +1,156 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Variable Arity</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_67.html">previous</A>, <A HREF="schintro_69.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC74" HREF="schintro_toc.html#SEC74">Variable Arity: Procedures that Take a Variable Number of Arguments</A></H3>
+
+<P>
+<A NAME="IDX77"></A>
+<A NAME="IDX78"></A>
+<A NAME="IDX79"></A>
+
+</P>
+<P>
+In Scheme, you can easily write procedures that can take a variable
+number of arguments.  Technically, the number of arguments a procedure
+accepts is called its <EM>arity</EM>, and we call a procedure that
+accepts a variable number a <EM>variable arity</EM>
+procedure.<A NAME="FOOT4" HREF="schintro_foot.html#FOOT4">(4)</A>
+
+</P>
+<P>
+One way to write a variable arity procedure is to use an argument
+declaration form that consists of a single argument name, rather
+than a parenthesized sequence of argument names.  This tells Scheme
+that the procedure's actual arguments should be packaged up as a list
+when the procedure is entered, and the procedure will have a single
+argument that points to this list of argument values.
+
+</P>
+<P>
+For example, we could write a procedure that takes any number of
+arguments and displays the list of actual arguments passed to the
+procedure.
+
+</P>
+
+<PRE>
+(define (display-all args)
+   (display args)) 
+</PRE>
+
+<P>
+Here the argument variable args receives the list of all arguments,
+and we use display to display this list.  Now if we call the
+procedure like this
+
+<PRE>
+(display-all 'foo 3 'bar)
+</PRE>
+
+<P>
+the argument variable <CODE>args</CODE> will be bound and initialized with
+a list <CODE>(foo 3 bar)</CODE>, which will be passed as the sole argument
+to <CODE>display</CODE>.  Once inside the procedure, there's nothing
+special about this argument variable--it just happens to hold the
+list of arguments that were passed.
+
+</P>
+<P>
+This works for <CODE>lambda</CODE> expressions as well.   We could define
+<CODE>display-all</CODE> using an equivalent plain variable definition
+whose initial value is the result of an explicit lambda expression:
+
+</P>
+
+<PRE>
+(define display-all
+        (lambda args
+           (display args)))
+</PRE>
+
+<P>
+Often, you write procedures that take a certain
+number of normal (required) arguments, but can take more.
+When you pass a procedure more arguments than it requires, Scheme
+packages up the extra arguments in a list, called a <EM>rest list</EM>.
+
+</P>
+<P>
+Scheme allows you to express this by writing a mostly normal-looking
+parenthesized sequence of argument names, followed by a dot and
+the name of the argument to receive the list of the remaining
+arguments.  (If no extra arguments are passed, this argument
+variable will receive the empty list.)
+
+</P>
+<P>
+For example, suppose we want our <CODE>display-all</CODE> procedure to
+accept at least one argument, display it, and then display the
+list of any remaining arguments.  We could write it like this:
+
+</P>
+<P>
+(define (display-all first . rest)
+   (display first)
+   (display rest))
+
+</P>
+<P>
+This allows us to declare that the procedure's first argument
+is required, and give it a name of its own.
+   
+The dot notation is similar to the dot notation for improper
+lists, and is used to suggest that the that variable after the
+dot refers to the "rest" of the actual
+arguments.\footnote{Consider an improper list <CODE>(a b . c)</CODE>.
+  Here the first element of the list is a, the <CODE>cadr</CODE> of the
+  list is <CODE>b</CODE>, and the rest of the list beyond that
+  (the <CODE>cddr</CODE>) is just <CODE>c</CODE>.  If we write the argument
+  declarations of a procedure in this way, e.g.,
+  <CODE>(lambda (a b . c) ...)</CODE>, we think of the formal parameter
+  <CODE>a</CODE> as "standing for" the first actual argument value, the formal
+  parameter <CODE>b</CODE> as standing for the second actual argument
+  value, and the formal parameter <CODE>c</CODE> as standing for the
+  rest of the actual argument values.}
+  
+One common application of variable arity is to allow optional
+arguments with default values.  For example we can define
+a procedure <CODE>foo</CODE> which takes two required arguments and a
+third, optional argument.  We would like to use a default
+value for the optional argument, say <CODE>#f</CODE>, if the optional
+argument is not actually passed.
+ 
+(define (foo a b . rest)
+  (let ((c (if (null? rest)  ; if no extra argument(s)
+               #f)           ; use default value #f for c
+               (car rest)))  ; else use first optional arg
+     (bar a b c)))    
+     
+This idiom is common in routines that perform I/O, where
+a given I/O operation typically reads from or writes to a special
+file--such as the standard input or output, or a log file--but
+can also be used to write to other files using explicit <EM>port</EM>
+objects, which are like file handles.  (Ports will be
+discussed in detail later.)  If no port is passed to
+specify where the I/O operation should be directed, it's
+directed to the usual file.
+     
+Another common application of variable arity is to allow
+procedures to operate on an arbitrary number of arguments.
+[give example]
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_67.html">previous</A>, <A HREF="schintro_69.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

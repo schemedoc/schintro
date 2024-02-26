@@ -1,0 +1,54 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Indenting Procedure Definitions</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_27.html">previous</A>, <A HREF="schintro_29.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H4><A NAME="SEC28" HREF="schintro_toc.html#SEC28">Indenting Procedure Definitions</A></H4>
+
+<P>
+As I hinted earlier, there's a special rule for indenting procedure
+definitions.  You generally indent the body of a procedure a few
+characters (I use 3), but you <EM>don't</EM> line the body expressions
+up directly under the list of variable names.
+
+</P>
+<P>
+Don't do this:
+
+</P>
+
+<PRE>
+(define (double x)
+        (+ x x))
+</PRE>
+
+<P>
+If you do this, a procedure definition looks like looks like a procedure
+call, or a normal variable definition.  To make it clearer you're defining
+a procedure, do this:
+
+</P>
+
+<PRE>
+(define (double x)
+   (+ x x))
+</PRE>
+
+<P>
+This makes it clear that the <CODE>(double x)</CODE> is a different kind of
+thing from <CODE>(+ x x)</CODE>.  The former declares how the procedure
+can be called, and the latter says what it will do.
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_27.html">previous</A>, <A HREF="schintro_29.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

@@ -1,0 +1,278 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Variables vs. Bindings vs. Values</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_71.html">previous</A>, <A HREF="schintro_73.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC78" HREF="schintro_toc.html#SEC78">Variables vs. Bindings vs. Values</A></H3>
+
+<P>
+The distinction between variables, bindings, and values is particularly
+important in Scheme, and important for understanding interpreters and
+compilers, so I'll take a little time to discuss it with examples.
+
+</P>
+<P>
+What is this distinction?  Why not just say that the variable holds
+a value, i.e., why not call the unit of storage a variable?  Because
+that's not right.  Consider the following short program.
+
+</P>
+
+<PRE>
+(define (double x)        ; define a procedure that doubles its argument
+   (+ x x))            
+
+(define (quadruple x)     ; define a procedure that quadruples
+   (+ (double x)          ; its argument.
+      (double x)))
+
+(define (foo x)           ; define a recursive procedure that calls
+   (if (&#62; x 0)            ; itself if its argument is more than 0,
+       (foo (- x 1)))     ; handing the recursive call an argument
+                          ; that's one less.
+</PRE>
+
+<P>
+Notice that we've defined three procedures, <CODE>double</CODE>, <CODE>quadruple</CODE>,
+and <CODE>foo</CODE>, each of which has a local (argument) variable <CODE>x</CODE>.
+(An argument variable is just a local variable that gets its initial
+value in a special way, passed from the caller of the procedure.)
+
+</P>
+<P>
+There are therefore <EM>three different variables named</EM> <CODE>x</CODE> in this
+code.  In each of the procedures, it means something different.  Each 
+procedure defines a different meaning for the name <CODE>x</CODE>, and each
+separate meaning is a different variable.
+
+</P>
+<P>
+This becomes obvious when we talk about "the variable <CODE>x</CODE> defined
+in the procedure <CODE>double</CODE>" versus "the variable <CODE>x</CODE> in the
+procedure <CODE>foo</CODE>," and so on.
+
+</P>
+<P>
+We could change the names of variables, so that every variable has
+a different name, without changing the meaning of any of the procedure
+definitions.  Wherever two different variables have the same name,
+we can change one of them to something else, as long as we change
+all references in the scope of that variable to the new name.
+
+</P>
+<P>
+In the example above, we might change each variable x to x1, x2, or x3,
+and change all uses within its scope to use the new name:
+
+</P>
+
+<PRE>
+(define (double x1)        ; define a procedure that doubles its argument
+   (+ x2 x3))            
+
+(define (quadruple x2)     ; define a procedure that quadruples
+   (+ (double x2)          ; its argument.
+      (double x2)))
+
+(define (foo x3)           ; define a recursive procedure that calls
+   (if (&#62; x3 0)            ; itself if its argument is more than 0,
+       (foo (- x3 1)))     ; handing the recursive call an argument
+                          ; that's one less.
+</PRE>
+
+<P>
+This makes it clearer that each of the variables is a different thing,
+but it doesn't change what the procedures do, because the normal
+scope rules of the language have the same effect.
+
+</P>
+<P>
+Notice also that when we define the procedures, there is no storage
+allocated for their local variables;  the variables named <CODE>x</CODE> in the
+procedures are just definitions--no space will be allocated for
+them until the procedures are actually <EM>called</EM>.  That's when binding
+happens--some storage is allocated at run time to hold the value.
+
+</P>
+<P>
+(Bear in mind that this happens in other languages too, even if people
+don't discuss it clearly--for example, a C argument variable is bound
+when you enter the procedure, because suddenly space is allocated for
+it and the name refers to that space.)
+
+</P>
+<P>
+When we call something a "variable," that's <EM>not</EM> because we can
+assign to it and change its value.  None of the above variables has a value
+that varies in that sense;  none of these procedures happens to
+modify the values they're given as arguments.  In some languages, such
+as pure functional languages, you can't do assignment at all, but those
+languages still have variables.
+
+</P>
+<P>
+In programming language terminology, the term "variable" means pretty much
+what it means in mathematics--at different times we invoke the same
+procedure and the variable will refer to something different.  For example,
+I may call <CODE>double</CODE> with the argument <CODE>10</CODE>, and while executing
+in that call to <CODE>double</CODE>, the value of <CODE>x</CODE> will be <CODE>10</CODE>.
+Later, I may call <CODE>double</CODE> with the value <CODE>500</CODE>, and while
+executing in <EM>that</EM> call the value of <CODE>x</CODE> will be <CODE>500</CODE>.
+
+</P>
+<P>
+Consider how similar this is to variables in logic.  I may have
+a logical statement that "for all <EM>x</EM>, if <EM>x</EM> is a person
+then <EM>x</EM> is mortal".  (Forall x, person(x) -&#62; mortal(x)).
+I can use the same logical rule (statement) and apply it to lots
+of things.
+
+</P>
+<P>
+If Socrates is a person then Socrates is mortal, and if Bill Clinton
+is a person then Bill Clinton is mortal, and so on.  (Or even, if my
+car is human then my car is mortal.) 
+
+</P>
+<P>
+Each time I use it, <EM>x</EM> may refer to a different thing, and that's
+why it's called a <EM>variable</EM>.
+
+</P>
+<P>
+Just because it's a variable doesn't mean that when I use it I change
+the state of the thing I use it to refer to--for example, Bill Clinton is
+probably not modified much by the fact that I'm inferring something
+about him, and I'm pretty sure Socrates isn't changed much at all
+by the experience.  
+
+</P>
+<P>
+It also doesn't mean that the meaning of a variable changes from instant
+to instant.  If I use the rule above, and apply it to Socrates, saying
+"if Socrates is a person then Socrates is mortal", <EM>x</EM> consistently
+refers to Socrates--that's the point.  But I can also say that
+"if Bill Clinton is a person then Bill Clinton is mortal."  In that
+case <EM>x</EM> refers consistently to Bill Clinton.  In logic, we
+say that in one case <EM>x</EM> is <EM>bound to</EM> Socrates, but then
+used consistently within the rule; and in the other, we say
+it's bound to Bill Clinton, and then used consistently within the rule.
+
+</P>
+<P>
+The point here is that the same variable can refer to different things
+at different times.  These different things are called <EM>bindings</EM>,
+because the variable is associated with ("bound to") something different 
+each time.
+
+</P>
+<P>
+Consider the recursive procedure <CODE>foo</CODE>, above.  In a recursive procedure,
+the same variable may be bound to <EM>different</EM> things at the <EM>same
+time</EM>.  Suppose I call <CODE>foo</CODE> with the argument <CODE>15</CODE>, and it binds
+its argument <CODE>x</CODE> and gives the binding the initial value <CODE>15</CODE>.  Then
+it examines that value, and calls itself with the argument <CODE>14</CODE>.  The
+recursive call binds its argument <CODE>x</CODE> with the value <CODE>14</CODE>, then
+examines that and calls itself with the value <CODE>13</CODE>, and so on.
+
+</P>
+<P>
+At each recursive call, a new <EM>binding</EM> of <CODE>x</CODE> is created, even
+if the old bindings still exist, because the earlier calls haven't finished
+yet--they're suspended for the duration of the recursion.
+
+</P>
+<P>
+When there are multiple bindings in existence at the same time, only one
+one is "visible" as a procedure executes.  For example, in a recursive
+set of calls to a procedure, only one binding is "in scope," that
+is, visible) to an executing procedure--the binding for that call.
+We call this the <EM>current binding</EM> of the variable.  When a
+call returns, an older binding becomes visible again, and becomes
+the current binding.
+
+</P>
+<P>
+But what is a variable bound to, i.e., to what does a variable refer?
+In Scheme, it refers to a piece of <EM>storage</EM>.  When you call a procedure,
+for example, each argument variable is bound to a piece of storage that
+can hold the argument value you pass.  Inside that call to that procedure,
+that variable name will refer to that piece of memory.
+
+</P>
+<P>
+A single binding of a Scheme variable may hold different values over time,
+because of assignments, as in most procedural languages.  So not only
+may the same variable be bound to different pieces of storage, but
+each piece of storage may hold different values over
+time.<A NAME="FOOT5" HREF="schintro_foot.html#FOOT5">(5)</A>
+
+</P>
+<P>
+Sometimes people talk about binding a variable to a <EM>value</EM>, but
+in Scheme (and other languages with assignment) this is not correct,
+and speaking in this sloppy way causes confusion.  If you don't distinguish
+between storage and values, you can't talk clearly about assignment.
+
+</P>
+<P>
+Always remember that there are <EM>three</EM> "one-to-many mappings" here:
+
+</P>
+
+<UL>
+<LI>a single name (identifier) can be used for different variables at
+
+       different places in a program, or for a symbol
+<LI>a given variable may be bound to different pieces of storage,
+
+       e.g., at different calls to the same procedure,
+<LI>a given binding may hold different values if you assign to
+
+       it and change what's stored there.
+</UL>
+
+<P>
+To keep these terms straight, it's usually best to think about
+local variables;  top-level or global variables are a special case, because
+they only have one binding each.
+
+</P>
+<P>
+Top-level defines can be a little confusing in terms of the
+variable/binding/value distinction, because they do <EM>three different</EM>
+things.  They declare a variable that will be visible in a scope (the
+top level scope), they bind they variable to new storage (creating the
+top-level binding), and they initialize that storage with an initial
+value.
+
+</P>
+
+<PRE>
+==================================================================
+This is the end of Hunk M.
+
+TIME TO TRY IT OUT
+
+At this point, you should go read Hunk N of the next chapter
+and work through the examples using a running Scheme system.
+Then return here and resume this chapter.
+==================================================================
+</PRE>
+
+<P>
+(Go to Hunk N, which starts at section <A HREF="schintro_100.html#SEC106">Interactively Changing a Program (Hunk N)</A>.)
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_71.html">previous</A>, <A HREF="schintro_73.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

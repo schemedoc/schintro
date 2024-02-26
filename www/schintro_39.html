@@ -1,0 +1,54 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Where the Empty List Got its Name</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_38.html">previous</A>, <A HREF="schintro_40.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC40" HREF="schintro_toc.html#SEC40">Where the Empty List Got its Name</A></H3>
+
+<P>
+Now that you understand Scheme lists and simple quoting, I can explain
+why the null pointer is called "the empty list," and written <CODE>'()</CODE>.
+
+</P>
+<P>
+Consider a list <CODE>foo</CODE> of three elements:
+
+</P>
+<P>
+<CODE>'(1 2 3)</CODE>
+
+</P>
+<P>
+The <CODE>cdr</CODE> of that list is a list <CODE>(2 3)</CODE>.  We could write
+a literal list like that as <CODE>'(2 3)</CODE>
+
+</P>
+<P>
+The <CODE>cdr</CODE> of <EM>that</EM> list is a one-element list, <CODE>(3)</CODE>.
+We could write a literal list like that as <CODE>'(3)</CODE>.
+
+</P>
+<P>
+The <CODE>cdr</CODE> of <EM>that</EM> list is a zero-element list, <CODE>()</CODE>,
+that is, it's the empty list.  We could write it in quoted form as
+<CODE>'()</CODE>.
+
+</P>
+<P>
+Given the way that Scheme lists work, a list of zero items is
+the same thing as a null pointer, and it's natural to for Scheme
+to print it as a list with zero elements, <CODE>()</CODE>---and for you
+to write it as a literal with a single quote, <CODE>'()</CODE>.
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_38.html">previous</A>, <A HREF="schintro_40.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

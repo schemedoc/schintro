@@ -1,0 +1,582 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Variants of let</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_125.html">previous</A>, <A HREF="schintro_127.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H2><A NAME="SEC159" HREF="schintro_toc.html#SEC159">Variants of <CODE>let</CODE>: <CODE>letrec</CODE> and <CODE>let*</CODE></A></H2>
+
+<P>
+Scheme provides two useful variants of <CODE>let</CODE>.  <CODE>letrec</CODE>
+supports the creation of recursive local procedures, including
+mutually recursive sets of procedures.  <CODE>let*</CODE> supports the
+sequenced binding of variables, where each initial value expression
+can use the previous bindings.
+
+</P>
+
+
+<H3><A NAME="SEC160" HREF="schintro_toc.html#SEC160">Understanding <CODE>letrec</CODE></A></H3>
+
+<P>
+When a normal <CODE>let</CODE> is evaluated, the initial value expressions
+are evaluated <EM>before</EM> binding is done.  The initial value expressions
+execute in the environment outside the let, and then the bindings
+are created and initialized with those values.
+
+</P>
+<P>
+Often, we want the initial value expression for a binding to be able to
+create a procedure that will see the new bindings.  For example, suppose
+we want to create a local procedure which is recursive.  We might try
+this:
+
+</P>
+
+<PRE>
+; buggy example with tail-recursive local procedure
+(define (some-procedure...)
+   (let ((helper (lambda (x) 
+                    ...
+                    (if some-test?
+                        (helper ...))))) ; broken recursive call
+     ...
+     (helper ...)  ; call to recursive local procedure
+     ...))
+</PRE>
+
+<P>
+The problem with this example is that when the <CODE>let</CODE> is evaluated,
+the <CODE>lambda</CODE> expression will create the helper procedure in the
+wrong environment--before the variable <CODE>helper</CODE> is bound.  The
+resulting procedure will be scoped in the environment outside the
+<CODE>let</CODE>, not the new environment where <CODE>helper</CODE> is visible.
+When the procedure calls <CODE>helper</CODE>---which we had intended to
+be a recursive call--it will not use new binding of <CODE>helper</CODE>
+that we created.  Inside the <CODE>lambda</CODE> body, <CODE>helper</CODE> will
+still refer to whatever binding of <CODE>helper</CODE> was visible before
+intering the let.  (Very likely, that's no variable at all, and this
+will cause an unbound variable error.)
+
+</P>
+<P>
+<CODE>letrec</CODE> lets us create an environment <EM>before</EM> evaluating
+the initial value expressions, so that the initial value computions
+execute inside the new environment.  We can fix the problem by using
+a <CODE>letrec</CODE> instead of a <CODE>let</CODE>:
+
+</P>
+
+<PRE>
+(define (some-procedure...)
+   (letrec ((helper (lambda (x) 
+                       ...
+                       (if some-test?
+                           (helper ...))))) ; recursive call
+     ...
+     (helper ...)  ; call to recursive local procedure
+     ...))
+</PRE>
+
+<P>
+Now the procedure <CODE>helper</CODE> can "see its own name," since the
+lambda expression is evaluated in the environment where <CODE>helper</CODE>
+is bound.
+
+</P>
+<P>
+A <CODE>letrec</CODE> expression is equivalent to a <CODE>let</CODE> where the
+bindings are initialized with dummy values, and then the initial
+values are computed and assigned into the bindings.  The above example
+is equivalent to:
+
+</P>
+
+<PRE>
+(define (some-procedure ...)
+   (let ((helper '*dummy-value*))
+      (set! helper (lambda (x)
+                      ...
+                      (if some-test?
+                          (helper ...))))) ; recursive call
+     ...
+     (helper ...)  ; call to recursive local procedure
+     ...))
+</PRE>
+
+<P>
+<CODE>letrec</CODE> can be used when defining mutually recursive procedures,
+each of which can see the others' names and call them.
+
+</P>
+
+<PRE>
+(define (some procedure ...)
+   (letrec ((helper1 (lambda ()
+                        ... (helper2) ...))
+            (helper2 (lambda ()
+                        ... (helper1) ...)))
+     ...
+     (helper1)  ; start up mutual recursion
+     ...))
+</PRE>
+
+<P>
+Notice that all <CODE>letrec</CODE> does is bind variables and (re-)initialize
+them.  You can use it to define plain variables as well as procedure
+variables.  For example, if the recursive procedures above need
+to reference a shared variable, you can do this:
+
+</P>
+
+<PRE>
+(define (some procedure ...)
+   (letrec ((helper1 (lambda ()
+                        ... var1 ... (helper2) ...))
+            (helper2 (lambda ()
+                        ... (helper1) ... var1 ...))
+            (var1 #f))
+     ...
+     (helper1)  ; start up mutual recursion
+     ...))
+</PRE>
+
+<P>
+[ should come up with some simple concrete examples...]
+
+</P>
+<P>
+As with <CODE>let</CODE>, the order of evaluation of a <CODE>letrec</CODE>'s initial
+value expressions is undefined.  For example, the above <CODE>letrec</CODE>
+might be compiled as though it were a <CODE>let</CODE> like this:
+
+</P>
+
+<PRE>
+(define (some procedure ...)
+   (let ((helper1 '*dummy-value*)
+         (helper2 '*dummy-value*)
+         (var1 '*dummy-value*))
+      (set! helper2 (lambda ()
+                        ... (helper1) ... var1 ...))
+   
+      (set! var1 #f)
+      (set! helper1 (lambda ()
+                       ... var1 ... (helper2) ...))
+     ...
+     (helper1)  ; start up mutual recursion
+     ...))
+</PRE>
+
+<P>
+When using <CODE>letrec</CODE> and <CODE>lambda</CODE> to define local procedures,
+in the usual way, the order of evaluation is irrelevant--the <CODE>lambda</CODE>
+expressions can be executed in any order, because they only refer to
+the <CODE>bindings</CODE> of the <CODE>letrec</CODE> variables, not their <CODE>values</CODE>.
+The values are only used when the resulting procedures are called.  The
+following would be an error, however:
+
+</P>
+
+<PRE>
+(define (some procedure ...)
+   (letrec ((helper1 ...)
+            (helper2 ...)
+            (var1 (list helper1 helper2)))
+      ...
+      ((car (var1 helper1)))  ; start up mutual recursion
+      ...))
+</PRE>
+
+<P>
+Here the initialization of <CODE>var1</CODE> depends on the values of
+<CODE>helper1</CODE> and <CODE>helper2</CODE>, which may not have been computed yet.
+
+</P>
+
+
+<H4><A NAME="SEC161" HREF="schintro_toc.html#SEC161">Using <CODE>letrec</CODE> and <CODE>lambda</CODE> to Implement Modules</A></H4>
+
+<P>
+Standard Scheme does not have a module system, but <CODE>letrec</CODE> and
+<CODE>lambda</CODE> are powerful enough to implement modules in portable
+Scheme.
+
+</P>
+<P>
+Suppose we would like to define a module that encapsulates a set of
+procedures and variables, but only exports a subset of those procedures.
+
+</P>
+<P>
+We can represent the module as a <CODE>letrec</CODE> environment which exports 
+an association list of of procedures.
+
+</P>
+<P>
+Here we'll create a module called <CODE>foo</CODE> module, which defines four
+procedures and two variables, and exports two of the procedures, <CODE>foo</CODE>
+and <CODE>bar</CODE>.
+
+<PRE>
+(define foo-module
+   ; create a letrec environment with internal definitions
+   ; of some variables and procedures
+   (letrec ((private-proc1 (lambda (...) ...))
+            (private-proc2 (lambda (...) ...))
+            (private-var1 ...)
+            (private-var2 ...)
+            (foo (lambda (...) ...))
+            (bar (lambda (...) ...)))
+      ; return an association list of "exported" closures
+      (list (list 'foo foo)
+            (list 'bar bar))))
+</PRE>
+
+<P>
+The <CODE>letrec</CODE> expression will create an environment, and within
+that environment it will evaluate the initial value expressions to
+initialize the bindings.  All of the procedures in the <CODE>letrec</CODE>
+can see each other's names, and call each other freely.  Procedures
+outside the <CODE>letrec</CODE> cannot.
+
+</P>
+<P>
+The only procedures that can be called from outside the <CODE>letrec</CODE>
+are <CODE>foo</CODE> and <CODE>bar</CODE>, which are returned from the <CODE>letrec</CODE>
+in an association list.  We've saved this list in the binding of
+<CODE>foo-module</CODE>, so that we can look those procedures up and call
+them.
+
+</P>
+<P>
+We can clean this up a little by providing an accessor function that
+will extract a single procedure from a module, by using <CODE>assq</CODE> to 
+find the appropriate closure:
+
+</P>
+
+<PRE>
+(define (module-get mod name)
+   (cadr (assq mod name)))
+</PRE>
+
+<P>
+To import a procedure and give it a name in another environment, we can
+do this:
+
+</P>
+
+<PRE>
+(define foo (module-get foo-module 'foo))
+</PRE>
+
+<P>
+If we want to, we can give it a different name in the environment we're
+"importing" it into.
+
+</P>
+
+<PRE>
+(define quux (module-get foo-module 'foo))
+</PRE>
+
+<P>
+This lets us rename a procedure imported from a module, to avoid naming
+conflicts.  <CODE>quux</CODE> is exactly the same procedure as <CODE>foo</CODE>,
+but by a different name in a different scope.  When we call it, it
+will execute in the environment where it was defined, namely the
+"private" environment of the module we created with <CODE>letrec</CODE>.
+
+</P>
+
+
+
+<H3><A NAME="SEC162" HREF="schintro_toc.html#SEC162"><CODE>let*</CODE></A></H3>
+
+<P>
+For situations where the order of initialization is important, Scheme
+provides a variant of <CODE>let</CODE> called <CODE>let*</CODE>.
+
+</P>
+<P>
+Suppose we tried the following using <CODE>let</CODE>:
+
+</P>
+
+<PRE>
+(define (foo x)
+   (let ((a 0)
+         (upper (+ a epsilon))
+         (lower (- a epsilon)))
+     ...))
+</PRE>
+
+<P>
+This will not do what we probably meant, because the initial values
+of <CODE>upper</CODE> and <CODE>lower</CODE> will be computed before <CODE>a</CODE> is
+bound.  We could fix this by using nested <CODE>let</CODE>'s, to force
+evaluation and binding to happen in the desired order:
+
+</P>
+
+<PRE>
+(define (foo epsilon)
+   (let ((a 0))
+      (let ((lower (- a epsilon))
+            (upper (+ a epsilon)))
+     ...))
+</PRE>
+
+<P>
+This ensures that <CODE>a</CODE> is bound before we evaluate the initial
+value expressions for <CODE>upper</CODE> and <CODE>lower</CODE>.
+
+</P>
+<P>
+Scheme provides <CODE>let*</CODE> to avoid needing lots of nested lets
+when initilizing a series of bindings, each of which may depend ont
+the previous ones, e.g.,
+
+</P>
+
+<PRE>
+(define (bar x y)
+   (let* ((diff (- x y))
+          (diff-squared (* diff diff))
+          (diff-cubed (* diff-squared diff)))
+     ...)
+</PRE>
+
+<P>
+is exactly equivalent to
+
+</P>
+
+<PRE>
+(define (bar x y)
+   (let ((diff (- x y)))
+      (let ((diff-squared (* diff diff)))
+         (let ((diff-cubed (* diff-squared diff)))
+            ...))))
+</PRE>
+
+
+
+<H2><A NAME="SEC163" HREF="schintro_toc.html#SEC163">Iteration Constructs</A></H2>
+
+
+
+<H3><A NAME="SEC164" HREF="schintro_toc.html#SEC164">Named <CODE>let</CODE></A></H3>
+
+<P>
+Named <CODE>let</CODE> is a general and flexible iteration construct that is
+really just syntactic sugar for a <CODE>letrec</CODE> and one or more
+<CODE>lambda</CODE>'s.  It looks like a <CODE>let</CODE>, but it's usually used
+as a loop.
+
+</P>
+<P>
+Named <CODE>let</CODE> implements iteration as recursion.  If you use it
+in normal ways, you write loops that act as tail-recursive procedures.
+You can also use it to write "loops" that aren't tail recursive,
+but that's uncommon.
+
+</P>
+<P>
+Named <CODE>let</CODE> binds loop variables, and executes the loop body.
+Anywhere in the loop body, you can call a procedure to iterate the
+loop.
+
+</P>
+<P>
+Here's an example loop, which prints out the integers from 0 to 9:
+
+</P>
+
+<PRE>
+(let loop ((i 0))
+   (display i)
+   (if (&#60; i 10)
+       (loop (+ i 1))))
+</PRE>
+
+<P>
+Here we've written a loop and given it an identifier, <CODE>loop</CODE>;  that's
+just a name we chose for this particular loop--we could have used any
+identifier.
+
+</P>
+<P>
+This loop binds the loop variable <CODE>i</CODE>, giving it the intial
+value 0.  Then it enters the body of the loop, which prints out
+<CODE>i</CODE> using display, and evaluates the <CODE>if</CODE> expression.
+If the <CODE>if</CODE> condition returns a true value, it evaluates the
+expression <CODE>(loop (+ i 1))</CODE>, which iterates the loop.  This
+looks like a call to a procedure named <CODE>loop</CODE>, which iterates
+the loop.  The argument passed is the new value of the loop variable
+for the next iteration.
+
+</P>
+<P>
+The reason that the expression that iterates a loop looks like a
+procedure call is that it <EM>is</EM> a procedure call.  A named <CODE>let</CODE>
+is exactly equivalent to a <CODE>letrec</CODE> that defines a named procedure,
+whose body is the body of the named <CODE>let</CODE>, and then calls that
+procedure to start the recursion.  When you write a "loop"
+with named <CODE>let</CODE>, you're really writing a recursive procedure
+and a call to that procedure.  The loop variable(s) are really arguments
+to the procedure, and the initial values of the loop variables are
+just the first argument passed to the procedure to start the recursion.
+
+</P>
+<P>
+The above example is exactly equivalent to:
+
+</P>
+
+<PRE>
+(letrec ((loop (lambda (i)      ; define a recursive
+                  (display i)   ; procedure whose body
+                  (if (&#60; i 10)  ; is the loop body
+                      (loop (+ i 1))))))
+   (loop 0)) ; start the recursion with 0 as arg i
+</PRE>
+
+<P>
+When you supply the name of a named <CODE>let</CODE>, you're really supplying the
+name of a <CODE>letrec</CODE> variable that will name a procedure.  When you supply
+the body of the named <CODE>let</CODE>, you're really supplying the body of
+the named procedure.  When it iterates the loop, it is calling itself
+recursively, passing the new invocation the new value of the loop
+variable as an argument.
+
+</P>
+<P>
+To start off the loop, named <CODE>let</CODE> passes this procedure the initial
+value expression for the loop variable.
+
+</P>
+<P>
+We can provide any expression we want to compute the new value of
+the loop variable--we don't have to increment it by one.  We can
+also provide any test we want to decide whether to iterate the loop.
+
+</P>
+<P>
+For example, here's procedure which uses a loop to search a
+list of alternating key/value pairs.  (This is not an association list,
+but a linear list of alternating keys and values, called a property
+list.)  It iterates through the list two elements at a time.  If it finds
+an odd-numbered element that's eq? to what it's looking for, it returns the
+next (even-numbered) element;  otherwise, it continues through the loop.
+
+</P>
+
+<PRE>
+(define (property-list-search lis target)
+   (let loop ((l lis))
+      (cond ((null? l)
+             #f)
+            ((eq? (car l) target)
+             (cadr l))
+            (#t
+             (loop (cddr l))))))
+</PRE>
+
+<P>
+[ same as: ]
+
+</P>
+
+<PRE>
+(define (property-list-search lis target)
+   (letrec ((loop (lambda (l)
+                     (cond ((null? l)
+                            #f
+                           ((eq? (car l) target)
+                            (cadr l))
+                           (#t
+                            (loop (cddr l))))))))
+      (loop lis)))   ; start the recursion
+</PRE>
+
+<P>
+The reason we supply a name for a loop in a named <CODE>let</CODE> is so that we
+can have nested loops with different names, and we can iterate any
+of the loops by calling it by name.
+
+</P>
+<P>
+For example, suppose we want to have a nested pair of loops, but want
+to be able to bail out of the iteration of the inner loop, and go
+directly to the next iteration of the outer loop.  We can do this:
+
+</P>
+<P>
+[ need example here ]
+
+</P>
+
+<PRE>
+(let outer-loop ((i ...))
+   (let inner-loop ((j ...))
+      (if (should-abort-inner-loop)
+          (outer-loop ...)) ; go directly to next iteration of outer loop
+      ...  ; do normal inner loop action
+      ...(inner-loop ...)  ; iterate inner loop normally
+   ...
+   ... (outer-loop ...))   ; iterate outer loop normally
+</PRE>
+
+<P>
+Some things to notice about Scheme loops:
+
+</P>
+
+<UL>
+<LI>
+
+      Loops can have any number of loop variables, each updated in
+      any way you like.  This corresponds to having a recursive
+      procedure with any number of arguments, and passing it any
+      values you like at each recursion.
+<LI>
+
+      Unlike most languages' loops, each time we iterate a loop, we
+      <EM>rebind</EM> the loop variable.  There's a new binding at each
+      iteration, because each iteration is really a call to a procedure
+      that binds arguments.  We don't bind the loop variable once and
+      side-effect it at each iteration.
+<LI>
+
+      Since loop bodies are really just procedure bodies, and loop
+      iterations are really just procedure calls, we can put calls that
+      iterate a loop anywhere in the body;  we can have multiple points
+      in the body that call the procedure to iterate the loop.
+<LI>
+
+      The variable bindings created at each iteration of a loop are
+      independent, and can be captured by lambda expressions in the
+      loop body.  Each closure created by lambda will capture the
+      bindings for <EM>that</EM> iteration of the loop.
+</UL>
+
+
+
+<H2><A NAME="SEC165" HREF="schintro_toc.html#SEC165">Programming with Procedures and Environments</A></H2>
+
+
+
+<H2><A NAME="SEC166" HREF="schintro_toc.html#SEC166">Exercises</A></H2>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_125.html">previous</A>, <A HREF="schintro_127.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

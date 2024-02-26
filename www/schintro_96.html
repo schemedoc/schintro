@@ -1,0 +1,119 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Using Equality Predicates</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_95.html">previous</A>, <A HREF="schintro_97.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC101" HREF="schintro_toc.html#SEC101">Using Equality Predicates</A></H3>
+
+<P>
+Suppose that Scheme didn't provide the predicate <CODE>equal?</CODE> to do 
+structural comparisons.  We could write our own, because we have
+other type and equality predicates.
+
+</P>
+<P>
+Let's write a simplified version of equal that works for lists,
+including nested lists.  We'll consider objects to be <CODE>our-equal?</CODE>
+if they are either
+
+</P>
+
+<UL>
+<LI>
+
+  exactly the same objects or equivalent numbers, i.e., they're <CODE>eqv?</CODE>,
+  or
+<LI>
+
+  if they're both pairs whose cars are <CODE>our-equal?</CODE> and whose
+  cdrs are also <CODE>our-equal?</CODE>.
+</UL>
+
+<P>
+That is, we'll test lists recursively for structural equivalence, "bottoming
+out" when we hit something that's not a pair.  This is pretty much what
+the standard Scheme predicate <CODE>equal?</CODE> does, except that it can handle
+structured data types besides pairs.  (For example, it considers two strings
+with the same character sequence <CODE>equal?</CODE>, even if they're two different
+objects.)
+
+</P>
+
+<PRE>
+Scheme&#62;(define (our-equal? a b)
+          (cond ((eqv? a b)
+                 #t)
+                ((and (pair? a)
+                      (pair? b)
+                      (our-equal? (car a) (car b))
+                      (our-equal? (cdr a) (cdr b)))
+                 #t)
+                (else
+                 #f)))
+</PRE>
+
+<P>
+This procedure checks the easy case first (which is usually a good idea):
+if two objects are <CODE>eqv?</CODE>, they're also <CODE>our-equal?</CODE>.
+
+</P>
+<P>
+Otherwise, they're only <CODE>our-equal?</CODE> if they're both pairs and
+their cars are equal and their cdrs are equal.  Notice the use of
+<CODE>and</CODE> here.  We first check to see that they're pairs, and
+then take their cars and cdrs and compare those.  If they're not pairs,
+we won't ever take their cars and cdrs.  (If we did, it would be an
+error, but we rely on the fact that <CODE>and</CODE> tests things sequentially
+and stops when one test fails.)
+
+</P>
+<P>
+Try it out:
+
+</P>
+
+<PRE>
+Scheme&#62;(our-equal? '() '())
+#t
+Scheme&#62;(our-equal? 1 1)
+#t
+Scheme&#62;(our-equal? 1 2)
+#f
+Scheme&#62;(our-equal? '(1) '(1))
+#t
+Scheme&#62;(our-equal? '(1) '())
+#f
+Scheme&#62;(our-equal? '(1 (2)) '(1 (2)))
+#t
+Scheme&#62;(our-equal? '(((3) 2) 1) '(((3) 2) (1)))
+#f
+Scheme&#62;(our-equal? '((#f . #t) . (#f . #t))
+                   '((#f . #t) . (#f . #t)))
+#t
+</PRE>
+
+
+<PRE>
+==================================================================
+This is the end of Hunk H
+
+At this point, you should go back to the previous chapter and
+read Hunk I before returning here and continuing this tutorial.
+==================================================================
+</PRE>
+
+<P>
+(Go BACK to read Hunk I, which starts at section <A HREF="schintro_50.html#SEC56">Choosing Equality Predicates  (Hunk I)</A>.
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_95.html">previous</A>, <A HREF="schintro_97.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

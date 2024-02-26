@@ -1,0 +1,174 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - First Class Procedures</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_60.html">previous</A>, <A HREF="schintro_62.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC67" HREF="schintro_toc.html#SEC67">Procedures are First Class</A></H3>
+
+<P>
+<A NAME="IDX64"></A>
+<A NAME="IDX65"></A>
+<A NAME="IDX66"></A>
+
+</P>
+<P>
+In Scheme, procedures are data objects--you can have a pointer to a 
+procedure and do the same things you can do with any other Scheme value.
+Technically, we say that procedures are <EM>first class</EM> objects in the
+language--you can pass a procedure value as an argument to a procedure,
+return it as the value of a procedure call, store it in a variable or
+a field of another object.  A procedure pointer is just a value that you
+can pass around like any other value, like a pair or a boolean.
+
+</P>
+<P>
+Procedures are special, of course, because they're the only kind of object
+that supports the procedure call operation.
+
+</P>
+<P>
+In Scheme terminology, a
+procedure call expression is called a <EM>combination</EM>.  Evaluation
+of a combination includes evaluation of the argument expressions and
+<EM>application</EM> of the procedure to the arguments, i.e., actually
+calling it with ("applying it to") those values.
+
+</P>
+<P>
+An unusual feature of Scheme is that it uses a <EM>unified namespace</EM>,
+which means that there's only one kind of name for both normal variables
+and procedures--in fact, procedure names are really just variable
+names, and there's only one kind of variable.  A named procedure is
+really just a first-class procedure object that happens to be referenced
+from a variable.
+
+</P>
+<P>
+When you define a procedure as we did above for the <CODE>min</CODE> example,
+you're really doing three things: creating a procedure, creating a 
+normal variable (named <CODE>min</CODE>), and initializing the variable with a
+pointer to the procedure.
+
+</P>
+<P>
+(This means that you can't have both a procedure variable and a "normal"
+data variable by the same name in the same scope--there's really only
+one kind of variable, so you can only have one binding in a given scope.)
+
+</P>
+<P>
+When you define a procedure as we did above for the <CODE>min</CODE> example,
+Don't let the special syntax for procedure definitions fool you--a
+procedure name is really just the name of a variable that happens to
+hold a procedure value.  You can use any variable that way, by storing
+a procedure value in it.   You can also assign a new procedure value
+to a variable, and then use it to name the new procedure.
+
+</P>
+<P>
+For example, if you've defined <CODE>min</CODE> as above, you can change the
+value in the binding of <CODE>min</CODE> by saying <CODE>(set! min +)</CODE>.
+That assignment expression will look up the value of the variable <CODE>+</CODE>,
+which is the addition procedure, and assign that into the variable <CODE>min</CODE>.
+
+</P>
+<P>
+Then when you call <CODE>min</CODE> as before, it will do addition instead, because 
+it will call the same procedure as <CODE>+</CODE>.  For example <CODE>(min 5 10)</CODE>
+will return <CODE>15</CODE>, not <CODE>5</CODE>.
+
+</P>
+<P>
+You could also change the meaning of <CODE>+</CODE>, just by assigning a new
+value to the (the binding of) the variable <CODE>+</CODE>.  This is probably a
+bad idea unless you really have
+a good reason, because if the new procedure doesn't do addition, any
+code that calls <CODE>+</CODE> will return different answers!
+
+</P>
+<P>
+It is important to understand how procedure calls actually work in Scheme,
+which is actually very simple.  Consider the combination (procedure
+call expression) <CODE>(+ a b)</CODE>.  What this really means is
+
+</P>
+
+<OL>
+<LI>
+
+look up the value of (the current binding of) the variable <CODE>+</CODE>,
+which we <EM>assume</EM> is a procedure,
+<LI>
+
+look up the values of (the current bindings of) the variables <CODE>a</CODE> 
+and <CODE>b</CODE>, and
+<LI>
+
+apply the procedure to those values, i.e., call it with those values as
+arguments.
+</OL>
+
+<P>
+The first subexpression of the combination is evaluated in
+just the same way as the others, although the result is used differently.
+The first subexpression is just a subexpression that should return a procedure
+value, and the others give the arguments to pass to it.
+
+</P>
+<P>
+This won't work if the first subexpression doesn't evaluate
+to a procedure value.  For example, you can change the meaning of 
+<CODE>+</CODE> with an assignment expression <CODE>(set! + 3)</CODE>.  Then if
+you attempt to call <CODE>+</CODE> with the combination <CODE>(+ 2 3)</CODE>
+you'll get an error.  Scheme will say something like "ERROR: Attempt to 
+apply non-procedure."
+
+</P>
+<P>
+The fact that the first (operator) subexpression is evaluated just
+like any other expression can be very useful.  Rather than giving the
+name of a particular procedure to call, we can use any expression
+whose result is a procedure.  For example, we might have a table of
+procedures to use in different kinds of situations, and search that
+table for the procedure to call at a particular time:
+
+</P>
+
+<PRE>
+((look-up-appropriate-procedure key) foo bar)
+</PRE>
+
+<P>
+Here we call the procedure <CODE>look-up-</CODE><CODE>appropriate-</CODE><CODE>procedure</CODE>
+with the argument <CODE>key</CODE> to get a procedure, and then apply it to the
+values of <CODE>foo</CODE> and <CODE>bar</CODE>.
+
+</P>
+<P>
+One warning about combinations:  the Scheme language doesn't specify
+the order in which the subexpressions of a combination are evaluated.
+Don't write code that depends on whether the operator expression is
+evaluated first, or on the order of evaluation of the argument
+expressions.
+
+</P>
+<P>
+You might wonder what's so special about first-class procedures, since
+some other languages (like C) let you pass around pointers to procedures,
+and call them via those pointers.  Scheme's procedures work like Pascal's
+if you use them for the kinds of things Pascal allows, but also lets
+you use them in more general ways that I'll explain later.
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_60.html">previous</A>, <A HREF="schintro_62.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

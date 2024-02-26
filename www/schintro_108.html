@@ -1,0 +1,284 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Procedure Specialization</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_107.html">previous</A>, <A HREF="schintro_109.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC126" HREF="schintro_toc.html#SEC126">Procedure Specialization</A></H3>
+
+<P>
+<A NAME="IDX118"></A>
+
+</P>
+<P>
+Suppose that we are writing a program where we need to take a list
+of numbers and produce a corresponding lists with numbers ten times
+as big.
+
+</P>
+<P>
+Notice that we already have a procedure, <CODE>map</CODE>, that can iterate
+over a list, apply a function to each item, and return the list of function
+values.  We also have a multiplication procedure, <CODE>*</CODE> that can
+multiply numbers by any value we want.
+
+</P>
+<P>
+We can't just write <CODE>(map * some-list)</CODE>, though, because when
+<CODE>map</CODE> iterates over a single list, it expects a procedure that
+takes exactly one argument, and <CODE>*</CODE> takes <EM>two</EM> arguments.
+Somehow, we need to supply the argument <CODE>10</CODE> to each of the
+calls <CODE>map</CODE> makes to <CODE>*</CODE>.
+
+</P>
+<P>
+What we need is a one-argument function that multiplies its argument
+by ten.  We could define our own multiplication-by-ten procedure, 
+<CODE>*10</CODE>, and then use <CODE>map</CODE> to apply it to the elements of
+<CODE>some-list</CODE>.
+
+</P>
+
+<PRE>
+(define (*10 number)
+   (* 10 number))
+
+(map *10 some-list)
+</PRE>
+
+<P>
+Here we've specialized <CODE>*</CODE> to create <CODE>*10</CODE>---we've taken a
+function with some number of arguments, and produced a function
+with fewer arguments, which is equivalent to calling the original
+procedure with the missing argument always the same.
+
+</P>
+<P>
+If <CODE>*10</CODE> is only used in one place, there's really no need
+to create a named procedure--we can just use a <CODE>lambda</CODE>
+expression to create the procedure where we need it, at the
+call to map:
+
+</P>
+
+<PRE>
+(map (lambda (number)
+        (* 10 number))
+     some-list)
+</PRE>
+
+<P>
+Here we create an anonymous procedure that multiplies its argument by
+10, and pass that procedure and a list to <CODE>map</CODE>, which will
+map the procedure over the list and return the corresponding list
+of results.
+
+</P>
+<P>
+It is often a good idea to design procedures with specialization
+in mind.
+
+</P>
+<P>
+Consider the similarities between <CODE>member</CODE>, <CODE>memv</CODE>, and
+<CODE>memq</CODE>.  All of them do almost the same thing, with the
+difference being which equality test they use during a search.
+
+</P>
+<P>
+We can define a general procedure, <CODE>mem</CODE>, which expresses
+the similarities between these procedures, and then specialize
+that procedure.
+
+</P>
+<P>
+Our general procedure will look like <CODE>member</CODE>, except that
+it will take an argument saying which test to use.  In Scheme,
+this is easy--we can simply hand it a first-class procedure
+like <CODE>equal?</CODE> or <CODE>eq?</CODE>, or any other test we want
+to use, and have it call that procedure to perform the test.
+
+</P>
+
+<PRE>
+(define (mem test-proc thing lis)
+   (if (null? lis)
+       #f
+       (if (test-proc (car lis) thing)
+           lis
+           (mem test-proc thing (cdr lis)))))
+</PRE>
+
+<P>
+To get the effect of <CODE>(member some-key some-list)</CODE>, we can
+write <CODE>(mem equal? some-key some-list)</CODE>.
+
+</P>
+<P>
+Note that here we're not calling <CODE>equal?</CODE>, we're just passing
+the value of the variable <CODE>equal?</CODE> (i.e., the procedure
+first-class procedure object <CODE>equal?</CODE>) to <CODE>mem</CODE>.
+<CODE>mem</CODE> receives this value when the argument variable
+<CODE>test-proc</CODE> is bound, and can call it by that name.
+
+</P>
+<P>
+(In the <CODE>*10</CODE> example, we specialized <CODE>*</CODE> with data--the
+number <CODE>10</CODE>---but here we're specializing <CODE>mem</CODE> with
+a procedure.  The same technique works, because procedures are
+data objects, and can be passed as arguments like any other data,
+then called as procedures.)
+
+</P>
+<P>
+If Scheme didn't provide <CODE>member</CODE>, we could easily define it by
+specializing <CODE>mem</CODE>---we simply define <CODE>member</CODE> to call <CODE>mem</CODE>,
+but always pass <CODE>equal?</CODE> as the first argument:
+
+</P>
+
+<PRE>
+(define (member thing lis)
+   (mem equal? thing lis))
+</PRE>
+
+<P>
+Likewise, we could define <CODE>memq</CODE> and <CODE>memv</CODE> by specializing
+<CODE>mem</CODE> with <CODE>eq?</CODE> and <CODE>eqv?</CODE>, respectively.
+
+</P>
+<P>
+This kind of function specialization is particularly useful when
+you have a pattern for a procedure, but may need arbitrary
+variants of it in the future.
+
+</P>
+<P>
+For example, suppose you want to search a list of lists, and you want
+your search routine to return the first sublist whose first two
+elements match a particular two-element list.  (This might be an
+ordered list of birthdays, and you could be searching for the
+part of the list that starts with a particular month of a particular
+year.)
+
+</P>
+<P>
+You might search the list for any list whose first elements are
+<CODE>1964</CODE> and <CODE>December</CODE>, by handing it a target list
+<CODE>(1964 December)</CODE>, like this:
+
+</P>
+
+<PRE>
+(mem-first-two? '(1964 December)
+                '((1961 January 15 "Susan")
+                  (1964 March 28 "Edward")
+                  (1964 March 29 "Selena")
+                  (1964 December 31 "Anton")
+                  (1965 January 8 "Booker"))))
+</PRE>
+
+<P>
+and get back the result
+
+</P>
+
+<PRE>
+((1964 December 31 "Anton")
+ (1965 January 8 "Booker"))))
+</PRE>
+
+<P>
+<CODE>member</CODE>, <CODE>memq</CODE>, and <CODE>memv</CODE> are useless for this,
+but it's pretty easy with <CODE>mem</CODE>.  First we define a match
+predicate for our purpose:
+
+</P>
+
+<PRE>
+(define (first-two-eqv? target thing)
+   (and (eqv? (car target) (car thing))
+        (eqv? (cadr target) (cadr thing))))
+</PRE>
+
+<P>
+Then we curry <CODE>mem</CODE> with that predicate to create our search
+procedure:
+
+</P>
+
+<PRE>
+(define (mem-first-two? thing lis)
+   (mem first-two-eqv? thing lis))
+</PRE>
+
+<P>
+If <CODE>first-two-eqv?</CODE> is only likely to be used in <CODE>mem-first-two</CODE>,
+we can put it inside <CODE>mem-first-two</CODE>, as a local procedure, instead
+of leaving it hanging out where it can be called from other procedures.
+This is a good idea for a procedure that is so specialized that it's unlikely
+to be useful in any other way--especially if you're sure it works for
+what you designed it for, but think it may be tricky to use for slightly
+different purposes.  (For example, we've chosen to use the <CODE>eqv?</CODE> test
+for matching list elements, but for some purposes this might be the
+wrong choice.)
+
+</P>
+
+<PRE>
+(define (mem-first-two thing lis)
+   (let ((first-two-eqv? (lambda (target thing)
+                            (and (eqv? (car target) (car thing))
+                                 (eqv? (cadr target) (cadr thing))))))
+      (mem first-two-eqv? thing lis)))
+</PRE>
+
+<P>
+In this routine, <CODE>first-two-eqv?</CODE> is only called from one place--the
+call to <CODE>mem</CODE>.  Rather than defining it as a named procedure,
+using <CODE>letrec</CODE> and <CODE>lambda</CODE>, we can simply use the <CODE>lambda</CODE>
+expression at the one place the procedure is needed:
+
+</P>
+
+<PRE>
+(define (mem-first-two thing lis)
+   (mem (lambda (target thing)
+           (and (eqv? (car target) (car thing))
+                (eqv? (cadr target) (cadr thing))))
+        target
+        lis))
+</PRE>
+
+<P>
+This idiom is very common in situations where you need a small procedure
+in exactly one place.
+
+</P>
+<P>
+Likewise, if <CODE>mem-first-two</CODE> itself is only useful in one place,
+it would be reasonable to avoid making it a procedure at all, and
+instead to simply call <CODE>mem</CODE> from that place:
+
+</P>
+
+<PRE>
+...
+(mem (lambda (target thing)
+        (and (eqv? (car target) (car thing))
+             (eqv? (cadr target) (cadr thing))))
+     target
+     lis)
+...
+</PRE>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_107.html">previous</A>, <A HREF="schintro_109.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

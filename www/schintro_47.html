@@ -1,0 +1,79 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Type and Equality Predicates</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_46.html">previous</A>, <A HREF="schintro_48.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H2><A NAME="SEC53" HREF="schintro_toc.html#SEC53">Type and Equality Predicates (Hunk G)</A></H2>
+
+
+<PRE>
+==================================================================
+Hunk G starts here:
+==================================================================
+</PRE>
+
+<P>
+<A NAME="IDX46"></A>
+
+</P>
+<P>
+<EM>[ Some of this stuff needs to come before recursion over various
+        data structures... we use a few predicates there.  Fix. ]</EM>
+        
+Since a pointer can point to any kind of thing, it's often good to
+know what kind of thing it does point to.  For example, you might
+have a mixed list of different kinds of things, and want to go
+through the list, doing a different operation for each kind of object
+you encounter.  For this, Scheme provides <EM>type predicates</EM>,
+which are procedures which test to see whether the pointed-to
+object is of a particular type.
+
+</P>
+<P>
+You also often want to know whether two values refer to the same
+object, or to data structures with the same structure.  For this,
+Scheme provides <EM>equality predicates</EM>.
+
+</P>
+
+<UL>
+<LI><A HREF="schintro_48.html#SEC54">Type Predicates</A>: Discriminating between different kinds of objects
+<LI><A HREF="schintro_49.html#SEC55">Equality Predicates</A>: Discriminating whether objects are the same
+<LI><A HREF="schintro_50.html#SEC56">Choosing Equality Predicates</A>: Testing different kinds of sameness
+</UL>
+
+<P>
+These procedures are called "predicates" because they test whether
+a property is true of a value, and return a yes-or-no answer--that
+is, the boolean <CODE>#t</CODE> or the boolean <CODE>#f</CODE>.  (This is like a
+"predicate" in formal logic, which is a kind of statement with
+a "truth value" that depends on its arguments.)
+
+</P>
+<P>
+The names of predicates generally end with a question mark, to signify
+that they return a boolean.  When you write your own programs,
+it's good style to end the names of boolean-valued (true/false) functions
+with a question mark.
+
+</P>
+<P>
+(An exception to this rule is the standard numeric
+comparison predicates like <CODE>&#60;</CODE>, <CODE>&#62;</CODE>, and <CODE>=</CODE>.  By
+the rule, they should have question marks after their names, but
+they're used very frequently and people generally recognize that
+they're predicates.  We don't bother with question marks in their
+names, because it would clutter up arithmetic expressions.)
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_46.html">previous</A>, <A HREF="schintro_48.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

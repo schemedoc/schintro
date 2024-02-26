@@ -1,0 +1,683 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Recursion Over Data Structures</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_45.html">previous</A>, <A HREF="schintro_47.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H2><A NAME="SEC47" HREF="schintro_toc.html#SEC47">Recursion Over Lists and Other Data Structures</A></H2>
+
+<P>
+<EM>[ This section is a little out of place--need to introduce
+        type and equality predicates first!  Those have been
+        presented in class, so this should be comprehensible anyway.
+        Need to make this a separate hunk, and move it after
+        the next hunk. ]</EM>
+        
+In this section I'll demonstrate the most common idioms
+for recursion over simple data structures--lists and trees.
+
+</P>
+<P>
+Some of the examples will be implementations of standard
+Scheme procedures like <CODE>length</CODE>, <CODE>list</CODE>, <CODE>append</CODE>,
+and <CODE>reverse</CODE>.  Scheme already has these procedures built
+in, but you should understand how they can be implemented using
+simpler procedures like <CODE>cdr</CODE> and <CODE>cons</CODE>.  You'll
+inevitably have to write special-purpose procedures that are
+slightly different, but coded similarly.  (In later chapters,
+I'll show some more advanced programming techniques that let
+you implement more general and/or efficient procedures like
+these.)
+
+</P>
+<P>
+I'll also show a few other handy procedures for operating on
+lists, e.g., a list-copying routine.
+
+</P>
+<P>
+Then I'll show recursion over simple binary trees of pairs.
+The normal style for recursion over trees in Scheme is slightly
+different from what you may be used to in languages like C
+or Pascal--and simpler.
+       
+
+
+<H3><A NAME="SEC48" HREF="schintro_toc.html#SEC48"><CODE>length</CODE></A></H3>
+
+<P>
+<A NAME="IDX39"></A>
+
+</P>
+<P>
+<CODE>length</CODE> is the standard Scheme procedure that returns the length
+of a list.  It only counts the elements along the spine of the list
+(down the <CODE>cdr</CODE>'s).
+
+</P>
+<P>
+It's easy to do this using recursion.  The length
+of a list is 0 if the list is empty, and otherwise it's 1 plus
+the length of the rest of the list.  Here's the easiest way to
+define <CODE>length</CODE>:
+
+</P>
+
+<PRE>
+(define (length lis)
+   (cond ((null? lis)
+          0)
+         (else
+          (+ 1 (length (cdr lis))))))
+</PRE>
+
+<P>
+The main thing to notice about this example is the recursive structure.
+The procedure can accept a pointer to <EM>either</EM> a pair <CODE>or</CODE> the
+empty list.  The structure of the procedure corresponds directly
+to the recursive definition of a (proper) list.  The two-part <CODE>cond</CODE>
+corresponds to the fact that there are two rules that characterize
+lists;  it figures out which case we're dealing with.
+
+</P>
+<P>
+We explicitly checked for the end-of-list case, but we implicitly
+<EM>assumed</EM> that otherwise the object being operated on is a
+pair.  This might seem like bad style, but actually it's <EM>good</EM>,
+because it ensures that an error will be signaled if the argument
+to length is not the empty list or a pair--the second branch
+of the <CODE>cond</CODE> will be taken (erroneously), but the attempt to
+evaluate <CODE>(cdr lis)</CODE> will signal an error.
+
+</P>
+<P>
+We could make this clearer by using a three-branch <CODE>cond</CODE>, with
+separate branches for the two valid cases and the error case:
+
+</P>
+
+<PRE>
+(define (length lis)
+   (cond ((null? lis)
+          0)
+         ((pair? lis)
+          (+ 1 (length (cdr lis))))
+         (else
+          (error "invalid argument to length")))
+</PRE>
+
+<P>
+Here I've used the error-signaling procedure <CODE>error</CODE>, which
+stops execution and signals an error.  (In most systems, the error
+message <CODE>"invalid argument to length"</CODE> will be printed and
+the user will be presented with a break prompt for debugging
+the problem.)  Unfortunately, <CODE>error</CODE> is not supported by
+all Scheme systems.  (Later I'll show an implementation that
+should work reasonably well in any Scheme system.)
+
+</P>
+<P>
+Also note that in this example, I've used <CODE>lis</CODE> as the name of a list
+argument, rather than <CODE>list</CODE>.  That's because there's a standard
+Scheme procedure named <CODE>list</CODE>, which will be shadowed by any
+local variable with the same name.  (This is because of Scheme's
+<EM>unified namespace</EM>---you can't have a variable and a procedure
+with the same name, for reasons that will be explained later;  <CODE>list</CODE>
+seems to be the only identifier for which this is commonly a problem.)
+
+</P>
+<P>
+The above definition of <CODE>length</CODE> is not tail recursive--after calling 
+itself, there must be a return so that <CODE>1</CODE> can be added to the value
+and returned.  Later I'll show a more efficient, tail-recursive version of
+<CODE>length</CODE>, and a more general procedure called <CODE>reduce</CODE> that
+can be used to construct a variety of procedures whose basic
+algorithm is similar.
+
+</P>
+
+
+<H3><A NAME="SEC49" HREF="schintro_toc.html#SEC49">Copying Lists</A></H3>
+
+<P>
+<A NAME="IDX40"></A>
+<A NAME="IDX41"></A>
+<A NAME="IDX42"></A>
+<A NAME="IDX43"></A>
+
+</P>
+<P>
+There are two common senses of copying, <EM>shallow</EM> copying, and
+<EM>deep</EM> copying.  A shallow copy makes a copy of one object,
+and the copy has pointers to the same objects that the original did.
+
+</P>
+<P>
+A <EM>deep</EM> copy copies not only the top-level objects in a data
+structure, but the ones below that, and so on recursively, so that
+a whole new data structure is created.
+
+</P>
+<P>
+For lists, which are made up of more than one object, it is often
+useful to copy the spine of the list, i.e., doing a deep copy along
+the <CODE>cdr</CODE>'s only.  We typically think of a list as being
+like a special kind of object, even though it's really a sequence
+of pair objects.  It's therefore natural to copy "just the list."
+
+</P>
+<P>
+If we just want to do a shallow copy, we can define <CODE>pair-copy</CODE>
+to copy a pair, without copying anything else.
+
+</P>
+<P>
+In these examples, I'll assume we only want to copy list structure--that
+is a connected set of pairs.  Whenever we come to something that's
+not a pair, we stop copying and the copy shares structure with the
+original.  (These aren't standard Scheme procedures.)
+
+</P>
+<P>
+Here's a truly shallow copy, just copying a single pair:
+
+</P>
+
+<PRE>
+(define (pair-copy pr)
+   (cons (car pr) (cdr pr)))
+</PRE>
+
+<P>
+If we want to do a deep copy, we can use recursion to copy <CODE>car</CODE>
+or <CODE>cdr</CODE> values that are also pairs.  The following code for
+<CODE>pair-tree-deep-copy</CODE> assumes that the structure to be copied is a
+tree of pairs.  (If there is any shared structure, it will be copied
+each time it is reached, and the copy will not have the same structure.
+It will always be a tree.  Preserving shared structure while copying
+is harder, but can be done.  If there's a directed cycle,
+<CODE>pair-tree-deep-copy</CODE> will loop infinitely.)
+
+</P>
+
+<PRE>
+(define (pair-tree-deep-copy thing)
+   (if (not (pair? thing))
+       thing
+       (cons (pair-tree-deep-copy (car thing))
+             (pair-tree-deep-copy (cdr thing)))))
+</PRE>
+
+<P>
+Notice that <CODE>pair-tree-deep-copy</CODE> works on improper as well as
+proper lists, but only copies the pairs.  Where it gets to a non-pair
+value, it stops and just uses the same value in the copy, and the copy
+shares structure with the original.
+
+</P>
+<P>
+The code for <CODE>pair-tree-deep-copy</CODE> directly reflects the kind of 
+structure it copies.  It can handle non-pairs, which are assumed to be
+leaves of the graph of pairs that it's copying, and it can handle pairs,
+which are assumed to be interior nodes of the tree.  Their <CODE>car</CODE> and
+<CODE>cdr</CODE> values may be leaves of the tree, or other pairs.
+
+</P>
+<P>
+So the recursive definition of a pair-tree is:
+
+</P>
+
+<UL>
+<LI>
+
+  a non-pair (leaf), or
+<LI>
+
+  a pair whose car and cdr are pair-trees
+</UL>
+
+<P>
+The first rule is the base case, i.e., is the simple one that doesn't
+require recursion.  The second is the recursive rule, which expresses
+the fact that an interior node's car and cdr fields can point to any
+kind of pair-tree: a leaf, or another interior node whose children
+may likewise be leaves or other interior nodes...
+
+</P>
+<P>
+This is the easy way to write recursive routines over data
+structures--figure out a recursive description that exactly describes
+the expected data structures, and then use that recursive description
+to write a recursive <EM>description</EM> of the result you want.  Then
+you can straightforwardly code routine that will traverse the structure
+and copmute that result.
+
+</P>
+<P>
+Generally, we write the base case first, to make it clear where recursion
+ends--and so that we don't forget to write it and accidentally write
+infinite recursions or unhandled cases.  If you do this consistently,
+your code will be more readable and you'll make fewer mistakes.
+
+</P>
+<P>
+To copy the spine of a proper list, we can use this description
+of the answer we want:
+
+</P>
+<P>
+A copy of a list is
+
+<UL>
+<LI>the empty list if the original list is empty, or
+
+<LI>(if the list is nonempty) a pair whose <CODE>car</CODE>
+
+      value is the same as the <CODE>car</CODE> of the original
+      list, and whose <CODE>cdr</CODE> value is a copy of the
+      rest of the original list.
+</UL>
+
+<P>
+Here's the code:
+
+</P>
+
+<PRE>
+(define (list-copy lis)
+   (cond ((null? lis)
+          '())
+         (else
+          (cons (car lis)
+                (list-copy (cdr lis))))
+</PRE>
+
+<P>
+As usual, we only check to see if we're a the end of
+the list, and otherwise assume the argument is a pair.  Since we
+take the <CODE>car</CODE> and the <CODE>cdr</CODE> of the pair in the latter case,
+we'll get an error if the argument is not a proper list.  This is usually
+what we want, so that Scheme will signal an error when it gets to
+the part of the list with unexpected structure. 
+
+</P>
+<P>
+The name <CODE>list-copy</CODE> was chosen to suggest that it operates on lists,
+and in Scheme terminology "list" means "proper list" by default.  If
+we want a routine that copies improper lists, we should call it something
+else, and write a comment saying what kinds of things it works for.
+
+</P>
+<P>
+Actually, lists are so common in Scheme that we could have just called
+it <CODE>copy</CODE>.  Most procedure names begin with the name of the kind
+of structure they operate on, but exceptions are made for lists and
+for numbers.
+
+</P>
+
+
+<H3><A NAME="SEC50" HREF="schintro_toc.html#SEC50"><CODE>append</CODE> and <CODE>reverse</CODE></A></H3>
+
+<P>
+<A NAME="IDX44"></A>
+<A NAME="IDX45"></A>
+
+</P>
+<P>
+Two handy operations on lists are <CODE>append</CODE> and <CODE>reverse</CODE>;
+both are standard Scheme procedures.
+
+</P>
+<P>
+<CODE>append</CODE> takes any number of lists as arguments, and returns a
+list with all of their elements.  <CODE>reverse</CODE> takes a list and returns
+a new list, with the same elements but in the opposite order.
+
+</P>
+<P>
+Note that like most Scheme procedures, neither of these procedures is
+destructive--each creates a new list without side-effecting (modifying)
+its argument(s).
+
+</P>
+
+
+<H4><A NAME="SEC51" HREF="schintro_toc.html#SEC51"><CODE>append</CODE></A></H4>
+
+<P>
+Append works much like <CODE>list-copy</CODE> except that we have multiple
+lists to deal with.
+
+</P>
+<P>
+The trick to getting it right is to maintain the essential structure
+of <CODE>list-copy</CODE>, with the right minor differences.
+
+</P>
+<P>
+For now, let's keep things simple, and just do a two-argument version
+of <CODE>append</CODE>, called <CODE>append2</CODE>.
+
+</P>
+<P>
+Our strategy is to recurse through the first list, like <CODE>list-copy</CODE>,
+copying one element of the list at each step.  When we get to the
+end, however, the base case is different--rather than terminating
+the list with the empty list, we just use the second list as the
+"rest" of the copy we're making.
+
+</P>
+<P>
+Notice that the base case occurs when the first list is null--the
+<CODE>append</CODE> of an empty list and another list is just that other
+list--conceptually, we <CODE>cons</CODE> zero items onto the front of
+that list.  Concretely, we can just return that list.  
+
+</P>
+<P>
+Here's the recursive characterization of the result we want
+
+</P>
+
+<UL>
+<LI>if the first list is empty, the result is just the second list
+
+<LI>if the first list is nonempty, the result is a pair
+
+      whose <CODE>car</CODE> is the <CODE>car</CODE> of the first list,
+      and whose <CODE>cdr</CODE> is the <CODE>append</CODE> of the rest of
+      the first list and (all of) the second list.  
+</UL>
+
+<P>
+Here's a simple two-argument version of <CODE>append</CODE>:
+
+</P>
+
+<PRE>
+(define (append2 lis1 lis2)
+  (cond ((null? lis1)
+         lis2)
+        (else
+         (cons (car lis1)
+               (append2 (cdr lis1) lis2)))))
+</PRE>
+
+<P>
+Note that <CODE>append2</CODE> copies its first list argument, but the
+result simply shares a pointer to the last list argument--the
+last list is not copied, so the result shares structure with
+that list.  This is also true of the standard Scheme function
+<CODE>append</CODE>, which can take any number of lists as arguments.
+The first <EM>n</EM>-1 lists are copied, but the last is shared.
+
+</P>
+<P>
+Be sure you understand the concrete operation of the above
+algorithm.  On the way down during recursion, we're taking
+the first list apart, holding onto one list element at each step.
+When we hit the end of the first list, recursion stops and we
+return the second list.  On the way back up, we're consing those
+items onto the new list we're creating, back-to-front.
+
+</P>
+<P>
+Suppose we have defined two lists, <CODE>foo</CODE> and <CODE>bar</CODE>, like
+this:
+
+</P>
+
+<PRE>
+(define foo '(x y z))
+(define bar '(a b))
+(define baz (append bar foo))
+</PRE>
+
+<P>
+The result will be that <CODE>baz</CODE> shares structure with <CODE>foo</CODE>,
+but not with <CODE>bar</CODE>.  Changes to the list via <CODE>foo</CODE> will
+also be visible via <CODE>baz</CODE>.
+
+</P>
+
+<PRE>
+                +----------------------------------------+                  
+                |                                        |
+               \|/                                       |
+     +---+    +---+---+     +---+---+      +---+---+     |
+ foo | *-+---&#62;| * | *-+----&#62;| * | *-+-----&#62;| * | * |     |
+     +---+    +-+-+---+     +-+-+---+      +-+-+---+     |
+                |             |             |            |
+               \|/           \|/           \|/           |
+                x             y             z            |
+                                                         |
+                                                         |
+     +---+    +---+---+     +---+---+                    |
+ bar | *-+---&#62;| * | *-+----&#62;| * | * |                    |
+     +---+    +-+-+---+     +-+-+---+                    |
+                |             |                          |
+               \|/           \|/                         |
+                a             b                          |
+               /|\           /|\                         |
+                |             |                          |
+     +---+    +---+---+     +---+---+                    |
+ baz | *-+---&#62;| * | *-+----&#62;| * | *-+--------------------+
+     +---+    +---+---+     +---+---+
+</PRE>
+
+<P>
+In general, the result of <CODE>append</CODE> shares structure with the
+last argument passed to <CODE>append</CODE>.  If you want to avoid
+this, you can pass <CODE>append</CODE> an empty list as its last
+argument.  For example <CODE>(append '(1 2 3) '())</CODE> will copy
+the list <CODE>(1 2 3)</CODE>.
+
+</P>
+<P>
+If you're worried about efficiency, be aware that <CODE>append</CODE>
+takes time proportional to the length of the lists that must be
+copied, i.e., all but the last list being <CODE>append</CODE>ed.  This
+usually doesn't matter, but it's a consideration for performance-critical
+parts of your program, especially if you're appending long lists.
+
+</P>
+<P>
+(It's common to <CODE>append</CODE> short lists onto the <EM>front</EM>
+of long lists, and then <CODE>reverse</CODE> the result if necessary.)
+
+</P>
+
+
+<H4><A NAME="SEC52" HREF="schintro_toc.html#SEC52"><CODE>reverse</CODE></A></H4>
+
+<P>
+<CODE>reverse</CODE> returns a reversed copy of a list.
+
+</P>
+<P>
+There's an easy (but slow) way to define <CODE>reverse</CODE> in terms
+of <CODE>append</CODE>.  We just take the first element off the list,
+reverse the rest of the list, and append the first element to the
+end of the list.  We do this recursively, so that each time we
+reverse the rest of the list, we're doing the same thing on
+a shorter list.  When we get down to the end of the list, reversing
+it is a no-op: the reverse of an empty list is the empty list.
+
+</P>
+
+<PRE>
+(define (reverse lis)
+   (if (null? lis)
+       '()
+       (append (reverse (cdr lis))
+               (list (car lis)))))
+</PRE>
+
+<P>
+Think about how this actually works.  <CODE>reverse</CODE> recurses down the
+list, calling itself on the <CODE>cdr</CODE> of the list at each recursive step,
+until the recursion stops at the end of the list.  (This last call
+returns the empty list, which is the reverse of the empty list.)
+At each step, we use <CODE>car</CODE> to peel off one element of the
+list, and hold onto it until the recursive call returns.
+
+</P>
+<P>
+The reversed lists are handed back up through the returns,
+with the cars being slapped on the rear of the list at each return
+step.  (To add a single item to the end of the list using <CODE>append</CODE>,
+we must first put it in a one-element list using <CODE>list</CODE>.)
+
+</P>
+<P>
+We end up constructing the new list back-to-front on the way up from
+the recursion.  Going down recursively tears the list apart, one item
+at each recursive step, and coming back up adds an element to the
+end of the new list at each step. 
+
+</P>
+<P>
+This is a good example to understand, both abstractly and concretely.
+You should understand the concrete steps involved in taking a list
+apart and putting it back together backwards.  On the other hand,
+you should also recognize that the algorithm works <EM>even if
+you don't pay attention to that</EM>.
+
+</P>
+<P>
+Once you get the hang of recursion, it's often easy to write algorithms
+without actually thinking about the little steps involved, or thinking
+much about the ordering of steps.  In this case, it's easy to see that
+if we can reverse the rest of the list, and append the first item to
+the end of that, we've reversed the whole list.  We don't need to think
+much about the ordering of the operations, because that falls naturally
+out of the way we pass arguments to functions.  We can declare that
+"the <CODE>reverse</CODE> of a non-empty list <EM>is</EM> the <CODE>append</CODE> of
+the <CODE>reverse</CODE> of the rest of the list and (a list containing) the
+first item in the list", and then write the code accordingly, as a
+<EM>pure function</EM>---one that only depends on the values of its
+arguments, and has no side effects.
+
+</P>
+<P>
+By writing this recursively, we'll apply the same trick
+all the way down the list.  Thinking a little
+more concretely--but not much--we can see that at each time we
+reverse the rest of the list, the list in question will be shorter.
+Somewhere we'll hit the end of the list, so we have to handle that
+base case.  It's usually easy to see what the right thing to do
+is for the base case.   In this case, we can declare that "the
+<CODE>reverse</CODE> of the empty list is the empty list," and add
+the appropriate branch to <CODE>append</CODE>.
+
+</P>
+<P>
+This is a good example of how you can combine functions to create
+new functions, implementing algorithms without using sequencing
+or side effects.  (Notice that if we had side effects, we'd have
+to think very carefully about the ordering of steps, to make sure
+that we used a data structure after certain changes, and before
+others.  Bleah.)
+
+</P>
+<P>
+(The following remarks about efficiency are fairly advanced--you
+shouldn't worry about these things yet if they get in the way of
+learning how to write programs simply and straightforwardly.  You
+can skip or skim them and come back to them later once you've gotten
+the hang of Scheme, and want to tune the time-critical parts of
+your programs for maximum efficiency.  On the other hand, you
+may find that thinking about the concrete details reinforces
+the basic ideas.) 
+ 
+There are two problems coding <CODE>reverse</CODE> this very simple way,
+however---<CODE>reverse</CODE> turns out to be one of the hardest
+"simple" list routines to code efficiently.  Later I'll sho
+better versions that are more clever, but only very slightly more
+complicated.  (They'll still be recursive, and won't use loops or
+assignment.) 
+
+</P>
+<P>
+<EM>[ where? (Later I need to show a linear-time version that
+uses list-&#62;vector and then reverses the vector into a list
+tail-recursively... ]</EM>
+
+</P>
+<P>
+The first problem is that each call to <CODE>append</CODE> takes time
+proportional to the length of the list it's given.  (Remember
+that <CODE>append</CODE> effectively copies all of the pairs in the first list
+it's given, making a backward copy.)  We have to copy the "rest" of
+the list using <CODE>append</CODE>, starting at each pair in the list.  On
+average, we copy half the list at a given recursive step, so since we
+do this for every pair in the list, we have an order n-squared
+algorithm.
+
+</P>
+<P>
+Another problem is that we're doing things on the way back up from
+recursion, which turns out to be more expensive than doing things
+on the way down.  As I'll explain in a later chapter, Scheme can
+do recursion very efficiently if everything is done in a forward
+direction, on the way down--Scheme can optimize away all but one
+of the returns, and the state-saving before the calls.
+(Luckily, this is easy to do.) 
+
+</P>
+<P>
+Since Scheme provides a built-in <CODE>reverse</CODE>, you don't have
+to think much about this.  A good Scheme system will provide
+a heavily-optimized implementation of <CODE>reverse</CODE> that is
+linear in the length of the list being reversed.
+
+</P>
+<P>
+<CODE>reverse</CODE> is very handy, and the efficiency of a built-in
+<CODE>reverse</CODE> is important, because it's usually best to
+construct a list in whichever order is easy and efficient,
+and then reverse the whole list if necessary.  Typically, you
+<CODE>cons</CODE> one item onto a list at a time, or maybe <CODE>append</CODE>
+a few items at a time, in whatever order it's easiest to create the
+list.  This allows you to construct the list in linear time;
+with a linear-time <CODE>reverse</CODE>, the overall process is still
+linear-time. 
+
+</P>
+<P>
+==================================================================
+
+</P>
+<P>
+This is the end of Hunk E.
+
+</P>
+<P>
+TIME TO TRY IT OUT
+
+</P>
+<P>
+At this point, you should go read Hunk F of the next chapter
+and work through the examples using a running Scheme system.
+Then return here and resume this chapter.
+
+</P>
+<P>
+==================================================================
+</PRE>
+
+(Go to Hunk F, which starts at section <A HREF="schintro_93.html#SEC98">Lists (Hunk F)</A>.)
+         
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_45.html">previous</A>, <A HREF="schintro_47.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

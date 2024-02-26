@@ -1,0 +1,236 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Quasiquote</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_128.html">previous</A>, <A HREF="schintro_130.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H2><A NAME="SEC179" HREF="schintro_toc.html#SEC179"><CODE>quasiquote</CODE></A></H2>
+
+<P>
+The special form <CODE>quasiquote</CODE> behaves a lot like <CODE>quote</CODE>, allowing
+you to write out literal expressions in your program, using the standard
+textual representation of s-expressions.  Scheme automatically constructs
+the data structures.  <CODE>quasiquote</CODE> is much more powerful than
+<CODE>quote</CODE>, however, because you can write expressions that are
+<EM>mostly</EM> literal, but leave holes to be filled in with values computed
+at runtime. 
+
+</P>
+<P>
+For example, the value of the expression <CODE>(quote (foo bar baz))</CODE>
+is a list <CODE>(foo bar baz)</CODE>.  Likewise, the value of the expression
+<CODE>(quasiquote (foo bar baz))</CODE> is a list <CODE>(foo bar baz)</CODE>.
+
+</P>
+<P>
+There's a big difference, though.  <CODE>quote</CODE> constructs an s-expression at
+compile time, when the procedure containing the <CODE>quote</CODE> expression
+is compiled.<A NAME="FOOT10" HREF="schintro_foot.html#FOOT10">(10)</A>
+<CODE>quasiquote</CODE> constructs an s-expression at <EM>run time</EM>,
+when the <CODE>quasiquote</CODE> form is executed.  This allows Scheme
+to "customize" a data structure, so that you actually get a 
+<EM>different</EM> data structure each time you execute the same
+<CODE>quasiquote</CODE> form.  You can use the <CODE>unquote</CODE> operator to
+specify which parts should be customized.
+
+</P>
+<P>
+For example, suppose you want to write a procedure that creates a
+three-element list whose first and last elements are the literal
+symbols <CODE>foo</CODE> and <CODE>baz</CODE>, but whose middle element is the
+<CODE>value</CODE> of the variable <CODE>bar</CODE>.
+
+</P>
+<P>
+Try this in your scheme system:
+
+</P>
+
+<PRE>
+Scheme&#62;(define bar 2)
+baz
+Scheme&#62;(quasiquote (foo (unquote bar) baz))
+(foo 2 baz)
+</PRE>
+
+<P>
+Without <CODE>quasiquote</CODE> and <CODE>unquote</CODE>, you could get the same
+effect by replacing <CODE>(quasiquote (foo (unquote bar) baz))</CODE> with
+<CODE>(list (quote foo) bar (quote baz))</CODE>, or the equivalent sugared
+form <CODE>(list 'quote foo 'baz)</CODE>.  For this simple example, 
+that's probably at least as clear, because the use of <CODE>(quasiquote ...)</CODE>
+and <CODE>(unquote ...)</CODE> is rather clunky.
+
+</P>
+<P>
+To make it easier to write quasiquoted expressions, Scheme provides a little
+syntactic sugar.  Just as you can use a single quote character and write
+<CODE>'(foo bar baz)</CODE> instead of <CODE>(quote (foo bar baz)</CODE>, you can
+use a <EM>backquote</EM> character (<CODE>`</CODE>) to replace <CODE>(quote ...)</CODE>
+and a <EM>comma</EM> character (<CODE>,</CODE>) to replace <CODE>(unquote ...)</CODE>.
+
+</P>
+<P>
+Now we can do this:
+
+</P>
+
+<PRE>
+Scheme&#62;`(foo ,bar baz)
+(foo 2 baz)
+</PRE>
+
+<P>
+This is much clearer.  Intuitively, the backquote character means
+"construct an s-expresson of the following (literal) form, except
+where commas appear," and the comma character means "use the
+<EM>value</EM> of the following expression here, instead of using it
+literally."
+
+</P>
+<P>
+Now you can see why it's called <CODE>quasiquote</CODE>---it's
+a way of writing "mostly quoted" expressions, instead of pure literals.
+You can turn quoting off where you want to.  This is particularly useful
+in constructing s-expressions that are in fact <EM>mostly</EM> literal,
+especially if they're complicated.
+
+</P>
+<P>
+For a simple example, suppose you want to write a procedure that 
+constructs a greeting to print to a user.  The greeting is always
+mostly the same, but includes the current day of the week:
+
+</P>
+
+<PRE>
+Scheme&#62; (define day-of-week 'Sunday)
+day-of-week
+
+Scheme&#62; (define (make-greeting)
+           `(Welcome to the FooBar system!  We hope you
+             enjoy your visit on this fine ,day-of-week)))
+greet
+</PRE>
+
+
+<PRE>
+Scheme&#62;(make-greeting)
+(Welcome to the FooBar system! We hope you enjoy your visit on this
+fine Sunday)
+
+Scheme&#62;(set! day-of-week 'Monday)
+day-of-week
+
+Scheme&#62;(make-greeting)
+(Welcome to the FooBar system! We hope you enjoy your visit on this
+fine Monday)
+</PRE>
+
+<P>
+You may have notice that this is somewhat similar to formatted output
+in other languages you've used, like C.  (C's <CODE>printf</CODE> procedure
+takes a string that is (mostly) quoted, but has special escape characters
+in it to tell where to substitute the printed representation of runtime
+values.  For example, if <CODE>day_of_week</CODE> holds a pointer to the
+string <CODE>"Sunday"</CODE>, <CODE>printf("Welcome.  It's %s.", day_of_week)</CODE>
+prints "<CODE>Welcome.  It's Sunday.</CODE>")
+
+</P>
+<P>
+The nice thing about Scheme quasiquotation is that it works on normal
+data structures.  For example, suppose you want to write a routine
+that creates an association list with several literal elements, and
+a several customized ones.
+
+</P>
+
+<PRE>
+(define (create-shipping-employee-association name)
+  `((name ,name)
+    (employee-id-no ,(get-next-employee-id!))
+    (department shipping)
+    (hire-date ,(get-day) ,(get-month) ,(get-year))))
+</PRE>
+
+<P>
+(Notice that here that most of the unquoted expressions are calls to
+procedures, whose return values will be used.  We can fill the holes
+in our templates with anything we want, not just variable values.)
+
+</P>
+<P>
+Depending on the value of the variable the values returned by the
+procedure calls, <CODE>(new-shipping-employee-alist "Philboyd Studge")</CODE>
+will return something like
+
+</P>
+
+<PRE>
+((name "Philboyd Studge")
+ (employee-id-no 6357)
+ (department shipping)
+ (hire-date 18 August 1997))
+</PRE>
+
+<P>
+Here it should be clear that <CODE>quasiquote</CODE> has let us write out a
+stereotyped data structure, and <CODE>unquote</CODE> lets us fill in the varying
+parts.  More complicated examples would be make this benefit clearer,
+but I'll leave them to your imagination.
+
+</P>
+
+
+<H3><A NAME="SEC180" HREF="schintro_toc.html#SEC180"><CODE>unquote-splicing</CODE></A></H3>
+
+<P>
+Scheme provides a variant of <CODE>unquote</CODE> for use when you want
+to merge an unquoted list into a literal list, rather than nesting
+it.
+
+</P>
+<P>
+For example, suppose you want to embed a phrase in a sentence, where
+the phrase is a list of symbols, and the sentence is a list of symbols.
+
+</P>
+<P>
+If you tried this with unquote, you'd get a nested list, rather
+than just a list of symbols:
+
+</P>
+
+<PRE>
+Scheme&#62; (define phrase-of-the-day '(the Lord helps those who take a big
+                            helping for themselves))
+phrase-of-the-day
+
+Scheme&#62; `(Remember that ,phrase-of-the-day)
+(Remember that (the Lord helps those who take a big helping for
+themselves))
+</PRE>
+
+<P>
+Rather than using <CODE>,</CODE><EM>expr</EM><CODE>)</CODE>, we can use use 
+<CODE>(unquote-splicing </CODE><EM>expr</EM><CODE>)</CODE>,
+or the syntactically sugared form, <CODE>,@</CODE><EM>expr</EM>.
+
+</P>
+
+<PRE>
+Scheme&#62; `(And remember that ,@phrase of the day)
+(And remember that the Lord helps those who take a big helping for
+themselves)
+</PRE>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_128.html">previous</A>, <A HREF="schintro_130.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

@@ -1,0 +1,120 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Recovering from Mistakes</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_81.html">previous</A>, <A HREF="schintro_83.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC87" HREF="schintro_toc.html#SEC87">Making mistakes and recovering from them</A></H3>
+
+<P>
+<A NAME="IDX89"></A>
+
+</P>
+<P>
+Sometimes you'll make mistakes when interacting with Scheme.  This is
+quite normal, and if you've done it already, don't worry.  When Scheme
+detects that something's wrong, it will complain.  In most text-based
+Scheme systems, it will give you a special kind of prompt, so that
+you can type in commands to fix the mistake.  In other systems, it
+may invoke a debugger, which is a program for diagnosing and
+fixing mistakes.  For now, you need to know the command for your system
+that tells Scheme to give up on trying to fix the mistake, and go back
+to its normal "top level" interaction mode.  Later, you should learn
+how to use the debugging facilities of your system, but for now just
+being able to get back to the normal Scheme prompt will do.
+
+</P>
+<P>
+Assuming you've looked up the command for aborting an expression (by
+reading the manual, or asking a help system), you should try it out.
+You should make a mistake intentionally, watch what the system does,
+and make sure you can recover from your mistakes.
+
+</P>
+<P>
+Here's a good mistake, and a hypothetical response from the Scheme,
+and a recovery to the normal Scheme prompt.  Try this on your system,
+and make sure you can do the equivalent things:
+
+</P>
+
+<PRE>
+Scheme&#62;(2 3 4)
+ERROR: attempt to apply non-procedure 2
+break[1]&#62;,toplevel
+Scheme&#62;
+</PRE>
+
+<P>
+Here, we typed in the expression <CODE>(2 3 4)</CODE>, which is illegal.  The
+Scheme system recognized it as a compound expression that's not a
+special form, so it attempted to interpret it as a procedure call,
+and apply the result of the first subexpression to the results of
+the other subexpressions.  In this case, the first subexpression is
+<CODE>2</CODE>, which evaluates to <CODE>2</CODE>, which isn't a procedure at
+all.  At that point, Scheme complained, telling us we'd tried to use
+<CODE>2</CODE> as a procedure, and switched to a "break loop" for debugging.
+
+</P>
+<P>
+The break loop presented the special debugging prompt
+<CODE>break[1]&#62;</CODE>, asking what to do about it.  We typed in the special
+command <CODE>,toplevel</CODE> to tell it to go back to normal interaction,
+and it did, presenting us with a fresh <CODE>Scheme&#62;</CODE> prompt.
+
+</P>
+<P>
+In your system, the prompts and commands are likely to be different.
+(For example, special commands may start with a colon, rather than
+a comma, and have different names.)  Whatever they are, they'll be simple,
+and you should learn to use them as soon as possible.  See the documentation
+for your system.
+
+</P>
+<P>
+Here's another common mistake, which you will make pretty soon, so
+you should try it and see what happens and how to get out of it:
+
+</P>
+
+<PRE>
+Scheme&#62;a-variable
+ERROR: unbound variable: a-variable
+break[1]&#62;,toplevel
+Scheme&#62;
+</PRE>
+
+<P>
+Here what happened is that we asked Scheme to evaluate the expression
+<CODE>a-variable</CODE>.  Since <CODE>a-variable</CODE> is just a normal identifier,
+like a variable name, Scheme assumed it was supposed to be a variable
+name, and that we were asking for its value.  There wasn't a variable
+named <CODE>a-variable</CODE>, though, so Scheme complained.  In Scheme
+terminology for giving a piece of memory a name, we hadn't
+defined that variable and "bound" it to storage.  Scheme couldn't
+find any storage by that name, much less fetch its value.
+
+</P>
+<P>
+(Your system may let you get away with using <CODE>set!</CODE> on an undefined
+variable, silently creating a binding automatically.  This is not
+required by the Scheme standard, and programs generally should <EM>not</EM>
+do this.)
+
+</P>
+<P>
+As before, we used the special escape command to abort the attempt to
+evaluate this broken expression, and get back to normal interaction with
+Scheme.
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_81.html">previous</A>, <A HREF="schintro_83.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

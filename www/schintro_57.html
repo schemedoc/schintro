@@ -1,0 +1,67 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Binding Environments and Binding Contours</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_56.html">previous</A>, <A HREF="schintro_58.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H4><A NAME="SEC63" HREF="schintro_toc.html#SEC63">Binding Environments and Binding Contours</A></H4>
+
+<P>
+<A NAME="IDX59"></A>
+ 
+The set of all bindings that are visible at a given point during program
+execution is called a <EM>binding environment</EM>.  That is, a binding
+environment maps a set of names to the pieces of storage they name.
+
+</P>
+<P>
+A top-level binding environment is the mapping that the Scheme system
+maintains between top-level variable names and the storage they're
+bound to.  This might be implemented as a hash table.
+
+</P>
+<P>
+<A NAME="IDX60"></A>
+
+</P>
+<P>
+With local variables, a simple "flat" table isn't sufficient.  Entering
+a <CODE>let</CODE>, for example, adds new bindings to the environment that code
+is executing in--it makes the new variable bindings visible, changing
+the mapping from names to storage.
+
+</P>
+<P>
+We say that each binding contruct we execute introduces a new <EM>binding
+contour</EM>.  We call it a contour because it changes the "shape" of
+the environment.
+
+</P>
+<P>
+You can think of a binding contour as being implemented by a new table
+that's created when you enter a <CODE>let</CODE>, or any other construct
+that binds variables.  When Scheme looks for a binding of an identifier,
+it looks first in this new table, then in the old table that represented
+the environment outside the <EM>let</EM>.  Since Scheme looks in the
+"inner" environment's table first, it will always find the innermost
+binding of any identifier, such as <CODE>x</CODE> in the example above.
+
+</P>
+<P>
+At any given point, the <EM>environment</EM> consists of <EM>all</EM> of
+the variable bindings that are visible.  This includes all of the
+bindings in the table for the innermost contour, and all of the bindings
+in the table for the contours it's nested inside, <EM>except</EM> those
+that are shadowed by inner bindings of the same names.
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_56.html">previous</A>, <A HREF="schintro_58.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

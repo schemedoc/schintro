@@ -1,0 +1,56 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - member</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_44.html">previous</A>, <A HREF="schintro_46.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H4><A NAME="SEC46" HREF="schintro_toc.html#SEC46"><CODE>member</CODE></A></H4>
+
+<P>
+<A NAME="IDX38"></A>
+
+</P>
+<P>
+<CODE>member</CODE> takes any value and a list, and searches the
+list for that value.  If it finds it, it returns a pointer to
+the first <EM>pair</EM> whose car holds that value, i.e.,
+the "rest" of the list starting at the point where the
+searched-for item was found.   If it is not found, <CODE>#f</CODE>
+is returned.  (The return value is therefore always either
+a pair or the false object.)
+
+</P>
+
+<PRE>
+(member 22 '(18 22 #f 300))
+</PRE>
+
+<P>
+returns <CODE>(22 #f 300)</CODE>.
+
+</P>
+<P>
+Notice that member can be used either to find a value's location
+in a list, or as a predicate to check whether the item is in
+the list at all.  Since pairs are true values, you can use
+the result of <CODE>member</CODE> in a conditional expression and it will
+count as true if the item is found.
+
+</P>
+<P>
+[ Maybe I should introduce strings and symbols here, moving some
+  material from the tutorial chapter here and possibly expanding the
+  tutorial with more examples. ]
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_44.html">previous</A>, <A HREF="schintro_46.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

@@ -1,0 +1,3037 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Compiling Scheme</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_141.html">previous</A>, <A HREF="schintro_143.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H1><A NAME="SEC269" HREF="schintro_toc.html#SEC269">A Simple Scheme Compiler</A></H1>
+
+<P>
+[ The example compiler in compiler.scm is the skeleton of a simple
+compiler for a subset of Scheme, whose structure corresponds fairly
+closely to the example interpreter in eval.scm. ]
+
+</P>
+<P>
+[ this is out of place, or needs more introductory intro first: ]
+
+</P>
+<P>
+Where the interpreter has a basic dispatch routine called <CODE>eval</CODE>, which
+can evaluate any kind of expression, the compiler has a basic dispatch
+routine called <CODE>compile</CODE>, which can compile any kind of expression. 
+Like <CODE>eval</CODE>, <CODE>compile</CODE> examines the expression to be compiled, 
+and dispatches to an appropriate routine for that kind of expression.
+The routine that compiles an expression may recursively call compile to
+compile subexpressions, just as the interpretive evaluator may call 
+<CODE>eval</CODE> recursively to evaluate subexpressions.
+
+</P>
+
+
+<H2><A NAME="SEC270" HREF="schintro_toc.html#SEC270">What is a Compiler?</A></H2>
+
+<P>
+[ This is somewhat redundant with earlier stuff, but more concrete.
+  Should I cut it down?]
+
+</P>
+<P>
+Before answering what a compiler is, let's backtrack and talk about
+interpreters.
+
+</P>
+
+
+<H3><A NAME="SEC271" HREF="schintro_toc.html#SEC271">What is an Interpreter?</A></H3>
+
+<P>
+An interpreter really does two things:
+
+</P>
+
+<OL>
+<LI>
+
+      it examines expressions and dispatches to the appropriate
+      code for that kind of expression
+<LI>
+
+      it performs the actual operations specified by the program
+</OL>
+
+<P>
+Typically, most of the work done by an interpreter is in the first
+category--our example interpreter, for example, spends a lot of
+time examining expressions to see if they're self-evaluating or
+symbols or lists, and dispatching to the appropriate procedure
+to evaluate that kind of expression.  This dispatching is interleaved
+with the actual work that evaluates the expressions.
+
+</P>
+<P>
+One of the problems with an interpreter is that every time an
+expression is encountered, it is analyzed again.  Consider an
+expression like <CODE>(+ foo bar)</CODE> embedded in a loop that iterates
+many times.  Our interpreter will encounter this expression at each
+iteration of the loop, and at each iteration of the loop it will
+do mostly the same things: it will examine the expression and find
+out it's a list, then call <CODE>eval-list</CODE>, which will further examine
+it to find out it's a combination (not a special form or macro),
+and call <CODE>eval-combo</CODE>.  Then <CODE>eval-combo</CODE> will call
+<CODE>eval</CODE> recursively
+to evaluate the subexpressions, and each call to <CODE>eval</CODE> will examine
+the subexpressions and dispatch to the appropriate specialized
+evaluation routine.  Only then do we start actually computing
+the value of the expression, by computing the values of the
+subexpressions <CODE>+</CODE>, <CODE>foo</CODE>, and <CODE>bar</CODE>, i.e., looking
+up the values of those variables.
+
+</P>
+
+
+<H3><A NAME="SEC272" HREF="schintro_toc.html#SEC272">OK, so what's a compiler?</A></H3>
+
+<P>
+We would rather factor out most of this redundant work, and examine
+the expression just once to see what to do.  Then each time we
+"evaluate" the expressions, we can just do those things.  For
+the expression <CODE>(+ foo bar)</CODE>, the set of actions an interpreter
+will execute (leaving out all of the analysis and dispatching
+is):
+
+</P>
+
+<PRE>
+     look up variable bar
+     look up variable foo
+     look up variable +
+     apply
+</PRE>
+
+<P>
+(Here we've assumed that we evaluate subexpressions of a combination
+from right-to-left, rather than the more intuitive left-to-right
+order;  that's a legal way to do it in Scheme an it turns out to be
+handy in a very simple compiler, as we'll explain in a minute.)
+
+</P>
+<P>
+[ maybe I should change this to do args left-to-right, but the
+  operator last, like RScheme. ]
+
+</P>
+<P>
+For code like this, which doesn't have any conditionals in it,
+we can convert an interpreter into a compiler very easily.  We
+just modify the interpreter so that instead of actually evaluating
+the expressions, it just records what operations it <EM>would</EM> execute
+if it were interpreting the expression.  I'm intentionally being
+vague as to how exactly these simple operations (like
+<CODE>look-up-</CODE><CODE>variable</CODE>) work, but you should be able to see that
+each of them should be translatable into a handful of machine
+instructions.  That's how most compilers work: they first translate
+a program into an <EM>intermediate code</EM> representation, like our 
+look-up-variable operations, and then translate that representation
+into machine instructions.  (In between there may be one or more steps 
+that "optimize" the intermediate code, and each step may
+represent the code in a different way.)
+
+</P>
+<P>
+So this simple compiler just "pretends" to evaluate the expression, but
+whenever it gets to an actual action (like looking up a variable, or
+calling a procedure), it simply records what action it would take if
+it were just an interpreter.  The result is a list of actions which,
+if taken, will have the same effect as interpreting the expression.
+
+</P>
+<P>
+Here's another example:
+
+</P>
+
+<PRE>
+(let ((x 22)
+      (y 15))
+   (+ x (* x y)))
+</PRE>
+
+<P>
+      
+Supposing that our intermediate code representation is a sequence of
+lists that represent operations and their operands, the code that our
+simple compiler will generate is:
+
+</P>
+
+<PRE>
+  (fetch-literal 22)
+  (fetch-literal 15)
+  (bind x y)
+  (look-up-variable y)
+  (look-up-variable x)
+  (look-up-variable *)
+  (call-procedure)
+  (look-up-variable x)
+  (call-procedure)
+  (unbind)
+</PRE>
+
+<P>
+Later on, we'll talk in more concrete detail about where values
+are temporarily stored when they're looked up, and various tweaks
+to make it possible to translate intermediate code into smaller
+and faster sequences of machine instructions.  For now just notice
+that we can string together sequences of these intermediate code
+operations, and if we just translate each of them into some machine
+instructions, we can string those sequences of machine instructions
+together and get a larger sequence that we can execute to evaluate the
+whole expression.  We can execute it as many times as we want, and all
+of the expression analysis and dispatching will already have been
+done--the only work done each time it's executed is the work that
+actually binds variables, looks up values, calls procedures, and
+so on. 
+
+</P>
+
+<P>
+It's not much harder to compile conditional expressions like <CODE>if</CODE>.
+When we compile an <CODE>if</CODE>, we need to generate code for the condition
+expression, the consequent expression, and the alternative expression.
+(The "consequent" is the code executed if the condition is true,
+and the "alternative" is the code executed if it's false.)  Then we
+need to string the code for those expressions together appropriately
+with some conditional branches:
+
+</P>
+
+<PRE>
+   &#60;code for condition&#62;
+   (branch-if-false "else-action-label")
+   &#60;code for consequent&#62;
+   (branch-unconditionally "end-label")
+"else-action-label"
+   &#60;code for alternative&#62;
+"end-label"
+</PRE>
+
+<P>
+The labels here will actually be translated into the addresses of
+the code they label, and the branches will be filled in with those
+addresses.  (We have to be careful to use a unique pair of new
+labels for each <CODE>if</CODE> we compile, so or some other trick like that,
+so that we can nest <CODE>if</CODE> expressions and keep their labels straight.)
+
+</P>
+<P>
+(One way of generating machine code from this representation is to
+translate each of the statements into a short sequence of assembly
+instructions and each label into an assembly label, stringing them
+together as shown.  Then the assembly code can be assembled into
+machine code.) 
+
+</P>
+<P>
+Note that for an <CODE>if</CODE>, the control structure of the compiler is 
+actually simpler than the control structure of an interpreter.  The
+interpreter will evaluate the condition expression, and then decide
+at run time whether to evaluate the consequent ("then") expression
+or the alternative ("else") expression.  The compiler will always
+compile all three subexpressions, and string them together with
+conditional branches that will do the deciding at run time, based
+on the runtime value computed by the code for the condition expression.
+
+</P>
+<P>
+Here's a slightly more complicated example:
+
+</P>
+
+<PRE>
+(let ((x 15))
+   (if x
+       (let ((y (* 2 x)))
+          (+ x y))
+       #t))
+</PRE>
+
+<P>
+translates to intermediate code roughly like:          
+
+</P>
+
+<PRE>
+   (fetch-literal 15)
+   (bind x)
+   (lookup-variable x)
+   (branch-if-false "else22")
+   (lookup-variable x)
+   (fetch-literal 2)
+   (lookup-variable *)
+   (call-procedure)
+   (bind y)               ; create and enter envt that binds y
+   (lookup-variable y)
+   (lookup-variable x)
+   (lookup-variable +)
+   (call-procedure)
+   (unbind)               ; exit envt that binds y
+   (branch "end22")
+ "else22"
+   (fetch-literal #t)
+ "end22"          
+</PRE>
+
+<P>
+There are actually a couple of minor things wrong with the code we've
+generated, but this is pretty close to a workable intermediate
+representation.
+
+</P>
+
+
+<H2><A NAME="SEC273" HREF="schintro_toc.html#SEC273">What Does a Compiler Generate?</A></H2>
+
+<P>
+[ Talk about machine code, interpretive virtual machines, etc. ]
+
+</P>
+
+
+<H2><A NAME="SEC274" HREF="schintro_toc.html#SEC274">Basic Structure of the Compiler</A></H2>
+
+<P>
+The main function of the compiler is <CODE>compile</CODE>, which generates
+intermediate code for an expression, and which may call itself
+recursively to generate code for subexpressions.
+
+</P>
+<P>
+Calls to <CODE>compile</CODE> hand it an expression and some bookkeeping
+information we'll discuss later.  Compile returns intermediate
+code, plus updated versions of some of the bookkeeping information.
+
+</P>
+<P>
+To start this process off, top-level forms (like the ones you type
+into the <CODE>read-</CODE><CODE>compile-</CODE><CODE>run-</CODE><CODE>print</CODE> loop, or
+definitions of top-level procedures) are massaged a little, then
+intermediate code for them is generated.  Then the intermediate 
+code is converted into real executable code and packaged up as a
+closure that can be called.
+
+</P>
+<P>
+We will discuss these issues of massaging top-level forms and
+generating executable closures later;  for now, the main thing
+to understand is the recursive generation of intermediate code
+for nested expressions.
+
+</P>
+<P>
+Here's the main dispatch routine of the compiler, which is analagous
+to the interpreter's <CODE>eval</CODE>:
+
+</P>
+
+<PRE>
+(define (compile expr c-t-envt literal-state c-t-cont)
+   (cond ((symbol? expr)
+          (compile-symbol expr c-t-envt literal-state c-t-cont))
+         ((pair? expr)
+          (compile-list expr c-t-envt literal-state c-t-cont))
+         ((self-evaluating? expr)
+          (compile-self-eval expr c-t-envt literal-state c-t-cont))
+         (#t
+          (syntax-error "Illegal expression form" expr))))
+</PRE>
+
+<P>
+For now, ignore most of the arguments to <CODE>compile</CODE>, we'll explain
+them later.  The main thing to notice is that it looks a lot like
+<CODE>eval</CODE>.
+
+</P>
+<P>
+[ blah blah blah...]
+
+</P>
+<P>
+[ Somewhere, it's important to bring out the difference between the
+  mutual recursion of eval and apply in the interpreter and the
+  way the compiler works.  Eval recurs locally, but just generates
+  code for apply...  The control structure of the compiler is actually
+  simpler than for the interpreter, because the hairy stuff just happens
+  at run time... ]
+
+</P>
+
+
+<H2><A NAME="SEC275" HREF="schintro_toc.html#SEC275">Data Representations, Calling Convention, etc.</A></H2>
+
+<P>
+Before trying to understand the compiler itself in more detail,
+it is probably best to have a concrete idea of what the representations
+of data are, how procedure calls work, and how registers are used.
+That is, you have to understand the "abstract machine" that the
+compiler compiles for.
+
+</P>
+<P>
+An abstract machine is an abstraction of low-level operations and objects.
+The compiler first compiles code from the source language into this
+lower-level representation, and then translates the "abstract machine
+language" into actual executable code.  (The executable code may be
+machine code that runs directly on the hardware, or an interpretive
+executable code such as bytecodes, which are interpreted by a fast
+interpreter.)
+
+</P>
+<P>
+You can think of an abstract machine as being more like an assembler than
+an interpreter, but maybe a little smarter than most assemblers.
+
+</P>
+<P>
+I will describe one particular set of features to make things concrete;
+this is not quite how RScheme works, or Scheme-48, or any particular
+other system that I know of, but there's nothing unusual about it
+except maybe its simplicity.
+
+</P>
+<P>
+In fleshing out our example compiler, let's suppose our system works
+this way:
+
+</P>
+
+<OL>
+<LI>
+
+      We have several important registers used in stereotyped ways,
+      e.g., to hold a pointer to the current binding environment.
+<LI>
+
+      We have an evaluation stack that's used to store intermediate
+      values while evaluating nested expressions.
+<LI>
+
+      We use a continuation chain to represent the saved state of
+      callers, their callers, and so on, so that they can be resumed
+      after a procedure returns.
+</OL>
+
+<P>
+The registers of the abstract machine may represent hardware registers,
+or just storage locations that are used in these stereotyped ways.
+(For example, if compiling to C, the registers might be C global
+variables, and the C compiler might or might not let you specify
+that the variables should be put in hardware registers.)
+      
+
+
+<H3><A NAME="SEC276" HREF="schintro_toc.html#SEC276">The Registers</A></H3>
+
+<P>
+We'll assume that there are several important registers that
+can be used by the code our compiler generates:
+
+</P>
+
+<OL>
+<LI>
+
+      The <CODE>VALUE</CODE> register, where an expression leaves a value
+      so that it can be used by an enclosing expression.  In
+      The case of a procedure, this is where the value is left
+      for the caller when the procedure returns.  The value
+      register is also used when calling a procedure.
+<LI>
+
+      The <CODE>ENVT</CODE> register, which holds a pointer to the
+      environment that code is currently executing in.
+<LI>
+
+      The <CODE>CONT</CODE> register, which holds a pointer to the chain of
+      saved continuations of callers.
+<LI>
+
+      The <CODE>TEMPLATE</CODE> register, which holds a pointer to a special
+      data structure associated with the procedure that is
+      currently executing, and
+<LI>
+
+      The <CODE>PC</CODE> (program counter) register, which says which
+      instruction we are currently executing.  (If we're compiling
+      to normal machine code, this is a special register built into
+      the CPU for this purpose, and we use it pretty much like any
+      other code would.  If we're compiling to an interpretive
+      executable code, this is probably variable in the interpreter.)
+</OL>
+
+
+
+<H3><A NAME="SEC277" HREF="schintro_toc.html#SEC277">The Evaluation Stack (or Eval Stack, for short)</A></H3>
+
+<P>
+The eval stack is used for holding values that have been computed
+by evaluating subexpressions, but not yet used or bound.
+
+</P>
+<P>
+In evaluating the expression <CODE>(+ foo 22)</CODE>, the three values will
+be computed.  When each value is computed, it will be left in
+the <CODE>VALUE</CODE> register.  We evaluate right to left, and after
+evaluating each argument, we perform a <CODE>PUSH</CODE> operation on the
+eval stack, which copies the value in the value register onto
+the eval stack.  When we get to the first subexpression (the
+one that's supposed to return a function to call), we leave
+the value in the value register, because that's where we put
+the closure pointer for a procedure call.
+
+</P>
+<P>
+The eval stack is used for two main purposes:
+
+</P>
+
+<OL>
+<LI>
+
+    storing intermediate values for nested expressions, and
+<LI>
+
+    passing arguments to procedures.
+</OL>
+
+<P>
+   
+The eval stack is <EM>not</EM> used to hold intermediate values
+or local variables for suspended procedures--it isn't like the activation 
+stack in a conventional implementation of C or Pascal.  The values in the
+eval stack at any given
+time are only the intermediate values stored for the <EM>currently
+executing</EM> procedure.  Intermediate values for suspended procedures are
+saved in the continuation chain as necessary.
+
+</P>
+<P>
+When we call a procedure, the only values on the eval stack are
+the arguments to the procedure.  Any other values used by the caller
+are moved from the eval stack into a continuation before calling. 
+
+</P>
+
+
+<H3><A NAME="SEC278" HREF="schintro_toc.html#SEC278">The Continuation Chain</A></H3>
+
+<P>
+The continuation chain is a data structure that fills roughly the
+role of an activation stack in the implementation of a conventional
+programming language.  The continuation chain is a linked list of
+<EM>partial continuations</EM>, each of which is a record that stores
+the saved state of a procedure.
+
+</P>
+<P>
+When a procedure performs a non-tail procedure call, it packages
+its important state information up into a partial continuation;  this
+record saves the values of the environment, template, PC, and continuation
+registers, and any temporary values on the eval stack.
+
+</P>
+<P>
+Once a caller has saved its state in a partial continuation, then
+the callee can do whatever it wants with the important registers and
+the evaluation stack.  (This is called a <EM>caller-saves</EM> register usage
+convention, because the caller of a procedure is obliged to save any
+values that it will need when it resumes.)
+
+</P>
+<P>
+Remember that continuations are allocated on the garbage collected
+heap and are immutable--we never modify a continuation once it's
+created.  When we resume from a saved partial continuation, we copy the
+values from the partail continuation into the registers and eval stack,
+but that doesn't modify the partial continuation itself--it's still
+sitting out there on the heap.  This is important for being able to
+implement call-with-current-continuation: it's what allows us to
+resume from the same continuation any number of times.
+
+</P>
+
+
+<H3><A NAME="SEC279" HREF="schintro_toc.html#SEC279">Environments</A></H3>
+
+<P>
+The compiler assumes that a binding environment is a chain of
+<EM>frames</EM>, each of which is a vector of slots which are the variable
+bindings.  Each frame also has a <EM>static link</EM> or <EM>scope link</EM>
+field, which points to the frame representing the next lexically enclosing
+environment.
+
+</P>
+<P>
+Top-level environments are represented specially, as hash tables
+that map names to bindings.  We'll use a hash table instead of
+the association lists we used in our simple interpreter, because
+they're faster if you have a lot of bindings.  A binding object for
+a top-level environment is pretty much the same as in the interpreter:
+a little vector with two important slots: a slot for its name and
+another slot that is the actual value field.
+
+</P>
+<P>
+Local environments are represented very differently from toplevel
+environments:  each frame is a vector of slots, and does <EM>not</EM>
+store the names of the bindings.  It turns out that the names are only
+needed at compile time, so they don't actually have to be stored in
+the runtime environment.  (The compiler also turns out to be able
+to do most of the work for looking up a toplevel variable at compile
+time, so the speed of our hash tables is not going to be critical to
+our runtime speed.) 
+
+</P>
+
+
+<H3><A NAME="SEC280" HREF="schintro_toc.html#SEC280">Closure Representation and Calling</A></H3>
+
+<P>
+Closures in our system are represented as objects with two fields:
+a pointer to the environment captured by the closure, and a pointer
+to an object called a <EM>template</EM>, which in turn contains a pointer to
+the code for the procedure.
+
+</P>
+<P>
+When we evaluate the following expression
+
+<PRE>
+(let ((foo 22)
+      (bar 15))
+   (lambda (...)
+       ...))
+</PRE>
+
+<P>
+we'll create an environment frame to hold the bindings of foo and
+bar, and initialize them to <CODE>22</CODE> and <CODE>15</CODE>, respectively.
+This environment frame will have a scope link pointing to the environment
+we were executing in when we entered the <CODE>let</CODE>.  Inside this environment,
+we'll create a closure.  The closure will hold a pointer to the
+new environment, and a pointer to a template object representing
+the anonymous procedure being closed.  The template will have a pointer to
+the actual executable code.  All of these things will be heap-allocated
+objects, and in our implementation we'll give each one header field
+showing what kind of object it is:
+
+<PRE>
+                                          &#60;to envt. frame
+                                           for enclosing
+                                              scope&#62;
+                                               
+                                                ^
+                                                |
+                                +----------+    |
+                                | envt. fr.|    |
+                        ,------&#62;+==========+    |
+                       /  scope |     +----+----+       
+     +----------+     /         +----------+
+     | closure  |    /      foo |       22 |
+     +==========+   /           +----------+
+envt |     +----+--'        bar |       15 |
+     +----------+               +----------+     
+proc |     +----+--.    
+     +----------+   \      +----------+   
+                     \     | template |       +----------+
+                      `---&#62;+==========+       |   code   |
+                      code |     +----+-----&#62; +==========+
+                           +----------+       |executable|
+                           |          |       + code for +
+                           +----------+       |procedure |
+                           |          |       +          +
+                           +----------+       |   ...    |
+                           |   ...    |       +----------+
+                           +----------+
+</PRE>
+
+<P>
+The template object holds not only the pointer to the actual code,
+but any other handy values that the compiler can compute or look up at
+compile time, and which should be available to the procedure at run
+time.  We'll discuss that more later. 
+
+</P>
+<P>
+When we want to apply a procedure to some argument values, we put the
+argument values on the eval stack, and a pointer to the closure we want
+to call in the <CODE>VALUE</CODE> register.  Then we execute a short sequence of
+instructions that does the call:
+
+</P>
+
+<UL>
+<LI>
+
+      Extract the environment pointer from the closure and put it
+      in the environment register. (This is basically just an
+      indexed load using the value register as a base.)
+      
+<LI>
+
+      Extract the template pointer from the closure and put it in
+      the template register.  (This is basically just another indexed
+      load using the value register as a base.)
+      
+<LI>
+
+      Extract the code pointer from the template and put it in the
+      program counter register, i.e., jump to that code.  (This is
+      basically just another indexed load using the template register
+      as a base, and a jump to that address.)
+</UL>
+
+<P>
+Thus actual machine code for our "apply" operation in our intermediate
+representation is just a handful of instructions that do this stuff--a
+stereotyped little instruction sequence that destructures a closure
+and puts the appropriate values in registers before beginning execution
+of the procedure. 
+
+</P>
+<P>
+Because this is the way the procedure calling convention works, we
+know that when we begin executing the code for a procedure, the
+environment register will point to the right environment (where the
+procedure was defined) and the template register will point to the
+template for that procedure.  Any values stored in the template by
+the compiler can be fetched at compile time by doing an indexed load
+with the template register as a base.
+
+</P>
+<P>
+Consider this procedure:
+
+</P>
+
+<PRE>
+(define (foo x y)
+   (list 'bar x y))
+</PRE>
+
+<P>
+   
+Here, the literal bar is needed by the procedure--there must be some
+code in foo that will somehow fetch a pointer to the symbol bar.  That's
+what the template object is for.  When this procedure is compiled, the
+compiler accumulates a list of such literals, and when the template
+object for the procedure is created, all of those values will be stored
+into it.  When the compiler generates code to fetch the symbol <CODE>bar</CODE>,
+it just looks at the symbol's position in the literal list (and thus its
+offset in the template object), and generates code to do an indexed
+load to fetch that value from the template at run time.
+
+</P>
+
+
+<H2><A NAME="SEC281" HREF="schintro_toc.html#SEC281">Continuations</A></H2>
+
+
+
+<H3><A NAME="SEC282" HREF="schintro_toc.html#SEC282">Applying a Procedure Doesn't Save the Caller's State</A></H3>
+
+<P>
+Remember that when we do a procedure call, we do <EM>not</EM> necessarily
+save the state of the caller.  For a non-tail call, the compiler
+must generate code to save the caller's state plus code for the
+actual call.  For a tail call, there is no need to save the state.
+Because of this, there isn't really a single "procedure call"
+operation that saves the caller's state and invokes the callee.  
+There are two separate operations, <CODE>save-continuation</CODE> and
+<CODE>apply</CODE>.
+
+</P>
+<P>
+As mentioned above, the code sequence that performs a procedure
+applicatin assumes that the pointer to the closure to be called is
+in the <CODE>VALUE</CODE> register.  The procedure will leave its value in that
+register when it returns.
+
+</P>
+
+
+<H3><A NAME="SEC283" HREF="schintro_toc.html#SEC283">Continuation Saving</A></H3>
+<P>
+ 
+<CODE>save-continuation</CODE> is the operation that saves the state of the
+currently executing procedure in a partial continuation, and
+pushes it onto the continuation chain.
+
+</P>
+<P>
+When pushing a continuations, it is important to save all of the
+values on the eval stack, <EM>except</EM> for the arguments to the procedure
+being called.  Therefore, when generating code for a combination
+(procedure call) expression, the code to save the caller's state
+does <EM>not</EM> come just before the actual code to call the procedure.
+This would remove the arguments to the procedure from the eval stack.
+Instead, the continuation save comes just before the code that generates
+the argument values that will be passed to the procedure:
+
+<PRE>
+  (save-continuation &#60;label&#62;) ; save everything else before computing args
+  &#60;compute argn&#62;
+    ...
+  &#60;compute arg1&#62;
+  &#60;compute callee&#62;
+  (apply)
+&#60;label&#62;
+</PRE>
+
+<P>
+that way, the arguments to the call (and nothing else) will be
+on the eval stack when the procedure is called, and when the
+procedure returns, it will restore the other values from the
+partial continuation onto the eval stack.
+
+</P>
+<P>
+This separation of the saving and calling code looks especially
+funny for nested expressions that call procedures, but it makes
+perfect sense.
+
+</P>
+<P>
+<CODE>save-continuation</CODE> takes an argument which is the address of
+the code to execute when the continuation is resumed.  This
+address is saved in the partial continuation, and when the
+continuation is resumed, it will be branched to (put in the
+<CODE>PC</CODE> register).
+
+</P>
+
+
+<H3><A NAME="SEC284" HREF="schintro_toc.html#SEC284">An Example</A></H3>
+
+<P>
+Now that we have a more detailed idea how the registers, eval stack,
+and continuations work, here's an example:
+
+<PRE>
+   (+ (- a b) (/ c d))
+</PRE>
+
+<P>
+compiles to intermediate code something like:
+
+<PRE>
+  (push-continuation "resume23") ; save cont for call to +
+  (push-continuation "resume24") ; save cont for call to -
+  (lookup-variable d)   ; get value of d into value reg
+  (push)                ; push value of d on eval stack
+  (lookup-variable c)   ; get value of c into value reg
+  (push)                ; push value of c on eval stack
+  (lookup-variable /)   ; look up /
+  (apply)               ; call /, which is in value reg after lookup
+  (push)                 
+"resume24" 
+  (push-continuation "resume25") ;save cont for -, incl. value of (/ c d)
+  (lookup-variable b)   ; get value of b
+  (push) 
+  (lookup-variable a)   ; get value of a
+  (push)
+  (lookup-variable -)   ; get value of -
+  (apply)               ; call -
+  (push)                ; push returned value on top of restored e stack     
+"resume25"
+  (lookup-variable +)   ; look up + 
+  (apply)               ; tail call +
+"resume23"  
+</PRE>
+
+<P>
+Things to notice:
+
+<OL>
+<LI>after the first <CODE>apply</CODE>, the called routine (or something it
+
+      directly or indirectly tail calls) will eventually do a procedure
+      return, and pop the latest continuation we pushed, restoring
+      anything that was on the eval stack at that point, and resuming
+      execution at label1.  [ OOPS... fix this ]
+<LI>after the second apply, the called routine will eventually
+
+      (directly or indirectly) do a procedure return, which will pop
+      the second continuation we pushed, restoring the already-computed
+      value of the subexpression <CODE>(/ c d)</CODE> to the eval stack.
+<LI>we generated code for the expression <CODE>(+ (- a b)</CODE> <CODE>(/ c d))</CODE>
+
+      to be used in tail position.  This code doesn't save a continuation
+      before the final call to +.  If the expression is to be used in
+      non-tail position, we must generate slightly different code, which
+      will save a continuation that will resume after this expression.
+</OL>
+
+
+
+<H3><A NAME="SEC285" HREF="schintro_toc.html#SEC285">Generating Unique Labels</A></H3>
+
+<P>
+[ where does this go? ]
+
+</P>
+<P>
+Like <CODE>compile-if</CODE>, <CODE>compile-combo</CODE> generates labels as 
+necessary to be able to name the code where execution should be resumed
+after a call--in the code it generates, it puts the label just before
+the intermediate code instruction to resume, and the same label
+in the call to <CODE>save-continuation</CODE> that should resume there.
+
+</P>
+<P>
+It is easy to generate unique labels for every resumable point
+in a program.  We just keep a counter of labels we've used so
+far, and to create a new one we append the digits representing
+this number to the string <CODE>"resume"</CODE>, so that we get
+<CODE>"resume1"</CODE>, <CODE>"resume2"</CODE>, and so on.
+
+</P>
+<P>
+We can write a Scheme procedure, <CODE>generate-label</CODE>, which keeps a
+counter, and when given a string as an argument, returns the a new
+string with the same characters plus the digits representing the
+number in the counter.  That way, we can use labels that start
+with <CODE>"else"</CODE> and <CODE>"end"</CODE> to label the branch targets of an
+<CODE>if</CODE> expression, and labels that start with <CODE>"resume"</CODE> to
+represent the resumption points for continuation saving.  This makes
+the intermediate code we generate fairly understandable, while ensuring
+that labels are still unique, and easy to use as assembler labels
+when translating intermediate code to machine language.
+
+</P>
+
+
+<H2><A NAME="SEC286" HREF="schintro_toc.html#SEC286">More on Representations of Environments</A></H2>
+
+<P>
+To get reasonable performance for our system, we'll want to treat
+the top-level environment differently from local variable binding
+environments.  We'll use a trick involving lexical scope to precompute
+most of the work done in looking up a local variable binding, and a
+different trick to make it fast to look up top-level variables.
+
+</P>
+<P>
+As we said before, each local variable binding contour (e.g., the
+bindings introduced by a <CODE>let</CODE>, or by binding the args to a procedure)
+is represented at run time as a frame with slots for each variable,
+plus a scope link that points to the frame representing the enclosing
+contour.
+
+</P>
+<P>
+A top-level environment is likely to be large, and we will want to
+be able to access it in special ways.  We will represent it as a hash
+table that maps symbols (variable names) to their toplevel bindings.
+The bindings themselves will be represented as objects, whose main
+function is to have one field that holds the current value of the
+variable.  For simplicity, we'll make them self-identifying as well:
+not only will the names be used as keys in the hash table, but
+the binding objects will hold pointers to their names as well as
+values.
+
+</P>
+<P>
+Keep in mind that this representation is just one that's convenient.
+A toplevel environment could be represented as any kind
+of table (e.g., an association list), but we want it to be reasonably
+fast to access even if there are thousands of top-level variables.
+(We'll use a special trick to make normal accesses to top-level
+variable bindings very fast at run time, but we want to make them
+reasonably fast at compile time as well, and hash tables are good
+for that.)
+
+</P>
+<P>
+Suppose we evaluate the following expressions at the top level, to
+define and initialize a couple of variables:
+
+</P>
+
+<PRE>
+(define quux "fubar")
+
+(define (double x) (+ x x))
+</PRE>
+
+<P>
+This will modify the toplevel environment by adding bindings for
+<CODE>quux</CODE> and <CODE>double</CODE>, in addition to what's already there:
+
+</P>
+
+<PRE>
+   +-------------------------------------------------------------------+
+   |                                                                   |
+   |                                                                   |
+  \|/                                                                  |
+   +------------------+                                                |
+   |   toplevel env.  |                                                |
+   +==================+         +----------+                           |
+   |   cons |    *----+--------&#62;| binding  |                           |
+   +--------+---------+         +==========+                           |
+   |        |         |   value |     *----+------&#62;&#60;closure for cons&#62;  |
+        .        .              +----------+                           |
+        .        .         name |     cons |                           |
+        .        .              +----------+                           |
+                                                                       |
+   |        |         |         +----------+                           |
+   +--------+---------+         | binding  |                           |
+   |   quux |    *----+--------&#62;+==========+                           |
+   +--------+---------+   value |     *----+------&#62;"fubar"             |
+   |        |         |         +----------+                           |
+        .        .         name |     quux |                           |
+        .        .              +----------+                           |
+        .        .                                                     |
+                                                                       |
+   |        |         |         +----------+                           |
+   +--------+---------+         | binding  |          +----------+     |
+   | double |    *----+--------&#62;+==========+          | closure  |     |
+   +--------+---------+   value |     *----+---------&#62;+==========+     |   
+   |        |         |         +----------+     envt |     *----+-----+
+        .        .         name |  double  |          +----------+
+        .        .              +----------+     proc |     *----+---&#62; ...
+        .        .                                    +----------+
+</PRE>
+
+<P>
+Several things to note:
+
+<UL>
+<LI>
+
+     The representation of the hash table itself may not really
+     be a simple array of name-value pairs, but I didn't want
+     to clutter up the picture with overflow buckets and whatnot.
+<LI>
+
+     In principle, we don't need to have pointers to separate
+     binding objects.  We could just store the values of bindings
+     right in the table, using the value fields of the name-value pair
+     to hold the actual variable values.  (After all, a binding
+     is really just a location with a name, used to hold a value.)
+     It will turn out to be convenient for our implementation
+     to have separate objects that hold the values.
+<LI>
+
+     The occurrences of symbol names in the picture would really be 
+     pointers to symbol objects, and the string <CODE>"fubar"</CODE> would
+     really be an object itself as well.  As usual, we selectively 
+     abbreviate our pictorial representation to avoid cluttering things up.
+<LI>
+
+     We refer to the toplevel binding objects as objects, but they're
+     not Scheme objects--standard Scheme doesn't give you any way
+     to get a pointer to one of these and play with it from inside
+     the language.  These "objects" are objects in the sense that
+     they're allocated on the heap and referred to via pointers by the
+     compiler and by compiled code, but they're not "first class."
+     (An extended version of the Scheme language may <CODE>let</CODE> you get
+     at them from inside the language, but that's not standard.) 
+</UL>
+
+
+
+<H2><A NAME="SEC287" HREF="schintro_toc.html#SEC287">Compiling Code for Literals</A></H2>
+
+<P>
+When the compiler compiles code for a literal, like <CODE>'foo</CODE> or
+<CODE>"foo"</CODE> or <CODE>22</CODE> in the following expression,
+
+<PRE>
+(list 'foo "foo" 22)
+</PRE>
+
+<P>
+it notices which literals the expression will need at run time,
+and ensures that those literals will appear in the template of the
+procedure.  It keeps a list of literals needed by the procedure
+it's compiling, and after compiling the code for the procedure, it
+uses that list to construct the template that goes with the code.
+
+</P>
+<P>
+If <CODE>foo</CODE> is the first literal encountered, it might be put into
+the list first, and assigned the first free slot in the template
+(after the code pointer).  <CODE>"foo"</CODE> might be assigned the second slot,
+and so on.  In the terminology of language implementation, the
+template acts as a <EM>literal frame</EM>, as well as holding the pointer
+to the procedure's code.
+
+</P>
+<P>
+After assigning a literal a position in the template, the compiler
+can generate one or two instructions that can fetch the value out
+of the template, by using the address of the template, adding
+the offset of that slot, and loading from the resulting address.
+Since the template address is guaranteed to be in the <CODE>TEMPLATE</CODE>
+register, this is probably just a single indexed load instruction.
+In pseudo-C, it might look like:
+
+<PRE>
+  value_register = *(template_register + offset)
+</PRE>
+
+<P>
+where offset is computed by the compiler and therefore is probably
+an immediate operand to the load instruction that loads the value
+into the value register.
+
+</P>
+<P>
+Notice that here we're taking advantage of the fact that the compiler
+runs in our system, and generates code that's just data in our
+system.  The code will run in the same heap, and the compiler can
+therefore just compute values and put them in the template, and
+they'll stay around until that code is executed.  (Life gets a little
+more complicated if you want to generate code that will be loaded
+into a different system and executed there.)
+
+</P>
+<P>
+[ Now we should explain that the <CODE>literal-state</CODE> argument to
+<CODE>compile</CODE> is the list of literals seen so far in compiling
+a procedure.  The return value of <CODE>compile</CODE> is intermediate
+code that includes an updated <CODE>literal-state</CODE>. ]
+
+</P>
+
+
+<H2><A NAME="SEC288" HREF="schintro_toc.html#SEC288">Compiling Code for Top-Level Variable References</A></H2>
+
+<P>
+Because of lexical scoping, it is easy for the compiler to tell
+the difference between a reference to a top-level variable binding
+and a reference to a local variable.  We'll talk about that in detail
+later, but for now just assume that the compiler knows the difference
+at the point where it generates code for a variable reference.
+
+</P>
+<P>
+When the compiler generates code for a top-level variable, it can
+usually look up the binding of that variable in the environment that
+the code is being generated for--the expression that defines the
+variable has already been executed, so the binding already exists.
+
+</P>
+<P>
+The compiler can therefore do the actual lookup at compile time,
+e.g., hashing into the hash-table that implements a toplevel
+environment and getting a pointer to the actual binding object
+that will be referenced at run time.
+
+</P>
+<P>
+To make references to this object fast, the compiler can simply
+put this pointer in the template for the procedure being compiled,
+as though it were a literal value.
+
+</P>
+<P>
+Be clear on what's going on here:  the compiler can't look up the
+<EM>value</EM> of the variable, because that's not known until the moment
+the variable is referenced at run time.  (Before the code is executed,
+some other piece of code might run and change the value stored in
+the binding.)  But the identity of the binding itself is known,
+and can be stashed in the literal frame. 
+
+</P>
+<P>
+Actually, it's just slightly more complicated than this.  A variable
+can be used in a procedure definition before the variable itself
+is defined.  (This is called a "forward reference.")  To get around
+this, the compiler "cheats," and goes ahead and creates the binding
+object and its entry in the toplevel environment before the definition
+of the variable is actually encountered.  At the language level,
+the variable hasn't been bound or given a value, but we go ahead
+and create the unique binding object and use it in compiling other
+expressions.  For error checking, we put a special value in the
+binding to indicate that the binding isn't "real" yet--we put a
+reference to some object we consider "not a real value," so that
+we can detect uses of a variable that isn't really bound.
+
+</P>
+<P>
+(In a system designed for maximum safety and early error checking,
+we could ensure that each reference to a toplevel variable would
+check for this value, and signal an error if it's found.  If we're
+not quite so concerned with early error checking, we can wait until
+somebody attempts to use such a value, e.g., by adding it to
+something, or taking the <CODE>car</CODE> of it, and we rely on the normal
+type checking of the language to tell us something's wrong at the
+point that operation occurs.)
+
+</P>
+
+<P>
+Now consider compiling a procedure like
+
+<PRE>
+(define (make-foo-list)
+   (list 'foo "foo"))
+</PRE>
+
+<P>
+The compiler will accumulate a list of toplevel bindings and literals
+needed for the procedure, namely a string <CODE>"foo"</CODE>, the symbol
+<CODE>foo</CODE>, and toplevel binding of the symbol <CODE>list</CODE>.  These will
+be put in the template for the procedure, in the first, second, and third
+slots after the code pointer.  The code generated for this procedure 
+(assuming right-to-left evaluation) will be something like:
+
+<PRE>
+  (fetch-literal 1) ; get string "foo" from template slot 1
+  (push)            ; push it on eval stack
+  (fetch-literal 2) ; get symbol foo from template slot 2
+  (push)            ; push it on eval stack
+  (fetch-literal 3) ; get toplevel binding of list from template slot 3
+  (t-l-bdg-get)     ; extract value from binding
+  (apply)           ; (tail-)call list
+</PRE>
+
+<P>
+Notice, of course, that we've made our intermediate code representation
+more concrete now--we use slot numbers as the arguments to fetch-literal,
+and we explicitly get the value of the toplevel variable from the toplevel
+binding object in the value register.  For setting the value in a binding,
+we'll use a different intermediate code instruction, <CODE>t-l-bdg-set!</CODE>
+(<CODE>t-l-binding-set!</CODE> expects the value register to hold a pointer to
+a toplevel binding object;  it extracts the value of the binding, and
+leaves that value in the value register.)
+
+</P>
+<P>
+[ Now we can explain more about literal states--we accumulate a list
+  of literal values and top-level variable bindings that must be
+  accessible when the procedure runs. ]
+
+</P>
+<P>
+By now it should be very clear how you would translate each of these
+little operations in our intermediate representation into a few
+assembly-language instructions.
+
+</P>
+<P>
+[ need picture? ]
+
+</P>
+
+
+<H2><A NAME="SEC289" HREF="schintro_toc.html#SEC289">Precomputing Local Variable Lookups using Lexical Scope</A></H2>
+
+<P>
+We can't really look up local variable bindings at compile time the way
+we can toplevel bindings--local variable bindings don't exist yet when
+we're compiling the expressions that create and use them.  (Consider the
+fact that every time you enter a <CODE>let</CODE>, or call a procedure that binds
+arguments, a new binding environment frame is created.  Code that executes
+in such environments will see a different binding environment frame in
+the environment register each time it runs.)
+
+</P>
+<P>
+What we <EM>can</EM> do is take advantage of lexical scope to precompute most
+of the <EM>search</EM> for a variable in an environment.
+
+</P>
+<P>
+Consider the execution of this procedure:
+
+<PRE>
+  (lambda (x y)
+     (let ((a &#60;some-expression&#62;
+           (b &#60;some-expression&#62;))
+        (list a b x y)))
+</PRE>
+
+<P>
+When we compute the arguments to the call to <CODE>list</CODE>, it's obvious that
+the first and second variables (<CODE>a</CODE> and <CODE>b</CODE>) will be in the first
+and second slots of the first binding environment frame, pointed directly
+to by the <CODE>ENVT</CODE> register.  This is the environment created by the
+<CODE>let</CODE>.  The third and fourth variables (<CODE>x</CODE> and <CODE>y</CODE>) will
+be in the next environment frame, pointed to by the scope link of the first.
+
+</P>
+<P>
+The compiler can compute the <EM>lexical address</EM> of each variable binding
+at the point where a reference to it is's compiled--that's the <EM>relative
+location</EM> of the variable starting from the environment register.
+A lexical address has two parts: the number of environment frames
+to skip to find the right frame, and the offset of the binding in
+that frame.  In the above example, the lexical addresses are:
+
+<PRE>
+   a:  0,1
+   b:  0,2
+   x:  1,1
+   y:  1,2
+</PRE>
+
+<P>
+(We use the convention that frame numbers start at zero, but slot
+numbers appear to start at 1 because the scope link is in slot 0.)          
+
+</P>
+<P>
+The code generated for the reference to a can simply be an indexed load
+instruction, using the environment register plus an offset to grab
+the value in the first variable binding slot.  In pseudo-C, that's
+something like
+
+</P>
+
+<PRE>
+  value_register = *(envt_register + offset)
+</PRE>
+
+<P>
+    
+where offset is probably 4 (bytes) to index past the scope link slot.
+Slightly more abstractly, its lexical address is   [ WHAT? ]
+
+</P>
+<P>
+The code for the reference to the variable <CODE>y</CODE> would involve one level
+of indirection--first the scope link pointer must be extracted from
+the first environment frame, and then that can be used for an indexed
+load to get the value of the second slot of the second frame:
+
+</P>
+
+<PRE>
+  value_register = *(envt_register)  ; get ptr to 2nd envt frame
+  value_register = *(envt_register + offset)
+</PRE>
+
+<P>
+where offset is probably 8 (bytes) to index past the scope link
+and the binding of <CODE>x</CODE>.
+
+</P>
+<P>
+Given this scheme, accessing a local variable takes time proportional
+to the number of environment frames intervening between between
+the expression being compiled and the environment where the referenced
+variable is defined.  That's usually fairly fast, for two reasons:
+
+<OL>
+<LI>
+
+      The depth of lexical nesting is usually small--it corresponds
+      to the nesting of binding expressions in the program, and is
+      usually between one and three, an only rarely greater than five
+      or so.
+      
+<LI>Most references that are executed at run time are to variables
+
+      in the current scope, or maybe a level or two back from that.
+      (Consider references to variables in inner loops, which
+      constitute the most frequently-executed code in most programs.)
+</OL>
+
+<P>
+For these reasons, most references to local variables will take between
+one and five instructions.  To a first approximation, the time to
+reference local variables can be regarded as a small constant.  (A
+slightly snazzier compiler can reduce this by using more registers,
+and leaving many values in registers instead of pushing and popping
+them from the eval stack, but that's a more advanced technique than
+we want to address here.)
+
+</P>
+
+
+<H3><A NAME="SEC290" HREF="schintro_toc.html#SEC290">Lexical Addressing and Compile-Time Environments</A></H3>
+
+<P>
+Computing lexical addresses is very easy for the compiler.  All it
+needs to do is maintain a data structure called a <EM>compile-time
+environment</EM>, which records the <EM>structure</EM> of the runtime environment.
+
+</P>
+<P>
+Each time the compiler compiles an expression that creates new bindings,
+it extends the compile-time environment to reflect the change to the
+environment structure, and when compiling expressions that will
+execute in that environment, it hands the new compile-time
+environment to the recursive call to <CODE>compile</CODE> which will compile
+that expression.
+
+</P>
+<P>
+For example, when compiling a <CODE>let</CODE>, the compiler dispatches to
+<CODE>compile-let</CODE>, the analogue of <CODE>eval-let</CODE>, which does four
+things:
+
+<OL>
+<LI>
+
+      Compiles code for the initial value expressions.  This code
+      executes in the environment outside the <CODE>let</CODE>, so the
+      <CODE>compile-let</CODE> uses the environment is was given when
+      making recursive calls to <CODE>compile</CODE> to generate the
+      initial value code.
+<LI>
+
+      Generates code to create a binding environment and intialize
+      it with those values.
+<LI>
+
+      Extends the compile-time environment with a new frame, reflecting
+      the fact that the body of the <CODE>let</CODE> will execute in a new scope
+      including the new bindings.
+<LI>
+
+      Calls <CODE>compile-sequence</CODE> to compile the body of the <CODE>let</CODE>,
+      passing it the new compile-time environment.
+</OL>
+
+<P>
+Just as the overall recursive structure of the compiler closely
+resembles the recursive structure of the interpreter, the role
+of the compile-time environment is very much like the role of the
+environment in the interpreter.
+
+</P>
+<P>
+When the interpreter (compiler) evaluates (compiles) subexpressions
+that execute in the same environment as their parent expressions, it
+hands the recursive invocation the same environment it was given.
+When the interpreter (compiler) evaluates (compiles) an expression in
+a new environment, it hands the recursive call the new (compile-time)
+environment.
+
+</P>
+<P>
+The structure of the compile time environment at any point in the
+compilation process mirrors the structure of the runtime environment
+where the code will execute.  Unlike the interpreter's representation
+of the environment, however, the compile-time environment doesn't
+contain actual bindings--it can't, and it doesn't need to.
+
+</P>
+<P>
+In effect, we split the interpreter's environment into two parts
+with parallel structure.  Where the interpreter's environements
+are chains of frames holding name-binding pairs, the compiler
+splits those into two chains of frames: the runtime environment,
+whose frames hold the actual bindings, and the compile-time
+environment, whose frames hold the corresponding names.
+
+</P>
+<P>
+Consider the expression
+
+<PRE>
+(let ((x 1)
+      (y 2))
+   (let ((foo 3)
+         (bar 4))
+      (list foo bar x y)))
+</PRE>
+
+<P>
+At the point where <CODE>(list a b x y)</CODE> is compiled or executed, the
+environment for an interpreted system appears as shown on the
+left, below, while the environments for a compiled system appear
+as shown on the right:  
+
+<PRE>
+     INTERPRETED                   COMPILED              COMPILED
+                                (compile time)          (run time)
+                    /\                         /\                   /\
+                     |                          |                    |
+ +---------------+   |           +----------+   |     +----------+   |
+ |   envt. frame |   |           | c.t.e.fr.|   |     | envt. fr.|   |
+ +===============+  /            +==========+  /      +==========+  /
+ |          +----+-'             |     +----+-'       |     +----+-'
+ +-------+-------+               +----------+         +----------+
+ |     x |     1 |               |        x |         |        1 |
+ +-------+-------+               +----------+         +----------+
+ |     y |     2 |               |        y |         |        2 |
+ +-------+-------+               +----------+         +----------+
+                  _                         _                    _
+                 |\                        |\                   |\
+                   \                         \                    \
+                    \                         \                    \
+ +---------------+   |           +----------+  |      +----------+  | 
+ |   envt. frame |   |           | c.t.e.fr.|  |      | envt. fr.|  |
+ +===============+  /            +==========+  /      +==========+  /
+ |          +----+-'             |     +----+-'       |     +----+-'
+ +-------+-------+               +----------+         +----------+
+ |   foo |     3 |               |      foo |         |        3 |
+ +---------------+               +----------+         +----------+
+ |   bar |     4 |               |      bar |         |        4 |
+ +-------+-------+               +----------+         +----------+
+</PRE>
+
+<P>
+Note that there is a many-to-one relationship between the compile-time
+environments and the run-time environments:  a <CODE>let</CODE> or <CODE>lambda</CODE>
+expression is compiled once, and the corresponding environment frame is 
+created and passed to the recursive calls that compile subexpressions. 
+The code may be executed many times, however, and each time a run-time
+environment frame will be created so that the code for subexpressions
+can be executed in that environment. 
+
+</P>
+
+
+<H3><A NAME="SEC291" HREF="schintro_toc.html#SEC291">A Detailed Example</A></H3>
+
+<P>
+Taking it step by step, let's look at the compilation of the
+expression
+
+</P>
+
+<PRE>
+(let ((x 1234)
+      (y 3456))
+   (let ((foo z))
+      (+ (- foo x)
+         (+ bar y))))
+</PRE>
+
+<P>
+        
+goes as follows.  (We'll assume that this expression occurs at
+the top level.)
+
+</P>
+<P>
+Since we're compiling a top-level expression, we compile it in
+a compile-time environment that corresponds to the top-level
+environment.  Toplevel environments are treated specially,
+because they're not created dynamically the way local binding
+environments.  There's a one-to-one relationship bewteen
+top-level compile-time environments and the corresponding
+run-time environments.  We'll represent the top-level compile-time
+environment as a special kind of environment frame, which really
+just holds a pointer to the top-level runtime environment so
+that top-level variables can be looked up.
+
+</P>
+<P>
+So we start in a top-level environment, which we'll depict
+as <CODE>[top-level]</CODE>;  we hand this to <CODE>compile</CODE> along with 
+the expression to compile.  <CODE>compile</CODE> is the main dispatch that
+analyzes the expression; in this case, it analyzes it and dispatches (via
+<CODE>compile-list</CODE> and <CODE>compile-special-form</CODE>) to <CODE>compile-let</CODE>,
+the specialized procedure for compiling <CODE>let</CODE> expressions.
+
+</P>
+<P>
+<CODE>compile-let</CODE> compiles the initial value expressions for <CODE>x</CODE>
+and <CODE>y</CODE> using <CODE>compile-multi</CODE>, which in turn calls <CODE>compile</CODE>
+recursively; they are compiled in the (top-level) environment, which is just
+passed along because no new environments have been created yet.
+In this case it doesn't matter, though, because they're just
+literals.  (The values <CODE>1234</CODE> and <CODE>3456</CODE> get added to the literal 
+list at this point.)  Then <CODE>compile-let</CODE> generates the code to bind 
+<CODE>x</CODE> and <CODE>y</CODE>.
+
+</P>
+<P>
+So far, the code generated looks like:
+
+<PRE>
+  (fetch-literal #1)    ; fetch 1234
+  (push)                ; push it on eval stack
+  (fetch-literal #2)    ; fetch 3456
+  (push)                ; push it on eval stack
+  (bind 2)              ; bind 2 vars (x and y), w/values form eval stack
+</PRE>
+
+<P>
+and the literals list holds <CODE>1234</CODE> and <CODE>3456</CODE>. 
+
+</P>
+<P>
+<CODE>compile-let</CODE> then calls <CODE>compile-sequence</CODE> to compile the
+body of the <CODE>let</CODE>, but first it creates a new compile-time environment,
+to represent the fact that the body sequence will execute in the new
+runtime environment after <CODE>x</CODE> and <CODE>y</CODE> have been bound.
+The structure of this environment is
+
+<PRE>
+   [ x y ] -&#62; [toplevel]
+</PRE>
+
+<P>
+(This is our new, terse way of drawing the box-and-arrow data
+structure for compile time environments.  I got tired of drawing
+ascii art.)
+
+</P>
+<P>
+<CODE>compile-sequence</CODE> calls <CODE>compile</CODE> recursively to evaluate a 
+sequence of expressions;  in this case, there's only one expression
+in the body.
+
+</P>
+<P>
+The recursive call to <CODE>compile</CODE> dispatches (again via
+<CODE>compile-list</CODE> and <CODE>compile-special-form</CODE> to <CODE>compile-let</CODE>,
+to compile the inner <CODE>let</CODE>.
+
+</P>
+<P>
+<CODE>compile-let</CODE> compiles the initial value expressions using
+<CODE>compile-multi</CODE>.  <CODE>compile-multi</CODE> calls <CODE>compile</CODE>
+recursively to compile the one expression in the list, the symbol
+<CODE>z</CODE>.  (Again, the same environment is just passed along, because
+we haven't created a new environment.) 
+
+</P>
+<P>
+The recursive call to compile now dispatches to <CODE>compile-symbol</CODE>,
+which looks up the binding information for the symbol <CODE>z</CODE> in the
+compile-time environment.  There's no binding in the first frame
+(containing <CODE>x</CODE> and <CODE>y</CODE>), so the search goes to the second frame,
+which is the top-level environment, and the top-level binding
+is returned.  This causes a dispatch to
+<CODE>compile-</CODE><CODE>toplevel-</CODE><CODE>var-ref</CODE>,
+which adds the toplevel binding of <CODE>z</CODE> to the literals list and
+generates code to get it from the template and extract its value
+at run time.
+
+</P>
+<P>
+Then <CODE>compile-let</CODE> generates code to bind the fetched value as the
+local variable foo. 
+
+</P>
+<P>
+The code generated so far is:
+
+<PRE>
+  (fetch-literal 1)    ; fetch 1234
+  (push)
+  (fetch-literal 2)    ; fetch 3456
+  (push)
+  (bind 2)             ; bind 2 values (x and y)
+  (fetch-literal 3)       ; get toplevel binding (of z)
+  (t-l-bdg-get)           ; get value from (z's) binding
+  (push)
+  (bind 1)                ; bind one variable (foo)
+</PRE>
+
+<P>
+and the literals list contains <CODE>1234</CODE>, <CODE>3456</CODE>, and the binding
+of <CODE>z</CODE>.
+   
+Now <CODE>compile-let</CODE> creates a new compile-time environment to represent
+the environment created by the inner <CODE>let</CODE>;  its structure is
+
+<PRE>
+ [ foo ] -&#62; [ x y ] -&#62; [toplevel]
+</PRE>
+
+<P>
+and it passes this to <CODE>compile-sequence</CODE> to compile the body of the
+let.  <CODE>compile-sequence</CODE> calls <CODE>compile</CODE> recursively once, handing
+it the new environment, to compile the one body expression,
+<CODE>(+ (- foo x) (+ bar y))</CODE>.
+
+</P>
+<P>
+The recursive call to <CODE>compile</CODE> dispatches (through
+<CODE>compile-list</CODE>) to <CODE>compile-combo</CODE>, which recursively calls
+<CODE>compile</CODE> three times, to generate code for the subexpressions
+<CODE>(+ bar y)</CODE>, <CODE>(- foo x)</CODE>, and <CODE>+</CODE>.  Since no new bindings
+are being created, the recursive calls are given the same environment.
+
+</P>
+<P>
+The recursive call to call <CODE>(+ bar y)</CODE> similarly dispatches to
+<CODE>compile-combo</CODE> and compiles <CODE>y</CODE>, <CODE>bar</CODE>, and <CODE>+</CODE>.
+Each of these calls dispatches to <CODE>compile-symbol</CODE> and the variables 
+are looked up in the compile-time environment.  The lookup for <CODE>y</CODE>
+returns a lexical address of 1,2, so the intermediate code generated is
+
+<PRE>
+  (local-var-ref 1 2)
+</PRE>
+
+<P>
+The lookup for bar doesn't find any local bindings and returns
+the toplevel binding so the binding is added to the literal
+list and the intermediate code is
+
+<PRE>
+  (literal-lookup 4)
+  (t-l-bdg-get)
+</PRE>
+
+<P>
+Similarly, the lookup for <CODE>+</CODE> doesn't find any local bindings and
+returns the toplevel binding, so the binding is added to the literal
+list and the intermediate code is
+
+<PRE>
+  (literal-lookup 4)
+  (t-l-bdg-get)
+</PRE>
+
+<P>
+now the call to <CODE>compile-combo</CODE> that compiles <CODE>(+ bar y)</CODE> can 
+string these three fragments together to get
+
+<PRE>
+  (save-continuation "resume26") ; save state for call to +
+  (local-var-ref 1 2)            ; look up y
+  (push)
+  (literal-lookup 4)             ; get toplevel binding (of bar)
+  (t-l-bdg-get)                  ; get value from bdg (of bar)
+  (push)
+  (literal-lookup 5)             ; get toplevel binding (of +)
+  (t-l-bdg-get)                  ; get value from binding (of +)
+  (apply)                        ; call +
+"resume26"                    
+</PRE>
+
+<P>
+and return that.  Notice that for the argument subexpressions,
+<CODE>compile-combo</CODE> inserts <CODE>(push)</CODE>es to save the values on the 
+eval stack. For the first (function position) subexpression, it leaves
+the value in the value register, which is where it's expected 
+(by <CODE>apply</CODE>).
+
+</P>
+<P>
+The recursive call to <CODE>compile-combo</CODE> to compile <CODE>(- foo x)</CODE>
+goes pretty similarly to the one for <CODE>(+ bar y)</CODE>, the main
+difference being that both <CODE>foo</CODE> and <CODE>x</CODE> are found to be
+local variables and compiled appropriately, with the
+result being the sequence
+
+<PRE>
+  (save-continuation "resume27") ; save state for call to -
+  (local-var-ref 1 2)            ; look up x
+  (push)
+  (local-var-ref 0 1)            ; look up foo
+  (push)
+  (literal-lookup 4)             ; get toplevel binding (of -)
+  (t-l-bdg-get)                  ; get value from binding (of -)
+  (apply)                     ; call -
+"resume27"
+</PRE>
+
+<P>
+The recursive call to compile the symbol <CODE>+</CODE> goes striaghtforwardly
+to <CODE>compile-symbol</CODE>, which looks up <CODE>+</CODE> and finds that it's
+a toplevel variable; the binding is already on the literals list, so the
+code generated is:
+
+<PRE>
+  (literal-lookup 5)   ; get toplevel binding (of +)
+  (t-l-bdg-get)        ; get value from binding (of +)
+</PRE>
+
+<P>
+and this is returned to the outer invocation of <CODE>compile combo</CODE>.
+It can then string together the code for the outer <CODE>+</CODE> expression,
+putting a <CODE>save-continuation</CODE> at the front and adding an <CODE>apply</CODE>
+at the end.  This code is returned to the inner invocation of
+<CODE>compile-let</CODE>, which appends it to its code and returns it to the
+outer invocation of <CODE>compile-let</CODE>, which returns the entire
+code sequence
+
+<PRE>
+  (fetch-literal 1)    ; fetch 1234
+  (push)
+  (fetch-literal 2)    ; fetch 3456
+  (push)
+  (bind 2)             ; bind 2 values (x and y)
+  (fetch-literal 3)       ; get toplevel binding (of z)
+  (t-l-bdg-get)           ; get value from (z's) binding
+  (push)
+  (bind 1)                ; bind one variable (foo)
+  (save-continuation "resume26") ; save state for call to +
+  (local-var-ref 1 2)            ; look up y
+  (push)
+  (literal-lookup 4)             ; get toplevel binding (of bar)
+  (t-l-bdg-get)                  ; get value from bdg (of bar)
+  (push)
+  (literal-lookup 5)             ; get toplevel binding (of +)
+  (t-l-bdg-get)                  ; get value from binding (of +)
+  (apply)                     ; call +
+"resume26"
+  (save-continuation "resume27") ; save state for call to -
+  (local-var-ref 1 2)            ; look up x
+  (push)
+  (local-var-ref 0 1)            ; look up foo
+  (push)
+  (literal-lookup 4)             ; get toplevel binding (of -)
+  (t-l-bdg-get)                  ; get value from binding (of -)
+  (apply)                     ; call -
+"resume27"
+  (literal-lookup 5)          ; get toplevel binding (of +)
+  (t-l-bdg-get)               ; get value from binding (of +)
+  (apply)                  ; (tail-)call + 
+</PRE>
+
+
+
+<H2><A NAME="SEC292" HREF="schintro_toc.html#SEC292">Preserving Tail-Recursiveness using Compile-Time Continuations</A></H2>
+
+<P>
+One very important thing we glossed over just now when describing
+the workings of the compiler was when exactly to save continuations,
+and when not to.  It is important to save continuations before
+calling procedures, if the callee must return and resume the
+execution of the caller.  This is not necessary for tail calls,
+and in fact Scheme requires that continuations <CODE>not</CODE> be saved
+for tail calls--if we save continuations before tail-calls
+that happen to implement loops, we may end up with an unbounded
+accumulation of unnecessary continuations.
+
+</P>
+<P>
+Another important question is when returns should be executed.
+If a procedure ends in a tail-call, it is assumed that the
+callee will do a return.  But eventually something actually
+has to do a return, and pass control back to its caller (or
+the caller of its caller... whatever).  This situation occurs
+when the tail expression of a procedure is not another
+procedure call, e.g., returning the value of a variable or a literal.
+
+</P>
+
+
+
+<H3><A NAME="SEC293" HREF="schintro_toc.html#SEC293">When Should We Save Continuations?</A></H3>
+
+<P>
+The general rule is that if a procedure call is the last thing
+a procedure does, no continuation should be saved--we can just
+jump into the callee, and since our state was not saved, the
+callee's return will resume our caller.  To get this right,
+we just have to keep track of which expressions are being compiled
+in "tail position."
+
+</P>
+<P>
+In the procedure
+
+<PRE>
+(lambda (x)
+   (if (foo x)
+       (bar (quux x))
+       (baz)))
+</PRE>
+
+<P>
+the <CODE>if</CODE> expression is in tail position, because the value of
+the if will be returned as the value of the procedure.  The
+condition expression <CODE>(foo x)</CODE> is not in tail position, because
+after it is executed, control must return to this procedure
+so that either the consequent expression <CODE>(bar (quux x))</CODE> or
+the alternative expression <CODE>(baz)</CODE> can be executed.
+
+</P>
+<P>
+Note that both the consequent and the alternative expressions
+are in tail-position;  whichever is executed, that will be
+the last thing this procedure does, and the value computed
+will be the result of this procedure.
+
+</P>
+<P>
+On the other hand, if we modify the procedure to always
+return <CODE>#f</CODE>, none of these expressions is in tail position.
+
+<PRE>
+(lambda (x)
+   (if (foo x)
+       (bar (quux x))
+       (baz))
+   #f)                                                  
+</PRE>
+
+<P>
+That's because now the expression <CODE>#f</CODE> is in tail position,
+not the <CODE>if</CODE> expression;  whatever the if does, control must
+come back to this procedure so that the value <CODE>#f</CODE> can be
+returned.
+
+</P>
+<P>
+Notice that the values to compute the arguments of a combination
+(procedure call) are never in tail position--after computing
+them, control must always come back so that the procedure can
+be applied.  The combination itself may be a tail call, of course,
+in which case once the arguments are computed, the apply may
+happen and control may never return.
+
+</P>
+<P>
+To get this kind of right, all that is necessary is that each
+recursive call to compile should know whether the code being
+compiled is going to be used in tail position or not; for this
+we use a <EM>compile-time continuation</EM>.  (Fear not--it's simpler
+than compile time environments.  It's really just a flag that
+gets passed along to recursive calls to <CODE>compile</CODE>, sometimes 
+getting turned off along the way.)
+ 
+Keep in mind that tails of tails are in tail positions, but
+non-tail subexpressions are not.  So in the case of nested <CODE>if</CODE>'s
+where the outer <CODE>if</CODE> is in tail position, only the consequent
+and the alternative of the consequent and the alternative
+are in tail position, e.g., in
+
+<PRE>
+(lambda ()
+   (if (if (a)
+           (b)
+           (c))
+       (if (d)
+           (e)
+           (f))
+       (if (g)
+           (h)
+           (i)))
+</PRE>
+
+<P>
+the tail calls are <CODE>(e)</CODE>, <CODE>(f)</CODE>, <CODE>(h)</CODE>, and <CODE>(i)</CODE>.
+All of the calls in the first inner <CODE>if</CODE> must return, because the
+value returned must be used by the outer <CODE>if</CODE>.  The calls to the
+condition expressions in the other two inner ifs must also return, because
+the values must be used to tell which of <EM>their</EM> alternative and
+consequent to use.
+
+</P>
+<P>
+For each basic kind of expression, we can tell which subexpressions
+should be considered tails if the overall expression is:
+
+<UL>
+<LI>
+
+     For a sequence, only the last subexpression can be a tail--the
+     rest are non-tails.
+<LI>
+
+     For <CODE>let</CODE>, the initial value expressions for bindings
+     are never tails, and the body is just a sequence, whose last
+     subexpression can be a tail.
+<LI>
+
+     For an if, the consequent and alternative can be tails, but
+     the condition never can.
+<LI>
+
+     For a procedure, the body is a sequence that's always in tail
+     position.         
+</UL>
+
+<P>
+         
+When we compile something in tail position, we pass <CODE>compile</CODE>
+a flag saying so.  The flag will be examined, and passed along
+to subexpressions if appropriate for compiling the kind of
+subexpression in question.
+
+</P>
+<P>
+For example, if <CODE>compile-sequence</CODE> is handed a flag saying it should
+compile for tail position, it will pass the tail flag along when
+calling <CODE>compile</CODE> recursively on its last subexpression.  For its
+other subexpressions, however, it will always pass the non-tail
+flag, because they must always return to execute the next expression
+in the sequence.
+
+</P>
+<P>
+Similarly, <CODE>compile-if</CODE> will pass whatever flag it is given along to
+when calling <CODE>compile</CODE> for its consequent and alternative subexpressions,
+but never when compiling its condition expression.
+
+</P>
+<P>
+<CODE>compile-combo</CODE> will always pass along a non-tail flag when
+calling compile on its subexpressions, but will examine the flag
+it's given to tell whether it should save a continuation before
+evaluating all of them.
+
+</P>
+<P>
+<CODE>compile-lambda</CODE> will always compile body expressions in non-tail
+position, except for the last one, which is always compiled in
+tail position.  (For simplicitly, <CODE>compile-lambda</CODE> just hands the
+whole body to <CODE>compile-sequence</CODE>, with a tail flag.)
+
+</P>
+<P>
+<CODE>compile-let</CODE>, always compiles its initial value expressions in
+non-tail position, and its body expressions like a sequence.  (For 
+simplicity, it just hands the whole body to <CODE>compile-sequence</CODE>,
+with whatever flag it's given.)
+
+</P>
+
+
+<H4><A NAME="SEC294" HREF="schintro_toc.html#SEC294">Compiling Returns</A></H4>
+
+<P>
+As mentioned above, when an expression other than a procedure
+call is a tail of a procedure, it must be accompanied by a
+return.  That is, <EM>every</EM> tail of a procedure must be either
+an <CODE>apply</CODE> (which will call something which will return, perhaps
+indirectly because of tail calling) or a <CODE>return</CODE>.
+
+</P>
+<P>
+The compiler can handle this by putting ensuring that wherever
+we generate intermediate code that is a leaf of the expression
+graph (e.g., in <CODE>compile-variable-ref</CODE> and <CODE>compile-literal</CODE>),
+we check the compile-time continuation flag to see if the
+expression occurs in tail position.  If so, rather than simply
+leaving the value in the value register, we also execute a <CODE>return</CODE>
+sequence--a series of instructions that will grab the values
+out of the first partial continuation on the chain, and restore
+them into the registers and evaluation stack to resume the
+suspended procedure.  We have a special intermediate code
+instruction that stands for this sequence, called return.
+
+</P>
+<P>
+Consider the following procedure:
+
+<PRE>
+(lambda (a b c)
+   (if (if a
+           (b)
+           c)
+       d
+       (e)))
+</PRE>
+
+<P>
+When compiling its body, we dispatch through <CODE>compile-sequence</CODE>
+and recursively call <CODE>compile</CODE> to compile the <CODE>if</CODE> in tail
+position.  It recursively calls <CODE>compile</CODE> to compile the nested
+if in non-tail position, which in turn recursively calls
+<CODE>compile</CODE> to compile <CODE>a</CODE>, <CODE>(b)</CODE> and <CODE>c</CODE> in non-tail
+position.
+
+</P>
+<P>
+Note that <CODE>a</CODE> is a leaf expression, and since it's in non-tail
+position, it can just leave its value in the value register.
+The subsequent code (the test for false and conditional branch
+that's part of the code for the inner <CODE>if</CODE>) will expect that value
+there, so that's fine.
+
+</P>
+<P>
+The expression <CODE>(b)</CODE> is not in tail position, because it inherits
+non-tail position from the inner <CODE>if</CODE>, so a continuation must be
+saved before the call to <CODE>b</CODE>.  When <CODE>b</CODE> returns, its value will be
+in the value register and execution will resume at the branch
+that is part of the <CODE>if</CODE>. 
+
+</P>
+<P>
+Similarly, the expression <CODE>c</CODE> is in non-tail position (which it
+also inherited from the inner if);  it can just leave its value
+in the value register where subsequent code can find it.  (In
+this case, it's the value returned by the inner <CODE>if</CODE>, and tested
+by the outer <CODE>if</CODE>'s test for false and conditional branch.)
+
+</P>
+<P>
+The expression <CODE>d</CODE> is different.  It's in tail position, and it's
+a leaf (not a call).  It can't just leave it's value in the
+register, because it's the end of the procedure;  it must
+therefore have a <CODE>return</CODE> sequence tagged onto it.
+
+</P>
+<P>
+The expression <CODE>(e)</CODE> is just a tail call, which can just call
+<CODE>e</CODE> without saving a continuation.  Whatever e calls can do whatever
+it wants, and probably something will eventually leave something
+in the value register and pop the caller's continuation.
+
+</P>
+<P>
+The code generated for the above procedure is:
+
+<PRE>
+  (bind 3)                     ; bind args (a, b, and c)
+  (local-var-ref 0 1)             ; get value of a
+  (push)
+  (branch-on-false "else32")      ; compare and maybe br to inner else
+  (save-continuation "resume33")
+  (local-var-ref 0 2)             ; get value of b
+  (apply)                         ; call b
+"resume33"
+  (branch end)
+"else32"
+  (local-var-ref 0 3)                ; get value of c
+"end32"
+  (branch-on-false else1)      ; compare and may br to outer else
+  (fetch-literal 1)               ; get toplevel binding of d
+  (t-l-var-get)                   ; get value of d from binding
+  (return)                        ; and return it
+  (branch end1)
+"else31"
+  (fetch-literal 2)               ; get toplevel binding of e
+  (t-l-var-get)                   ; get value of e from binding
+  (apply)                         ; and tail-call it
+"end31"
+</PRE>
+
+<P>
+(Notice that when we generated the code for the outer else, we
+generated a branch that can never be taken.  <CODE>compile-if</CODE>
+generates a label for the end of the code, so that after executing the
+consequent, control will resume at whatever code follows the <CODE>if</CODE>.
+In the case of this <CODE>if</CODE>, the consequent will always execute a
+return before encountering the branch.  A slightly smarter compiler
+would probably recognize this situation, and eliminate the branch.)
+ 
+
+
+<H2><A NAME="SEC295" HREF="schintro_toc.html#SEC295">Compiling Top-Level Expressions</A></H2>
+
+<P>
+We said earlier that the compiler mainly uses recursion to generate
+intermediate code for nested expressions.  To make this useful,
+though, at some point the intermediate code for a top-level
+expression must be converted into actual executable code and packaged
+up so that it can be called.
+
+</P>
+<P>
+Suppose we interact with our system via a read-eval-print loop
+where eval is really implemented by compiling the expression and
+executing the resulting compiled code.
+
+</P>
+<P>
+To make it easy to implement this, it's nice if there aren't
+very many kinds of top-level expressions that the compiler has
+to generate code for and be able to actually call.  In particular,
+it's convenient if different kinds of expression can be transformed
+into the same kind of expression.  The easy way to do this is
+to make all different kinds of executable expressions into
+expressions that generate procedures, and then call those procedures. 
+
+</P>
+<P>
+If we type
+
+<PRE>
+(let ((x 2))
+  (+ x x))
+</PRE>
+
+<P>
+to the r.e.p. loop, the r.e.p. loop can simply wrap this up
+in a procedure expression compile that and package it up as
+something executable, and call it.  In effect the read-eval-print
+loop will convert it to
+
+<PRE>
+(lambda ()
+   (let ((x 2))
+      (+ x x))
+</PRE>
+
+<P>
+before compiling it, and call the resulting closure to execute it.
+
+</P>
+<P>
+Likewise, expressions like
+
+</P>
+
+<PRE>
+(set! foo quux)
+</PRE>
+
+<P>
+and
+
+<PRE>
+(if bar baz)
+</PRE>
+
+<P>
+can be wrapped up as
+
+<PRE>
+(lambda () (set! foo quux))
+</PRE>
+
+<P>
+and
+
+<PRE>
+(lambda () (if bar baz))
+</PRE>
+
+<P>
+Now when we start compiling, we only have to deal with one kind of
+thing--a whole procedure, and when we get the resulting code back and
+package it up to run it, we'll always be dealing with the code for a
+whole procedure.  That makes it easy to create an actual closure to call.
+
+</P>
+<P>
+The main routine we use to start off compilation is <CODE>compile-procedure</CODE>,
+which takes an expression, a compile-time environment, a compile-time
+continuation, and a literal list as arguments.  It returns
+intermediate code and an updated literal list for the procedure.
+
+</P>
+<P>
+We take the intermediate code and hand it to the procedure
+<CODE>intermediate-code-&#62;executable-code</CODE> which generates the executable
+code object.  (This may be by translating the sequence of intermediate
+code instructions into the equivalent sequences of assembly language
+instructions, and running that through an assembler.  Before doing
+the assembly, it may run the intermediate code through one or more
+optimization phases.
+
+</P>
+<P>
+We take the resulting executable code and the literals list, and
+hand them to <CODE>make-template</CODE> to create the template object.
+
+</P>
+<P>
+Now we can hand the appropriate runtime environment and the
+template to <CODE>make-closure</CODE> and get back a callable closure for the
+procedure.
+
+</P>
+
+
+<H2><A NAME="SEC296" HREF="schintro_toc.html#SEC296">Compiling <CODE>lambda</CODE> Expressions Inside Procedures</A></H2>
+
+<P>
+When we compile a <CODE>lambda</CODE> expression, we must generate code that
+will create a closure at run time.  A very naive way to do this
+would be to generate code that would call the compiler at runtime
+to compile the <CODE>lambda</CODE> expression into a procedure, plus a little
+code to create a closure of that object in the runtime environment.
+
+</P>
+<P>
+Luckily, this is not necessary, and the compiler can do all of
+the real compilation at compile time--since the code for the
+<CODE>lambda</CODE> expression will be the same every time it's executed,
+and since lexical scope guarantees that it will always execute
+in an environment with the same structure, only one version of
+the code is needed, and it can be shared among all closures of
+that procedure.  The template can be shared as well.
+
+</P>
+<P>
+The compiler therefore generates code and a template for the <CODE>lambda</CODE>
+procedure;  at run time, the actual code for the <CODE>lambda</CODE> expression
+just makes a closure on the heap and initializes its environment
+pointer and template pointer.  This code will get the environment
+pointer from the environment register (and put it in the environment
+field of the new closure);  the template pointer will be the ponter
+to the template for the <CODE>lambda</CODE> procedure.
+
+</P>
+<P>
+To allow this little code sequence to quickly grab the template
+for the procedure being closed, the compiler stores a pointer to
+that template in the template of the procedure which executes
+the <CODE>lambda</CODE> expression.  For example, if a <CODE>lambda</CODE>
+expression is encountered while compiling procedure <CODE>foo</CODE>, 
+the compiler will compile the <CODE>lambda</CODE> procedure and store
+its template in the template of <CODE>foo</CODE>.  (While compiling <CODE>foo</CODE>,
+it simply records the pointer to the new <CODE>lambda</CODE> procedure's
+template as another literal.  Then it will
+end up in <CODE>foo</CODE>'s template like other literals.)
+
+</P>
+<P>
+So the code generated for
+
+<PRE>
+   ...
+   (lambda (x)
+      (...))
+   ...
+</PRE>
+
+<P>
+looks like
+
+<PRE>
+   ...
+   (envt-reg-get)     ; primitive to copy envt. reg. onto eval stack
+   (push)
+   (fetch-literal 15) ; grab template pointer for lambda proc
+   (push)
+   (make-closure)     ; code that will create closure w/those values
+   ...
+</PRE>
+
+<P>
+The real trick is in compiling the <CODE>lambda</CODE> procedure and stuffing
+its template into the template of the procedure that contains
+the <CODE>lambda</CODE> expression.  The compiler just calls itself to generate
+the code and template then saves the template in the literal list
+and generates code like the above to reference the right literal.
+
+</P>
+
+
+<H2><A NAME="SEC297" HREF="schintro_toc.html#SEC297">Compiling Top-level Definitions</A></H2>
+
+<P>
+We said above that we can deal with top-level expressions by turning
+them all into <CODE>lambda</CODE> expressions, which will have the effect of
+evaluating those expressions when called.
+
+</P>
+<P>
+This is a little bit tricky when dealing with top-level definitions,
+because top-level definitions can't be nested inside lambda
+expressions in the obvious way--they'd just become local definitions.
+
+</P>
+<P>
+We therefore have to treat them specially.  We use a special procedure,
+<CODE>environment-define!</CODE>, which operates on top-level environments and
+allows us to create top-level bindings.  This is not a standard
+Scheme procedure--it's a special procedure that the compiler can
+generate calls to, but normal portable Scheme code cannot use directly.
+
+</P>
+<P>
+The read-eval-print-loop will therefore recognize top-level
+definitions and treat them specially.  When it encounters one,
+the initial-value expression will be wrapped up as a <CODE>lambda</CODE> and
+compiled, and the results turned into code, a template, and a
+closure.  (The closure is given the runtime toplevel environment
+pointer.)
+
+</P>
+<P>
+The closure will be called to get a result for the initial value
+expression, and <CODE>environment-define!</CODE> will be used to create and
+initialize the toplevel variable.
+
+</P>
+<P>
+(This might appear at first to cause a scoping problem: if the
+binding isn't created until after the initial value expression is
+compiled, the compiler won't see the binding.  But recall that if
+we compile an expression that uses an undefined variable, we assume
+it's a toplevel variable and create a binding object for it, and
+mark that object invalid.   If the binding has already been created
+by a forward reference in this way, <CODE>environment-define!</CODE> will
+just overwrite the marker with a real value.)
+
+</P>
+<P>
+Of course, if the top-level definition uses procedure definition
+syntax, it is necessary to massage that into a <CODE>lambda</CODE> expression
+before doing the above massaging and compiling.
+
+</P>
+
+
+<H2><A NAME="SEC298" HREF="schintro_toc.html#SEC298">Interfacing to the Runtime System</A></H2>
+
+<P>
+In order to support garbage collection (as is required for Scheme),
+there must be some agreement between the compiler and the garbage
+collector, so that the collector can find the pointers that the
+running program might find, and ensure that all objects the
+program could reach from them are preserved.
+
+</P>
+<P>
+A common way of doing this (used in RScheme and Scheme-48) is to
+have a fixed set of registers (plus maybe an eval stack) that hold
+all of the root values that the collector needs to know about, and
+guarantee that whenever garbage collection occurs, all pointers
+will be identifiable as such.  Any given register must be known
+to never contain pointers, to always contain a pointer, or to
+contain self-identifying (tagged) values that are decodable to
+see if they're pointers.
+
+</P>
+<P>
+For example, in the straightforward compiled system we've described
+in detail, the <CODE>VALUE</CODE> register and the <CODE>EVAL</CODE> stack only 
+contain normal Scheme values: tagged values that can be checked to see
+if they're pointers.  On the other hand, the template and procedure,
+pointers would probably always contain raw pointers, since they can
+only point at one kind of thing, and the tags would slow some things 
+down.
+
+</P>
+<P>
+There might also be some other registers, which always contain
+nonpointers.
+
+</P>
+
+
+<H3><A NAME="SEC299" HREF="schintro_toc.html#SEC299">Garbage Collection</A></H3>
+
+
+
+<H4><A NAME="SEC300" HREF="schintro_toc.html#SEC300">Safe Points</A></H4>
+
+<P>
+Many systems (like RScheme and Scheme-48) ensure that garbage
+collection can only happen when a program is at a well-defined
+"safe point", not at an arbitrary point in the code.  At a safe
+point, all pointer values are known to be recognizable.  In between
+safe points, it's okay for the code to use values that aren't
+properly decipherable by the GC.  (For example, a register that
+normally contains only tagged values might briefly hold a raw
+pointer.)
+
+</P>
+<P>
+This is easy in a single-threaded system;  the GC just keeps
+some space in reserve, so that it never runs out of memory between
+safe points.  If an allocation requires dipping into this reserve,
+a flag is set so that a GC will occur at the next safe point.
+
+</P>
+<P>
+The usual trick is to ensure that each procedure call and backward
+branch is a safe point.  This ensures that the a program (or thread)
+reaches safe points periodically, 
+
+</P>
+<P>
+It's a little bit trickier in a multithreaded system--you have to
+make sure that you suspend threads at safe points, so that if another
+thread forces a GC while another thread is suspended. 
+
+</P>
+
+
+<H4><A NAME="SEC301" HREF="schintro_toc.html#SEC301">GC at Any Time</A></H4>
+
+<P>
+Some systems do not use safe points, and in effect make every
+point in the code a safe point for collection.  They ensure that
+no matter where a GC occurs (or where a thread was suspended
+before the GC occurred), there will be enough information lying
+around so that the collector can find all of the pointers it needs
+to find.
+
+</P>
+<P>
+Some compilers do this by restricting the way registers are used
+and code is generated.  (For example, the Orbit compiler only uses
+certain registers to hold pointers, and only uses certain others
+to hold nonpointers.  In addition, all pointers in registers must
+point directly to the beginning of an object;  array indexing cannot
+be converted into arbitrary ponter arithmetic by the optimizing 
+compiler.) 
+
+</P>
+<P>
+Other compilers allow more use of odd representations and more
+flexible use of registers, so that values can be figured out at
+run time.  For example, a register might be assumed to hold
+nonpointers, except at points in the code flagged by the compiler,
+based on its having register allocated a variable there.
+
+</P>
+
+
+<H3><A NAME="SEC302" HREF="schintro_toc.html#SEC302">Interrupts</A></H3>
+
+
+
+<H2><A NAME="SEC303" HREF="schintro_toc.html#SEC303">Advanced Compiler and Runtime System Techniques</A></H2>
+
+
+
+<H3><A NAME="SEC304" HREF="schintro_toc.html#SEC304">Inlining Small Procedures</A></H3>
+
+<P>
+The system we've described so far generates fairly slow code, and a
+major culprit is the frequency of continuation saving and procedure
+calls.  Even very small, frequently-executed procedures like eq?,
+car, cdr, and + require a handful if instructions to call and
+another handful to return, plus another handful to save a continuation
+if it's a non-tail call.  This is much slower that the cost of
+similar operations in conventional languages like C or Pascal;  in
+those languages, these simple little "operations" don't have the
+semantics of calls to first-class procedures.
+
+</P>
+<P>
+Sometimes it is desirable to trade away some of the purity and
+elegance of a language like Scheme, and trade reduced flexibility
+for better performance.  One way of doing this is by declaring
+frequently-used small procedures <CODE>not</CODE> to be redefinable, and allowing
+the compiler to compile those operations inline rather than as
+procedure calls.  In some systems this only works for built-in
+procedures that the compiler understands, but in others the compiler
+is smart enough to inline user-defined procedures if so directed.
+
+</P>
+<P>
+In some Scheme systems, you can declare procedures to be inlinable,
+or use a compiler flag that says you promise not to redefine the
+common little procedures that are most valuable to inline.  This
+means that you can't change the definition of something like +
+on the fly, but you seldom want to.  A common tradeoff is to avoid
+inlining any but the most frequently-called procedures during
+program development, and once the program is finished, recompile
+with lots of inlining.  This gives you the flexibility to modify
+procedure definitions on the fly during debugging, while getting
+maximum speed once it's clear which procedures won't ever be
+redefined in normal operation.
+
+</P>
+<P>
+Some high-tech compilers use advanced techniques to do lots of
+inlining when it's safe, without reducing flexibility much or
+requiring the user to supply a lot of declarations.
+
+</P>
+<P>
+The Self compiler aggressively inlines code, and automatically
+recompiles the code that is invalidated by changes to procedure
+definitions. (This compiler is for the language Self, not Scheme,
+but similar techniques could be applied to Scheme.)
+
+</P>
+<P>
+Some compilers currently in development have a special mode
+for compiling finished programs which will not be used with
+a read-eval-print loop.  Such a compiler takes advantage of the
+fact that if it can look at the whole program (rather than 
+having parts typed in by the user interactively), it can tell
+which variables could ever be modified at run time.  (As long
+as there are no calls to eval at run time, the compiler can
+tell that all of the code for the program exists at compile-time;
+new closures may be created at run time, but not totally new
+procedures.)  After globally determining that there is no code
+in the program that could change the definition of a procedure,
+it is free to inline the code for that procedure into its callers. 
+
+</P>
+
+
+<H3><A NAME="SEC305" HREF="schintro_toc.html#SEC305">Type Declarations and Type Analysis</A></H3>
+
+<P>
+Another key performance problem with naive implementations of
+Scheme (or other dynamically typed languages) is that basic
+operations are generally slow relative to their execution in
+conventional statically-typed languages.  For example, the
+Scheme procedure + must check the types of its arguments and
+(depending on those types) execute any of several possible
+code sequences to add two numbers.  Usually, the checking
+overhead alone is several times greater than the cost of the
+actual addition.
+
+</P>
+<P>
+One way of reducing this cost is by extending Scheme to allow
+the user to declare the types of some variables.  The compiler
+may be able to use this information to compile fast versions
+of operations for values of known types.  (This is especially
+true if common operations are inlined--the compiler can choose
+to inline the appropriate version rather than the more general
+code.)
+
+</P>
+<P>
+Another way of reducing type checking cost is for the system to
+automatically infer the types of some expressions.  For example,
+consider the expression <CODE>(+ a 22)</CODE>.  Since <CODE>22</CODE> is a literal, 
+its type is known at compile time.  If the compiler can inline the
+<CODE>+</CODE> procedure, it may at least omit the type check of that argument.
+
+</P>
+<P>
+A combination of declarations and inferencing can work well.  For
+example, if the user has declared variable a to be of type <CODE>&#60;integer&#62;</CODE>,
+then the compiler can tell that <CODE>(+ a 22)</CODE> is an expression whose
+arguments are integers (so no run time type test are necessary there)
+<EM>and</EM> whose result is an integer, which may eliminate the need for
+type checks by the expression that uses the value.
+
+</P>
+<P>
+More aggressive schemes are possible for reducing the frequency
+of dynamic type checks.  For example, the Self compiler aggressively
+inlines and transforms code so that multiple dynamic type checks
+can be collapsed into a single one.
+
+</P>
+
+
+<H3><A NAME="SEC306" HREF="schintro_toc.html#SEC306">Using More Hardware Registers</A></H3>
+
+<P>
+[ blah blah ]
+
+</P>
+<P>
+For example, it's very likely a good idea to use more registers,
+and either not have an eval stack or not use it as often.  Our
+simple abstract machine requires arguments to be passed on the
+eval stack, which means storing into memory at least once for
+each argument, and loading back from memory when arguments are
+used.  Most modern machines have several hardware registers
+available for argument passing, and more for holding intermediate
+values of computations.
+
+</P>
+<P>
+If we have a few more registers that can be used for argument
+passing, we could just leave the argument values in those known
+registers, and procedures could expect them there.  In many
+cases, argument values could be computed in a way that the
+result is left in the appropriate argument-passing register,
+without having to copy it there from somwhere else.  Similarly,
+in many cases, procedures could leave their arguments in the
+argument passing registers and use them there, without actually
+copying them into a binding environment on the heap.  (Even if
+only a few registers can be devoted to this, it will account
+for the large majority of arguments passed, since most procedure
+calls are to procedures that take between one and three arguments.)
+
+</P>
+<P>
+Similarly, in many cases a temporary value generated by evaluating
+a subexpression could be left in a register, and then used by
+another expression, without pushing and popping the eval stack.
+
+</P>
+<P>
+This can be a big performance win--it is much faster to operate
+on arguments and temporary values that are already in registers,
+rather than copying them to and from memory all of the time.
+
+</P>
+<P>
+Using more registers can make the compiler and runtime system
+more complicated.  If variables are in registers when continuations
+are saved, their values must be saved in the continuations and
+restored at procedure returns.  This requires the compiler to
+keep track of which registers are in use at which points, and
+generate appropriate code.  It also complicates the interface
+between the compiled code and the garbage collector;  the garbage
+collector must be able to find all of the pointer values that
+are stored in registers, so that it can find all of the reachable
+objects.  The compiler must therefore record sufficient information
+that all pointer values can be found at garbage collection time.
+(Alternatively, the compiler may record a safe approximation of
+the information, and require the collector to make conservative
+guesses about what's what.)
+
+</P>
+
+
+<H3><A NAME="SEC307" HREF="schintro_toc.html#SEC307">Closure Analysis</A></H3>
+
+<P>
+One of the performance problems with a naive implementation of
+Scheme is that in the general case, variable bindings must be
+allocated on the garbage-collected heap, and procedure calls
+must be via pointers to closures.  This is often much slower than
+the usual implementation of conventional programming languages,
+which don't have to support <CODE>lambda</CODE>.  Allocating closures and
+environments on the heap is mainly slow because creating and
+accessing variable bindings is slower than if the variables
+were allocated on a stack or in registers.
+
+</P>
+<P>
+A smart Scheme compiler can get rid of most of this overhead
+by analyzing programs and noticing that many closures are used
+in stereotyped ways, and calls to them can be implemented more
+cheaply than the naive implementation.  Similarly, analysis
+of expressions may reveal that most binding environments can't
+possibly be captured by closures, and therefore don't need
+to be allocated on the garbage-collected heap.  The bindings
+can be saved in continuations along with temporary values,
+or a more conventional stack may be used, or (best of all),
+the bindings can be register-allocated.
+
+</P>
+<P>
+A simple example of a language-level closure that doesn't need
+the fully general naive implementation is a closure created
+by a <CODE>lambda</CODE> expression that appears in the function position
+of a combination:
+
+<PRE>
+((lambda (x)
+    (+ x x))  
+ 2))
+</PRE>
+
+<P>
+(Recall that constructs like this are often generated by macros
+that implement binding constructs like <CODE>let</CODE>---this one is 
+equivalent to
+
+<PRE>
+(let ((x 2)
+   (+ x x))
+</PRE>
+
+<P>
+In this case, we can tell from the fact that the <CODE>lambda</CODE> expression
+appears in the function position that the closure can't "escape"
+and have anything weird done with it.  That is, no pointer to the
+closure is assigned into a variable binding, or passed to a
+procedure call, or inserted into a data structure.  It's clear
+that the only thing that can happen to this closure is that it
+will be called, and then the pointer to it will be "dropped," i.e.,
+not passed anywhere else.  The closure will therefore become
+garbage immediately after it's executed.
+
+</P>
+<P>
+A smart compiler will therefore recognize that all the closure
+really does is bind its variable and execute it's body;  it will
+leave out the code to create the closure and just compile in
+the equivalent code--in this case, it will generate the obvious
+code for a <CODE>let</CODE> expression.
+
+</P>
+<P>
+(Some compilers always transform <CODE>let</CODE>'s and <CODE>letrec</CODE>'s into 
+<CODE>lambda</CODE> combinations, and rely on their optimizers to recognize the
+unnecessary <CODE>lambda</CODE>'s and remove them.  This may seem backwards,
+but it's nice because the same optimizations work whether the
+lambda combinations were the result of transforming a <CODE>let</CODE>,
+or macroexpanding a user-defined macro, or written directly
+by the user, or whatever.  The more sophisticated the optimizer,
+the more simply the user can write macros and procedures, and
+expect the compiler to sort it all out and generate efficient
+code.)
+
+</P>
+<P>
+Another simple case for closure and environment analyis is binding
+environments that don't have any closures created in their scopes.
+Suppose that our compiler inlines calls to <CODE>car</CODE>, <CODE>eq?</CODE>,
+and <CODE>cdr</CODE>, and consider the expression
+
+<PRE>
+(let ((x (car a))
+   (if (eq? (car x) target)
+       (car (cdr x))
+       #f))
+</PRE>
+
+<P>
+in this case, the body of the <CODE>let</CODE> can be compiled into entirely
+inline code, and it is clear that there is no possible path
+of execution that can create a closure that captures <CODE>x</CODE>.  <CODE>x</CODE>
+can therefore be allocated in a register for its whole lifetime,
+making this code much faster.
+
+</P>
+<P>
+[ separate section?  Figure out structure here... ]
+
+</P>
+
+<P>
+Actually, some of these analyses are trickier than they appear,
+due to the presence of side effects and <CODE>call/cc</CODE>.
+
+</P>
+<P>
+[ Haven't talked about <CODE>call/cc</CODE> yet! ]
+
+</P>
+<P>
+Consider the expression, where we don't assume any inlining
+
+<PRE>
+(let ((x (car a)))
+   (if (eq? (car x) target)
+       (car (cdr x))
+       (set! x (foo))))
+</PRE>
+
+<P>
+At first it appears that since there are no <CODE>lambda</CODE>'s in the 
+expression, <CODE>x</CODE> can be allocated in a register, and saved in
+continuations across calls.  (E.g., when calling <CODE>car</CODE>, we could 
+just save the value of <CODE>x</CODE> in the continuation and have it restored
+when <CODE>car</CODE> returns, right?)
+Unfortunately, if we don't have any guarantees that <CODE>car</CODE> won't be
+redefined in weird ways, then it's possible that the call will be
+to procedure that will (directly or indirectly) call <CODE>call/cc</CODE>,
+and capture a continuation that could be used to return into this
+procedure any number of times.  In that case, we can't be sure that
+we won't return into this code and modify <CODE>x</CODE>.  If we did, then each
+time we returned into this environment, we should see the latest
+value of <CODE>x</CODE>.  This will happen if the value of <CODE>x</CODE> is in a
+normal binding environment on the heap, but not if it's in a register
+that gets saved in a continuation.  Recall that when we restore a
+continuation, we just copy the values out into the registers.  If we
+restore the same continuation multiple times, we'll just keep copying
+the same value of <CODE>x</CODE> back out.
+
+</P>
+<P>
+To get this right, we have to ensure that if there are any assignments
+to <CODE>x</CODE>, then all references to <CODE>x</CODE> go through a pointer to a
+heap-allocated binding.  Then when we save a continuation, we save this 
+pointer to the binding of <CODE>x</CODE>, not the <EM>state</EM> (value) of the 
+binding of <CODE>x</CODE>.  Every time set or read the value of <CODE>x</CODE>, we
+go through this indirection to the same binding, and see the latest value.
+
+</P>
+<P>
+Because of this, high-tech scheme compilers keep track of which
+variables are ever <CODE>set!</CODE> anywhere in their scopes, and make sure to
+allocate those variables' bindings on the heap.
+
+</P>
+<P>
+In Scheme, it is a common idiom to code iteration as recursion;
+macros for different looping constructs often compile into <CODE>letrec</CODE>'s
+with tail-calling <CODE>lambda</CODE> expressions.
+
+</P>
+<P>
+While this is a very powerful framework for expression various
+patterns of iteration, a naive implementation is slow.  In most
+cases, loops created in this way are actually just used as loops,
+and it is desirable to compile away the overhead of closure creation
+and calling.  For example, consider a named <CODE>let</CODE> like 
+
+<PRE>
+(let loop ((x 0))
+   &#60;body&#62;
+   (if (&#60; x 10)
+       (loop (+ x 1))))
+</PRE>
+
+<P>
+that has been transformed to
+
+<PRE>
+(let ((loop (lambda x)
+               &#60;body&#62;
+               (if (&#60; x 10)
+                   (loop (+ x 1))))))
+   (loop 0)
+</PRE>
+
+<P>
+We can look at this expression, and if no reference to the variable
+<CODE>loop</CODE> occurs in the &#60;body&#62; expression, we can tell that we can
+compile it as a loop.
+
+</P>
+<P>
+The analysis here is just slightly more complicated than the one
+that allows us to optimize closures that are produced by <CODE>lambda</CODE>
+expressions in function position of a combination.
+
+</P>
+<P>
+When compiling the <CODE>let</CODE>, we can keep track of each <CODE>let</CODE> variable
+and see whether it is ever used for as anything but the name of
+a procedure to tail-call--if the value of loop is never assigned,
+and never read except to call it, then we know that the "calls"
+to loop don't really need to be full-blown closure calls at all.
+We can inline the code for the body of the loop and compile these
+calls as jumps directly to that code.
+
+</P>
+<P>
+FOOD FOR THOUGHT--does it matter whether the calls are tail-calls
+or not, if we just treat them as procedure calls to a known address,
+and go ahead and save a continuation with the right label?
+
+</P>
+
+
+
+<H3><A NAME="SEC308" HREF="schintro_toc.html#SEC308">Register Allocating Loop Variables for Loops</A></H3>
+
+<P>
+Notice that register closure analysis is particularly important
+for loop control variables and variables for little <CODE>let</CODE>'s inside
+loops.  Because Scheme requires that a loop variable be bound
+again (to fresh memory) at each iteration of a loop, actually
+allocating them on the heap is expensive.  If it can be determined
+that the variable is dead at the end of the loop, however, then
+the variable can be re-bound at each iteration by simply
+re-using the same register.  (We're binding the name to a particular
+piece of memory--the register--over and over again, and it just
+happens that these conceptual rebindings incur no runtime cost.)
+
+</P>
+<P>
+With good closure analysis, loop conversion, and register allocation,
+a Scheme compiler can compile "normal" loops into code that's
+just as efficient as any compiler's.
+
+</P>
+
+
+<H3><A NAME="SEC309" HREF="schintro_toc.html#SEC309">Conventional Optimizations</A></H3>
+
+<P>
+Besides the optimizations described above, conventional compiler
+optimizations are applicable to optimizing languages like Scheme.
+
+</P>
+<P>
+Just as in a FORTRAN or C compiler, data flow analysis and control
+flow analysis can let the compiler simplify intermediate code and
+produce better machine code.
+
+</P>
+
+
+<H3><A NAME="SEC310" HREF="schintro_toc.html#SEC310">Stack Caches</A></H3>
+
+<P>
+Inlining and closure analyisis can greatly reduce the amount of
+heap allocation in a Scheme implementation.  Allocating all binding
+environments and continuations on the heap may inflate allocation
+rates by an order of magnitude over the rate of allocation of normal
+data structures like pairs and vectors.   With a simple compiler
+and garbage collector, this can greatly inflate garbage collection
+costs.  Despite the high rate at which continuations and environments
+are allocated, there are typically relatively few of them live at
+any given time--the vast majority of them are used very, very
+briefly and then become garbage.
+
+</P>
+<P>
+Inlining procedure calls may greatly reduce the allocation of
+continuations, and closure analysis may allow most bindings to be
+allocated in registers instead of on the heap.
+
+</P>
+<P>
+Still, it may be desirable to keep most of the continuations
+and environments from making it to the normal garbage-collected heap.
+
+</P>
+<P>
+A <CODE>stack cache</CODE> is an area of memory (or pool of discontiguous chunks
+of memory) that's used to for initial allocation of continuations
+and/or binding environments, in the expectation that most of them
+will die quickly.  A stack cache caches part of the continuation
+chain;  it's called a stack cache because it behaves mostly like
+a stack.  Stack caches may be used for continuatons, with environments
+still being allocated on the heap, or a more complex design may be
+used to keep most environments from making it to the heap as well.
+
+</P>
+<P>
+For the most part, a stack cache is treated like a stack, in that
+continuations are pushed and popped as though it were a stack.  When
+a continuation is captured by <CODE>call/cc</CODE>, however, the continuation
+chain is first moved to the heap so that it can be preserved in the
+usual way.  This is generally a good tradeoff, because <CODE>call/cc</CODE>
+is not typically executed very often, and the stack cache can behave like a
+stack most of the time.  The large majority of continuations will
+be reclaimed very quickly, by popping the stack cache, while a
+small minority will be moved out to the normal heap.
+
+</P>
+<P>
+Caching binding environments is a little trickier, but the basic
+principle is the same;  most environments are created in the stack
+cache, and only moved to the garbage-collected heap when necessary,
+i.e., when a closure is created on the heap.  At that moment, the
+environment is moved to the heap, one frame at a time, until
+a frame is reached that is already on the heap.  (The code that
+does this must ensure that an environment is never copied to the
+heap twice, destroying the sharing of outer environements by 
+inner environments created in their scope.)
+
+</P>
+<P>
+It is not clear how desirable a stack cache for environments is,
+given a compiler that does a reasonably good job of closure analysis.
+Using a stack cache for environments makes closure creation slower,
+and if most of the short-lived environments have been eliminated
+by closure analysis and register allocation, it may not be worth it.
+
+</P>
+<P>
+There is also some controversy about whether stack caches are
+worthwhile in general, or whether a generational garbage collector
+will take care of the large volume of short-lived data efficiently.
+
+</P>
+<P>
+One interesting point is that a stack cache really <EM>is</EM> a kind of
+generational garbage collection scheme, which exploits the typically
+short lifetimes of particular kinds of data.  (When environments
+and continuations are moved to the normal heap, that can be viewed
+as moving objects from one generation to the next.  This special
+generation is cheaper than a normal generational scheme, however,
+because of the stereotyped structures of continuation chains and
+binding environments.)
+
+</P>
+<P>
+A stack cache, because it's small, can reduce the amount of memory
+that is used very frequently, compared to a generational GC without
+a stack cache.  (A stack cache may only be a few kilobytes, but
+the youngest generation of a generational GC may be hundreds
+of kilobytes, or megabytes.)  For some cache architectures, frequent
+reuse of this large an area causes significant cache miss penalties.
+(For some other architectures, the misses still occur but the cost
+is surprisingly low.  I believe that stack caches are nonetheless
+a good idea, because they never hurt much and may sometimes help
+a lot.)
+
+</P>
+<P>
+Scheme-48 has a stack cache that caches both continuations and
+binding environments.  RScheme has a stack cache for continuations
+only, and relies on the compiler to compile away most heap allocation
+of binding environments.  (This may not currently be as effective
+as it should be--the compiler needs more testing and improvement
+before it will generate really good code.)
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_141.html">previous</A>, <A HREF="schintro_143.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

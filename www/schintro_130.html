@@ -1,0 +1,1630 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Defining New Special Forms</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_129.html">previous</A>, <A HREF="schintro_131.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H2><A NAME="SEC181" HREF="schintro_toc.html#SEC181">Defining New Special Forms</A></H2>
+
+<P>
+Sometimes we want to write stereotyped <EM>code</EM>, not just
+stereotyped data structures.  As with data, we sometimes want
+part of our stereotyped piece of code to vary.  We can do
+this with <EM>syntax extensions</EM>, also known as macros.
+
+</P>
+<P>
+(If you're familiar with macros from C, don't scoff.  Macros in
+C are stunningly lame and hard to use compared to Lisp or Scheme
+macros.  Read on to find out what you've been missing.  If you're
+familiar with Lisp macros, but have never done advanced programming
+with them, you probably don't realize how powerful they are--Lisp
+macros are so error-prone that people often avoid them.  Scheme
+macros are very powerful, but automate away some of the tricky
+parts.)
+
+</P>
+<P>
+Macros are syntax extensions to a programming language, expressed
+as a translation of expressions.  By writing a macro, what you're
+really doing is extending the functionality of the compiler or
+interpreter--you're telling it how to compile (or interpret)
+a new construct, by telling it how to rewrite that construct into
+something it already knows how to compile or interpret.
+
+</P>
+<P>
+(Conceptually, defining a macro is extending the compiler--you're
+telling the parser how to recognize a new construct, to change
+the grammar of the language, and also specifying how to generate
+code for the new construct.  This is something you can't do in most
+languages, but it's easy in Scheme.)
+
+</P>
+<P>
+Scheme recognizes macro definitions, and then uses them to recognize
+and translate the new constructs into other constructs.
+The interpreter or compiler's process of translating a 
+level constructs is often called "macro expansion," despite the
+fact that the resulting expression may not be bigger than the original 
+expression.  Macroexpansion can be recursive, because macros can use
+macros, and a macro can even use itself, like a recursive procedure.
+
+</P>
+<P>
+Syntax extension is powerful, and hence somewhat dangerous when used too
+casually.  Be aware that when you write a macro, you can change the syntax
+of your programming language, and that <EM>can</EM> be a bad thing--you
+and others may no longer be able to easily understand what the
+program does.  Used judiciously, however, such syntactic extensions
+are often just what you need to simplify your programs.  They
+are especially useful for writing programs that write programs,
+so that you can avoid a lot of tedious repetitive coding.
+
+</P>
+<P>
+Macros are so useful that they're usually used in the implementation
+of Scheme itself.  Most Scheme compilers actually understand only
+a few special forms, and the rest are written as macros. 
+
+</P>
+<P>
+In a later chapter, I'll describe some advanced uses of macros,
+which let your "roll your own" language with powerful new features.
+
+</P>
+
+
+
+<H3><A NAME="SEC182" HREF="schintro_toc.html#SEC182">Macros vs. Procedures</A></H3>
+
+<P>
+Why do we want macros?  In Scheme, the main code abstraction mechanism
+is procedural abstraction, e.g. using <CODE>define</CODE> or <CODE>lambda</CODE> to
+write procedures that do stereotyped things.  In a sense, we 
+"specialize" procedures by passing them argument values--a procedure
+can do different things depending on the values it's given to work
+with.  We can also "specialize" procedures by creating closures
+in different environments.  Isn't this enough?
+
+</P>
+<P>
+Not in general.  While procedural abstraction is very powerful,
+there are times when we may want to write stereotyped routines that
+can't be written as procedures.
+
+</P>
+<P>
+Suppose, for example, you have a Scheme system which gives you things
+like <CODE>let</CODE> and <CODE>if</CODE>, but not <CODE>or</CODE>.  (Real Schemes all 
+provide <CODE>or</CODE>, but pretend they don't.  It makes a nice, simple
+example.)
+
+</P>
+<P>
+You want an <CODE>or</CODE> construct (rather like the one actually built 
+into Scheme).  This <CODE>or</CODE> can take two arguments;  it evaluates
+the first one and returns the result if it's a true value, otherwise it
+evaluates the second one and returns that result.
+
+</P>
+<P>
+Notice that you can't write <CODE>or</CODE> as a procedure.  If <CODE>or</CODE>
+were a procedure, both of its arguments would always be evaluated <EM>before</EM>
+the actual procedure call.  Since <CODE>or</CODE> is only supposed to evaluate
+its second argument if the first one returns <CODE>#f</CODE>, it just wouldn't
+work.
+
+</P>
+<P>
+If Scheme didn't have <CODE>or</CODE>, you could fake it at any given point
+in your program, by writing an equivalent <CODE>let</CODE> expression with
+an <CODE>if</CODE> statement in it.
+
+</P>
+<P>
+For example, suppose you wanted to write the equivalent of
+<CODE>(or (foo?) (bar?))</CODE>.
+
+</P>
+<P>
+As a first try, you might do this:
+
+</P>
+
+<PRE>
+(if (foo?)
+    (foo?)
+    (bar?))
+</PRE>
+
+<P>
+      
+That is, test <CODE>(foo?)</CODE>, and return its value if it's a true value.
+That's not really quite right though, because this if statement
+evaluates <CODE>foo?</CODE> twice: once to test it, and once to return it.
+
+</P>
+<P>
+We really only want to evaluate it once--if <CODE>(foo?)</CODE> is an
+expression with side effects, evaluating it twice could make the program
+incorrect as well as inefficient.
+
+</P>
+<P>
+To avoid this, we can always evaluate the first expression
+just once to get the value, and store that value in a temporary variable
+so that we can return it without evaluating it again:
+
+</P>
+<P>
+You could instead write
+
+</P>
+
+<PRE>
+(let ((temp (foo?)))
+   (if temp
+       temp
+       (bar?)))
+</PRE>
+
+<P>
+This <CODE>let</CODE> expression gives the same effect as
+<CODE>(or (foo?) (bar?))</CODE>, because it evaluates <CODE>foo</CODE> exactly once,
+and then tests the value;  if the value is true, it returns that value.
+(The use of a <CODE>let</CODE> variable to stash the value allows us to test
+it without evaluating <CODE>(foo?)</CODE> again.)  If the value is <CODE>#f</CODE>,
+it evaluates <CODE>(bar?)</CODE> and returns the result.
+
+</P>
+<P>
+This is the transformation we'd like to be able to automate by
+defining <CODE>or</CODE> as a macro.
+
+</P>
+<P>
+Here's a simple version of <CODE>or</CODE> written as a macro.  I've called
+it <CODE>or2</CODE> to distinguish it from Scheme's normal <CODE>or</CODE>.
+
+</P>
+
+<PRE>
+(define-syntax or2
+   (syntax-rules ()
+      ((or2 a b)        ; pattern
+       (let ((temp a)) ; template
+          (if temp
+              temp
+              b)))))
+</PRE>
+
+<P>
+What we're saying to Scheme is that we want to define the syntax of
+<CODE>or</CODE> by giving <EM>syntax rules</EM> for recognizing it and translating
+it.  For this simple version of <CODE>or</CODE>, we only need one rule, which says
+to translate <CODE>(or </CODE><EM>a b</EM><CODE>)</CODE> into the desired <CODE>let</CODE>
+expression.
+
+</P>
+<P>
+<CODE>(or a b)</CODE> is called the rule's <EM>pattern</EM>, which specifies
+what counts as a call to the <CODE>or</CODE> macro, and the <CODE>let</CODE>
+expression is the rule's <EM>template</EM>, which specifies
+the equivalent code that Scheme should translate calls into.
+ 
+The variables <CODE>a</CODE> and <CODE>b</CODE> are called <EM>pattern variables</EM>.
+They stand for the actual expressions passed as arguments to the
+macro.  They are "matched" to the actual expressions when the
+pattern is recognized, and when the template is interpreted or compiled,
+the actual expressions are used where the pattern variables occur.
+
+</P>
+<P>
+You can think of this in two steps.  When a macro is used,
+
+</P>
+
+<OL>
+<LI>
+
+  the template is copied, except that the pattern variables are replaced
+  with the macro's argument expressions, 
+<LI>
+
+  the result is interpreted (or compiled) in place of the call
+  expression.
+</OL>
+
+<P>
+(It's really not quite this simple, but that's the basic idea.)
+
+</P>
+<P>
+In some ways, macro arguments are a lot like procedure arguments,
+but in other ways they're very different.  The pattern variables are
+<EM>not</EM> bound at run time, and don't refer to storage locations.
+They're only used in translating a macro call into the equivalent
+expression. 
+
+</P>
+<P>
+Always remember that arguments to a macro are <EM>expressions</EM> used in
+transforming the code, and <EM>then</EM> the code is executed.  (For example,
+the output of the <CODE>or</CODE> macro doesn't contain a variable
+named <CODE>a</CODE>;  <CODE>a</CODE> is just a shorthand for whatever expression
+is passed as an argument to the macro.  In the example use
+<CODE>(or (foo?) (bar?))</CODE>, the expression <CODE>(foo?)</CODE> is
+what gets evaluated at the point where <CODE>a</CODE> is used in the
+macro body.)
+
+</P>
+<P>
+This is why our macro has to use a temporary variable, like the
+hand-written equivalent of <CODE>or</CODE>.  If we tried to write
+the macro like a procedure, without using a temporary variable,
+like this
+
+</P>
+
+<PRE>
+(define-syntax or
+   (syntax-rules ()
+      ((or a b)
+       (if a
+           a
+           b))))
+</PRE>
+
+<P>
+then <CODE>(or (foo?) (bar?))</CODE> would be translated into
+
+</P>
+
+<PRE>
+(if (foo?)
+    (foo?)
+    (bar?))
+</PRE>
+
+<P>
+As with the buggy handwritten version, <CODE>(foo?)</CODE> would be evaluated
+twice when this expression was evaluated.
+
+</P>
+<P>
+(This is the most common mistake in writing macros--forgetting that
+while macros give you the ability to control when argument expressions
+are evaluated, they also <EM>require</EM> you to control it.  It's safe
+to use a procedure argument multiple times, because that's just
+referring to a value in a run-time binding.  Using a macro argument
+causes evaluation of the entire argument expression at that point.)
+
+</P>
+<P>
+We can make a better <CODE>or</CODE> by using more rules.  We might want <CODE>or</CODE>
+to work with any number of arguments, so that
+
+</P>
+
+<OL>
+<LI>
+
+  <CODE>or</CODE> of zero arguments returns <CODE>#f</CODE>, because it has zero true
+       arguments, 
+<LI>
+
+  <CODE>or</CODE> of one argument is equivalent to that argument--it's true
+      if and only if that argument is true.
+<LI>
+
+  <CODE>or</CODE> of two or more arguments evaluates its first argument, and
+      returns its value if it's true.  Otherwise, it computes the
+      <CODE>or</CODE> of the rest of its arguments, and returns its
+      result.
+</OL>
+
+<P>
+Here's the Scheme definition with these three rules:
+
+</P>
+
+<PRE>
+(define-syntax or
+   (syntax-rules ()
+      ((or)             ; OR of zero arguments
+       #f)              ;   is always false
+      ((or a)           ; OR of one argument
+       a)               ;   is equivalent to the argument expression
+      ((or a b c ...)   ; OR of two or more arguments 
+       (let ((temp a))  ;   is the first or the OR of the rest
+          (if temp           
+              temp             
+              (or b c ...)))))) 
+</PRE>
+
+<P>
+Notice that this definition is recursive.  (The third rule's template
+uses the <CODE>or</CODE> macro recursively.)  If we hand <CODE>or</CODE> four
+arguments, like this: <CODE>(or foo bar baz quux)</CODE>, it should
+be equivalent to <CODE>(or foo (or bar (or baz (or quux))))</CODE>.
+
+</P>
+<P>
+Scheme will use recursion to translate the expression, one
+step at a time.  When Scheme encounters a macro call, it transforms
+the call into the equivalent code, using the appropriate rule.
+It then interprets (or compiles) the resulting expression.  If the
+result itself includes a macro call, then the interpreter (or compiler)
+calls itself recursively to translate <EM>that</EM> before
+evaluating it.   For a correctly written macro, the recursive
+translation will eventually "bottom out" when no more macro calls
+result, and the code will be evaluated in the usual way.
+
+</P>
+<P>
+(As I'll show later, this fits in very neatly with the interpreter's
+or compiler's recursive evaluation of expressions.)
+
+</P>
+<P>
+This recursion is recursion in Scheme's <EM>transformation</EM>
+of the call expression into equivalent code--it doesn't
+mean that the resulting code is recursive.  A Scheme compiler
+will do all of the recursive transformation at compile time,
+so there's no runtime overhead.  Of course, the recursion
+has to terminate, or the compiler will not be able to finish
+the translation.
+
+</P>
+<P>
+In this definition of <CODE>or</CODE>, the third rule contains the symbols
+<CODE>c ...</CODE>.  The Scheme identifier <CODE>...</CODE> is treated specially,
+to help you write recursive rules.  (In previous examples, I used
+<CODE>...</CODE> as an ellipsis to stand for code I didn't want to write out,
+but here we're usuing the <EM>actual Scheme identifier</EM> <CODE>...</CODE>;
+it's actually used in the Scheme code for macros.)
+
+</P>
+<P>
+Scheme treats a pattern variable followed by <CODE>...</CODE> as matching
+<CODE>zero or more</CODE> subexpressions.  In this <CODE>or</CODE> macro, <CODE>c ...</CODE>
+matches <EM>all</EM> of the arguments after the first two.
+
+</P>
+<P>
+Scheme matches <CODE>(or foo bar baz quux)</CODE> by the third rule,
+whose pattern <CODE>(or a b c ...)</CODE>, because it has at least two
+arguments.  In applying the rule, Scheme matches <CODE>a</CODE> to <CODE>foo</CODE>,
+<CODE>b</CODE> to <CODE>bar</CODE>, and <CODE>c ...</CODE> to the <EM>sequence</EM> of
+expressions <CODE>baz bleen</CODE>.
+
+</P>
+<P>
+[ This is similar to how you use <CODE>unquote-splicing</CODE> inside
+  backquote--you can splice a list into a list at the same
+  level, rather than nesting it. ]
+
+</P>
+<P>
+The result of processing this <CODE>or</CODE> is
+
+</P>
+
+<PRE>
+(let ((temp foo))
+      (if temp
+          temp
+          (or bar baz quux)))
+</PRE>
+
+<P>
+Now Scheme evaluates this expression.
+
+</P>
+<P>
+But there's another <CODE>or</CODE> in there--when Scheme gets to
+<CODE>(or bar baz quux)</CODE> it will match the third rule again,
+with <CODE>a</CODE> matched to <CODE>bar</CODE>, <CODE>b</CODE> matched to <CODE>baz</CODE>,
+and  <CODE>c ...</CODE> being matched to just <CODE>quux</CODE>.
+The result of this macro-processing step is
+
+<PRE>
+(let ((temp foo))
+   (if temp
+       temp
+       (let ((temp bar))
+          (if temp
+              temp
+              (or baz quux)))))
+</PRE>
+
+<P>
+And the new let expression is evaluated. 
+
+</P>
+<P>
+There <CODE>or</CODE> is again, so Scheme will treat <CODE>(or baz quux)</CODE>
+the same way, again using the third rule--this time matching <CODE>a</CODE> to
+<CODE>baz</CODE>, <CODE>b</CODE> to <CODE>quux</CODE>, and <CODE>c ...</CODE> to nothing at all,
+producing
+
+</P>
+
+<PRE>
+(let ((temp foo))
+   (if temp
+       temp
+       (let ((temp bar))
+          (if temp
+              temp
+              (let ((temp baz)
+                 (if temp
+                     temp
+                     (or quux))))))))
+</PRE>
+
+<P>
+And this will be evaluated.
+
+</P>
+<P>
+Now the resulting <CODE>or</CODE> matches the <EM>second</EM> rule in the <CODE>or</CODE>
+macro, because it has only one argument <CODE>quux</CODE>, which is matched to
+<CODE>a</CODE>.  The whole translation is therefore:
+
+</P>
+
+<PRE>
+(let ((temp foo))
+   (if temp
+       temp
+       (let ((temp bar))
+          (if temp
+              temp
+              (let ((temp baz)
+                 (if temp
+                     temp
+                     quux)))))))
+</PRE>
+
+<P>
+There are no more macro calls here, so the recursion terminates.
+
+</P>
+<P>
+You might have noticed that the example translation of 
+<CODE>(or foo bar baz quux)</CODE> has several different variables
+named <CODE>temp</CODE> in it.  You might have wondered if this
+could cause problems--is there a potential for accidentally
+referring to the wrong variable in the wrong place in the
+code generated by a macro?
+
+</P>
+<P>
+The answer no.  Scheme's macro system actually does some magic to
+avoid this, which I'll discuss later in a later section.  Scheme
+actually keeps track of which variables are introduced by different
+applications of macros, and keeps them distinct--the different
+variables named <CODE>temp</CODE> are treated as though they had
+different names, so that macros follow the same scope rules as
+procedures.  (Scheme macros are said to be <EM>hygienic</EM>;
+what that really means is that they respect lexical scope.)
+
+</P>
+<P>
+You can think of this as a <EM>renaming</EM>, as though Scheme had
+sneakily changed the names each time the macro was applied to transform
+the expression, and the result were 
+
+</P>
+
+<PRE>
+(let ((temp_1 foo))
+   (if temp_1
+       temp_1
+       (let ((temp_2 bar))
+          (if temp_2
+              temp_2
+              (let ((temp_3 baz)
+                 (if temp_3
+                     temp_3
+                     quux)))))))
+</PRE>
+
+<P>
+Scheme implements the same scoping rule for macros and their
+arguments as for procedures and their arguments.
+When you call a procedure, the argument expressions
+are evaluated at the call site, i.e., in the call site environment,
+and the values are passed to the procedure--the environment inside
+the called procedure doesn't affect the meaning of the argument
+expressions.  Likewise 
+
+</P>
+<P>
+In writing macros like <CODE>or</CODE>, we want to control <EM>when</EM>
+and <EM>whether</EM> the arguments are evaluated, but otherwise
+we want them to mean the same thing they would if they were
+arguments to a procedure.
+
+</P>
+<P>
+For example, suppose we call <CODE>or</CODE> with an argument expression
+that happens to use a name that's used inside <CODE>or</CODE>.  <CODE>or</CODE>
+uses a local variable named <CODE>temp</CODE>, and we might just happen
+to pass it an expression using the name <CODE>temp</CODE>.
+
+</P>
+<P>
+Consider the following procedure, which uses local variables <CODE>perm</CODE>
+and <CODE>temp</CODE>, and calls <CODE>or</CODE> in their scope.
+
+</P>
+
+<PRE>
+(define (employee? person)
+  (let ((perm (member person permanent-employees))
+        (temp (member person temporary-employees)))
+     (or perm temp))
+</PRE>
+
+<P>
+If we translated the or macro naively, without worrying about
+accidental naming conflicts, we'd get this:
+
+</P>
+
+<PRE>
+(define (employee? person)
+  (let ((perm (member person permanent-employees))
+        (temp (member person temporary-employees)))
+     (let ((temp perm)
+        (if temp
+            temp
+            temp)))
+</PRE>
+
+<P>
+(This is <EM>not</EM> what R5RS Scheme macros do!)
+
+</P>
+<P>
+Note what's wrong here.  The name <CODE>temp</CODE> was passed into the
+macro from the call site, but it appeared in the body of the macro
+inside the <CODE>let</CODE> binding of <CODE>temp</CODE>.  At the call site,
+it referred to the "outer" <CODE>temp</CODE>, but inside the macro,
+it turne out to refer to something else--in the process of moving
+the expression around, we accidentally changed its meaning.
+
+</P>
+
+
+
+<H2><A NAME="SEC183" HREF="schintro_toc.html#SEC183">Implementing More Scheme Special Forms</A></H2>
+
+<P>
+As examples of Scheme macros, I'll show how to implement several
+special forms in terms of <CODE>lambda</CODE>.  This is how most real
+Scheme compilers work--the compiler itself only "understands"
+how to compile a few special forms directly, but the others can
+be defined as macros.
+
+</P>
+<P>
+Traditionally, the compiler understands
+<CODE>lambda</CODE>, and all other binding forms are implemented in
+terms of <CODE>lambda</CODE> and procedure calling.  The compiler must
+also understand a few other special forms, <CODE>if</CODE>, <CODE>set!</CODE>,
+<CODE>quote</CODE>, a simple version of <CODE>define</CODE> [ did I leave
+one out? ].)
+
+</P>
+
+
+<H3><A NAME="SEC184" HREF="schintro_toc.html#SEC184"><CODE>let</CODE></A></H3>
+
+<P>
+Recall that in chapter [ whatever ], I explained how the semantics
+of <CODE>let</CODE> can be explained in terms of <CODE>lambda</CODE>.  For
+any <CODE>let</CODE> expression, which binds variables and evaluates
+body expressions in that scope, there is an exactly equivalent
+expression using <CODE>lambda</CODE> and procedure calling.  The <CODE>lambda</CODE>
+creates a procedure which will bind the variables as its argument
+variables, and execute the body of the <CODE>let</CODE>.  This <CODE>lambda</CODE>
+is then used in a combination--calling the procedure makes it
+bind variables when it accepts arguments.
+
+</P>
+
+<PRE>
+(define-syntax let ()
+   (syntax-rules
+     ((_ ((var value-expr) ...) body-expr ...)  ; pattern
+      ((lambda (var ...)
+          body-expr ...)
+       (value-expr ...)))))
+</PRE>
+
+<P>
+Here I've used an underscore to stand for the keyword <CODE>let</CODE> in the
+macro call pattern.  This is allowable, and recommended, because it
+avoids having to write the keyword in several places.  (If you had
+to write out the keyword in each pattern, it would make it more difficult
+and error-prone to change the name of a macro.)
+
+</P>
+<P>
+I've also taken advantage of the fact that Scheme is pretty smart about
+patterns using the <CODE>...</CODE> (ellipsis) symbol.  The pattern has
+two ellipses. One matches any number of binding forms (variable names
+and initial value expressions);  the other matches any number of body
+expressions.
+
+</P>
+<P>
+The body expressions matched by <CODE>body-expr ...</CODE> are simply
+used in the body of the <CODE>lambda</CODE> expression.
+
+</P>
+<P>
+The expressions matched by <CODE>(var value-expr) ...</CODE> are used differently,
+however--they are not simply substituted into the macro template.
+Instead, <CODE>(var ...)</CODE> is used to generate the argument list
+for the <CODE>lambda</CODE>, and <CODE>value-expr ...</CODE> is used to generate
+the list of initial expressions.
+
+</P>
+<P>
+Scheme's macro system is smart enough to figure out what's going on.
+If the pattern contains an ellipsis following a compound form
+(like <CODE>(var init-expr) ...</CODE>, and the template uses one of the
+pattern variables from that compound form (followed by an ellipsis),
+then Scheme assumes you want <EM>the corresponding part</EM> of
+each form matched by the pattern form.
+
+</P>
+<P>
+If we think of the expressions as s-expressions, we've matched a
+pattern that is one list of two-element lists, and restructured
+it into two separate lists of elements.  (That is, we're going from a
+list of <CODE>car</CODE>s and <CODE>cadr</CODE>s to a list of <CODE>car</CODE>s
+and a list of <CODE>cadr</CODE>s.)
+
+</P>
+<P>
+As an example of use, consider
+
+</P>
+
+<PRE>
+(let ((var-a (some-procedure foo))
+      (var-b (some-procedure bar)))
+   (quux var-a)
+   (quux var-b))
+</PRE>
+
+<P>
+which translates to
+
+</P>
+
+<PRE>
+((lambda (var-a var-b)
+    (quux var-a)
+    (quux var-b))
+ (some-procedure foo)
+ (some-procedure bar))
+</PRE>
+
+<P>
+[ The following is out of place--here I should just be showing some
+  uses of macros.  The problem is that I don't want to lie and pretend
+  that it's all very simple--Scheme does something sophisticated when
+  you write binding contstructs as macros... 
+  
+  This stuff will all be clearer after I've talked about hygiene
+  problems with Lisp macros, and laziness and call-by-name... how to
+  fwd ref gracefully? ]
+  
+An extraordinarily astute and thoughtful reader might wonder if there's
+something wrong here.  (Luckily, there's actually nothing to worry about.)
+Recall that when discussing <CODE>or</CODE>, I said
+that Scheme is careful to treat names introduced by a macro as though
+they were distinct, effectively renaming variables introduced in a macro.
+What about the argument variables to <CODE>lambda</CODE> in this example?
+One might think <CODE>var-a</CODE> and <CODE>var-b</CODE> would just be renamed and
+we'd get:
+
+</P>
+
+<PRE>
+((lambda (var-a-1 var-b-1)
+    (quux var-a)
+    (quux var-b))
+ (some-procedure foo)
+ (some-procedure bar))
+</PRE>
+
+<P>
+Clearly, this isn't what we want--we <EM>want</EM> <CODE>var-a</CODE> and
+<CODE>var-b</CODE> in the <CODE>lambda</CODE> body to refer to the variables introduced
+in by <CODE>lambda</CODE>---that's what it's for.
+
+</P>
+<P>
+Scheme's macro processor is smart enough to infer that this is what
+you want.  When you write a macro that accepts a <EM>name</EM> as an
+argument and <EM>binds</EM> it, Scheme assumes you're doing that for a good
+reason.  If you then take another argument to the same macro and
+use it in the scope of that new variable, Scheme assumes you want
+occurrences of the name to refer to the <CODE>new</CODE> variable.
+
+</P>
+<P>
+That is, Scheme uses an algorithm that checks what you do
+with names in forms that get passed as arguments into a macro.  If
+you just use them in the normal ways, evaluating or assigning to
+them as variable names, Scheme assumes you mean to refer to
+whatever those names refer to at the call site of the macro.
+(That's normal lexical scope.)  But if you take the name and
+use it <CODE>as the name of a new variable</CODE>, Scheme assumes
+you're defining a binding construct, and that any other
+arguments you put in that scope should see the new binding,
+instead of being scoped at the call site.)
+
+</P>
+<P>
+Scheme can generally assume this, because if you're not implementing
+a scoping binding form (like <CODE>let</CODE> or <CODE>do</CODE>), there's no
+reason for a macro to accept a name as an argument and then turn
+around and bind it.
+
+</P>
+
+
+<H3><A NAME="SEC185" HREF="schintro_toc.html#SEC185"><CODE>let*</CODE></A></H3>
+
+<P>
+Once we have <CODE>let</CODE>, we can implement <CODE>let*</CODE> in terms
+of that.  We simply write a recursive macro that peels off
+one binding form at a time and generates a <CODE>let</CODE>, so that
+we get a nested set of <CODE>let</CODE>s that each bind one variable.
+
+</P>
+
+<PRE>
+(define-syntax let* ()
+   (syntax_rules
+      ((_ () body-expr ...)
+       (begin body-expr ...))
+      ((_ ((var1 value-expr1)(var value-expr) ...)
+       (let ((var1 value-expr))
+          (_ ((var value-expr) ...)
+             body-expr ...)))))
+</PRE>
+
+<P>
+This macro uses two syntax rules.  The first is the termination
+case for recursive macroexpansion.  A <CODE>let*</CODE> that has an empty
+binding form (i.e., binds zero variables) should be translated into
+a <CODE>begin</CODE>; it will just sequence the body
+expressions.
+
+</P>
+<P>
+The recursive rule says that a <CODE>let*</CODE> with one or more binding
+subforms should translate into a <CODE>let</CODE> that performs the first
+binding and another <CODE>let*</CODE> to bind the rest and evaluate the
+body.  (Note that I've used the <CODE>_</CODE> shorthand for <CODE>let*</CODE>
+in the recursive call, as well as in the pattern.)
+
+</P>
+<P>
+As with <CODE>let</CODE>, Scheme recognizes this as a binding construct,
+and does the right thing--it notices that the <CODE>var</CODE> argument
+passed into the macro is used as a name of a new binding in the
+macro, so it assumes that the new binding should be visible to
+the body expressions. 
+
+</P>
+
+
+<H3><A NAME="SEC186" HREF="schintro_toc.html#SEC186"><CODE>cond</CODE></A></H3>
+
+
+
+<H3><A NAME="SEC187" HREF="schintro_toc.html#SEC187">Discussion</A></H3>
+
+<P>
+Scheme macros also have several features I haven't demonstrated,
+to make it easier to write more sophisticated macros than <CODE>or</CODE>,
+and I'll demonstrate those later, too.
+
+</P>
+<P>
+In the next section, though, I will discuss a different and simpler
+kind of macro system, which is <EM>not</EM> standard Scheme,
+and <EM>does</EM> have problems with variable names.
+
+</P>
+
+
+<H2><A NAME="SEC188" HREF="schintro_toc.html#SEC188">Lisp-style Macros</A></H2>
+
+<P>
+In this section, I'll discuss a simple kind of macro system that isn't
+standard in Scheme (and you might be able to skim this section
+without too much loss) but is interesting for several reasons.
+
+</P>
+
+<UL>
+<LI>
+
+It is very easy to explain how it works--it
+is a real macro system, but one which is very easy to implement.
+We can add it to our interpreter with a few function definitions.
+This should clear up any confusion about what macros basically
+are, and how to think about them.  (It's also another nice example
+of Scheme programming--we'll get to cheat and use <CODE>quasiquote</CODE>
+to do most of our work for us.  Then I'll show how to implement
+<CODE>quasiquote</CODE>, too.)
+<LI>
+
+The simple Lisp-style macro system also demonstrates two important
+issues in macros: the power of procedural transformation, and problems
+with scoping when code is transformed.  An understanding of Lisp
+macros can only help later when we return to Scheme macros for an
+in-depth discussion of how to work and how to use them.
+<LI>
+
+The new standard Scheme macro system is safer than Lisp macros, and very
+useful, but not quite as powerful. Sometimes it's they're still useful,
+if you use them for simple things they're appropriate for.  Some
+of our later examples will use this kind of macro.
+<LI>
+
+[ R5RS will have macros, but IEEE/ANSI Scheme does not, and may not
+for some time.  Most Schemes do support Lisp-style macros, even
+though they're not part of the standard... and you can use them to
+bootstrap a portable implementation of R5RS macros.
+
+[Guile uses Lisp-style macros fairly heavily, so Guile programmers
+should definitely pay attention.] ]
+
+<LI>
+
+[ You might need to program in Lisp some day, or talk intelligently
+about Lisp. ]
+
+<LI>
+
+[ People keep reinventing them, and not noticing that they were invented
+  decades ago, for Lisp--I've seen at least three languages with
+  reinventions of Lisp macros, usually in an inferior form.  I want
+  to make it clear what Lisp macros do, and what's good and bad about
+  them, to avoid further awkward reinventions of the wheel. ]
+</UL>
+
+
+
+<H3><A NAME="SEC189" HREF="schintro_toc.html#SEC189">Ultra-simple Lispish Macros</A></H3>
+
+<P>
+The classic macro system is the Lisp macro system, which allows
+the user to define an arbitrary Lisp procedure to rewrite a
+new construct.  (Most dialects of Lisp, e.g., Common Lisp, have
+a macro facility of the same general kind, called <CODE>defmacro</CODE>.)
+We'll talk for a moment about a simplified version of Lisp-style
+macros.  Later we'll explain why and how Scheme macros are better,
+at least for most purposes.
+
+</P>
+<P>
+Suppose we have a macro system that we can use to tell
+the interpreter or compiler that when it sees an expression that's
+a list starting with a particular symbol, it should call a particular
+routine to rewrite that expression, and use the rewritten version
+in its place.
+
+</P>
+<P>
+For the <CODE>or</CODE> example, we want to tell the compiler that if it
+sees an expression of the form <CODE>(or </CODE><EM>a b</EM><CODE>)</CODE>
+it should rewrite that into an expression of the form
+
+<PRE>
+(let ((temp a)
+   (if temp
+       temp
+       b))
+</PRE>
+
+<P>
+So now we want to tell the compiler how to rewrite expressions
+like that.  Since Lisp expressions are represented as lists, we
+can use normal list operations to examine the expression and
+generate the new expression.  Let's assume our system has
+a special form called <CODE>define-rewriter</CODE> that lets us specify
+a procedure of one argument to write a particular kind of
+expression.
+
+</P>
+<P>
+Here's a rather ugly rewriter macro for <CODE>or</CODE>:
+
+<PRE>
+; OR with subtle scope bug
+(define-rewriter 'or          ; tell compiler how to rewrite (or ...)
+   (lambda (expr)
+      (let ((a (cadr expr))              
+            (b (caddr expr)))
+         (cons 'let                                 ; make LET form
+               (cons (list (list 'temp a)))         ; make let binding form
+                     (append '(if temp temp)        ; make IF form
+                             (list b))
+</PRE>
+
+<P>
+There's actually a scoping problem with this macro, which I'll ignore
+for now--it's the problem that define-syntax fixes.  Later, I'll show
+what's wrong and fix it, but for a while I just want to talk about
+basic syntax of Lisp-style macros.
+
+</P>
+<P>
+Now when the interpreter or compiler is about to evaluate an
+expression represented as a list, it will check to see if it starts
+with <CODE>or</CODE>.  If so, it will pass the expression to the above
+rewriter procedure, and interpret or compile the resulting list
+instead.
+
+</P>
+<P>
+(Actually, macroexpansion doesn't have to happen just before
+interpreting or compiling a particular expression.  The system
+might rewrite all of the macro calls in a whole procedure, or
+a whole program, before feeding the procedure or program to
+the normal part of the compiler.  It's easier to understand
+macros if they're interleaved with expression evaluation
+or compilation, though--it's just an extra case in the main
+dispatch of your interpreter or compiler.)
+
+</P>
+<P>
+Implementing <CODE>define-rewriter</CODE> is easy.  (We'll show an 
+implementation for our example interpreter in a later section.) 
+We only need to do two simple things:
+
+</P>
+
+<UL>
+<LI>
+
+  Provide a procedure that can add rewriter procedures to a table,
+  keyed by the name of the forms they rewrite.
+<LI>
+
+  Modify the interpreter (or compiler) to check whether expressions
+  of the form <CODE>(</CODE><EM>symbol</EM> <EM>...</EM><CODE>)</CODE> begin
+  with the name of a rewriter macro, and if so, to call the
+  rewriter to transform the expression before interpreting
+  (or compiling) it.
+</UL>
+
+<P>
+That's all.
+
+</P>
+<P>
+The above system works, but it has several awkwardnesses.  One
+is that it is tedious to write routines that construct s-expressions
+directly.  We can use <CODE>quasiquote</CODE> to make this easier.  It
+will allow us to simply write the s-expression we want the macro
+to produce, and use unquote to fill in the parts we get from
+the arguments to the macro.
+
+</P>
+
+<PRE>
+; OR with subtle scope bug
+(define-rewriter 'or       ; tell compiler how to rewrite (or ...)
+   (lambda (expr)
+      (let ((a (cadr expr))              
+            (b (caddr expr)))
+         `(let ((temp ,a)) ; return an s-expression of this form
+             (if temp
+                 temp
+                 ,b))
+</PRE>
+
+<P>
+This is much easier to read.  The backquoted expression is now readable
+as code--it tells us the general structure of the code produced by
+the macro, and the commas indicate the parts that vary depending on
+the arguments passed to the macro.
+
+</P>
+<P>
+Note that there is no magic here: <CODE>define-rewriter</CODE> and quasiquotation
+can be used independently, and are very different things.  It just happens
+that quasiquotation is often very useful for the things you want to
+do in macros--returning an s-expression of a particular form.
+
+</P>
+<P>
+This simple rewriting system is still rather tedious to use, for several
+of reasons.  First, we always have to quote the name of the special
+form we're defining.  Second, it's tedious to write a <CODE>lambda</CODE>
+every time.  Third, it's tedious to always have to destructure the
+expression we're rewriting to get the parts we want to put into
+the expression we generate.  ("Destructure" means take apart
+to get at the components--in this case, subexpressions.)
+
+</P>
+
+
+<H4><A NAME="SEC190" HREF="schintro_toc.html#SEC190">Better Lisp-style Macros</A></H4>
+
+<P>
+It would be nice if the macro facility allowed you to declare the
+argument pattern to the macro, and automatically destructured it for you.
+Most Lisp systems have a special form called <CODE>defmacro</CODE> that does
+this for you, and avoids the need to write a <CODE>lambda</CODE> expression
+every time.  For consistency with Scheme naming conventions,
+we'll call our equivalent <CODE>define-macro</CODE>.
+
+</P>
+<P>
+<CODE>define-macro</CODE> implicitly creates a transformation procedure whose
+body is the body of the define-macro form.  It also implicitly destructures
+the expression to be transformed, and passes the subexpressions to the
+transformation procedure.
+
+</P>
+<P>
+Using <CODE>define-macro</CODE>, we can write <CODE>or</CODE> this way, specifying
+that <CODE>or</CODE> takes two arguments:
+
+</P>
+
+<PRE>
+; OR with subtle scope bug
+(define-macro (or a b)
+   `(let ((temp ,a))
+       (if temp
+           temp
+           ,b))
+</PRE>
+
+<P>
+We didn't have to write the code that destructures the form into
+<CODE>a</CODE> and <CODE>b</CODE>---<CODE>define-macro</CODE> did that for us.  We also
+didn't have to explicitly write a <CODE>lambda</CODE> to generate the
+transformation procedure; <CODE>define-macro</CODE> did that too.
+
+</P>
+<P>
+This makes the syntax of <CODE>define-macro</CODE> similar to a procedure-defining
+<CODE>define</CODE> form.  Still, you should always remember that you're
+not writing a normal procedure: you're writing a procedure to transform
+code before it is interpreted or compiled.  The combination of automatic
+argument destructuring and template-filling (using backwuote and comma)
+makes it easier to do this in many cases.
+
+</P>
+<P>
+Like a procedure, a macro can take a variable number of arguments,
+with the non-required ones automatically packaged up into a rest list.
+We can define a variable-arity <CODE>or</CODE> with <CODE>define-macro</CODE>:
+
+</P>
+<P>
+[ need to check this example--it's off the top of my head ]
+
+</P>
+
+<PRE>
+; variable arity OR with subtle scope bug
+(define-macro (or . args)
+   (if (null? args)  ; zero arg or?
+       #f
+       (if (null? (cdr? arg-exprs)) ; one arg or?
+           (car arg-exprs)          
+           `(let ((temp ,(car arg-exprs)))
+               (if temp
+                   temp
+                   (or ,@(cdr arg-exprs)))))))
+</PRE>
+
+<P>
+Here we're just accepting the list of argument expressions to the
+<CODE>or</CODE> expression as the rest list <CODE>args</CODE>.
+
+</P>
+<P>
+If it's an empty list, we return <CODE>#f</CODE>.  Keep in mind that we're
+returning the <CODE>#f</CODE> object, which will be used in place of the <CODE>or</CODE>
+expression, i.e. as the literal <CODE>#f</CODE> to use in the resulting code.
+(Conceptually, it's a fragment of a program code, even though that program
+fragment will in fact return the value #f when it executes, because #f is
+self-evaluating. We could have quoted it to make that clearer.)
+
+</P>
+<P>
+If it's a one-element list, we just return the code (s-expression)
+for the first argument.
+
+</P>
+<P>
+If it's a list of more than one argument expression, we return
+an s-expression for the <CODE>let</CODE> with a nested <CODE>if</CODE>.  (Note
+the use of <CODE>unquote-splicing</CODE> (<CODE>,@</CODE>) to splice the <CODE>cdr</CODE>
+of the expression list into the <CODE>or</CODE> form as its whole list
+of arguments.)
+
+</P>
+<P>
+You should be aware, though, that what you're really doing is specifying
+a procedure for transforming expressions before they're compiled or
+interpreted, and that quasiquote is just syntactic sugar for procedural
+code that constructs an s-expression.
+
+</P>
+<P>
+<CODE>define-macro</CODE> is easy to write, once we've got <CODE>define-rewriter</CODE>;
+we don't have to modify the interpreter or compiler at all.
+We just use <CODE>define-rewriter</CODE> to write <CODE>define-macro</CODE> as
+a simple macro.  We'll make <CODE>define-macro</CODE> a macro that generates
+transformation procedures, and uses <CODE>define-rewriter</CODE> to register
+them with the interpreter.
+
+</P>
+
+
+<H4><A NAME="SEC191" HREF="schintro_toc.html#SEC191">Problems With Lisp-Style Macros</A></H4>
+
+<P>
+Earlier we alluded to a lurking bug in our <CODE>define-rewriter</CODE>
+and <CODE>define-macro</CODE> definitions for <CODE>or</CODE>.
+
+</P>
+<P>
+Suppose we use the <CODE>or</CODE> macro this way--we check to see if someone
+is employed as either a permanent or temporary employee, and generate
+a w2 tax form if either of those is true.
+
+</P>
+
+<PRE>
+  (let ((temp (member x temporary-employees))
+        (perm (member x permanent-employees)))
+     (if (or temp perm)
+         (generate-w2 x)))
+</PRE>
+
+<P>
+         
+The expansion of this is:
+
+</P>
+
+<PRE>
+(let ((temp (member x temporary-employees))
+      (perm (member x permanent-employees)))
+   (if (let ((temp temp))
+          (if temp
+              temp
+              temp)))    ;BUG! (should refer to outer temp, not inner)
+       (generate-w2 x)))
+</PRE>
+
+<P>
+The problem here is that we happened to use the same name, <CODE>temp</CODE>, at
+both the call site and inside the macro definition.  The reference to
+<CODE>temp</CODE> in <CODE>(or temp perm)</CODE> gets "captured" by the binding
+of temp introduced in the macro.
+
+</P>
+<P>
+This occurs because a normal macro facility does not understand issues
+of name binding--the name <CODE>temp</CODE> refers to one program variable
+at the call site, and another at the site of its use inside the macro--and
+the macroexpander doesn't know the difference.  To the macroexpansion
+mechanism, the symbol <CODE>temp</CODE> is just a symbol object, not a name of
+anything in particular, i.e., a particular program variable.
+
+</P>
+<P>
+There are two ways to get around this problem.  One is for the
+macro-writer to be very careful to use names that are very unlikely
+to conflict with other names.  This makes code very ugly, because
+of the unnatural names given to variables, but more importantly, it's
+harder to get right than it may seem.  The other way around the
+problem is to get a much smarter macro facility, like the new Scheme
+<CODE>define-syntax</CODE> macro system.
+
+</P>
+
+
+<H4><A NAME="SEC192" HREF="schintro_toc.html#SEC192">Ugly Hacks Around Name Conflicts</A></H4>
+
+<P>
+One way to avoid name conflicts is to pick names for variables used
+inside macros in such a way that they're unlikely to conflict with
+names that users of the macros might pick, e.g.,
+
+</P>
+
+<PRE>
+(define-macro (or first-arg second-arg)
+   `(let ((temp!in!or!macro ,first-arg)
+       (if temp!in!or!macro
+           temp!in!or!macro
+           ,second-arg)))
+</PRE>
+
+<P>
+          
+It's unlikely that anyone will name a different variable
+<CODE>temp!in!or!macro</CODE> someplace else, so the problem is solved,
+right? Not necessarily.
+
+</P>
+<P>
+Besides the fact that this is incredibly tacky, there's still
+a situation where this kind of solution is <EM>likely</EM> to fail--when
+people nest calls to the same macro.  Each nested call will
+use the same name for different variables, and things can go
+nuts.  (Food for thought: is this true of the <CODE>or</CODE> macro above?
+Does it nest properly?)
+
+</P>
+<P>
+The standard hack around that problem is to have each <EM>use</EM> of the
+macro use a different name for each local variable that might get
+captured.  This requires some extra machinery from the underlying
+system--there has to be a procedure that generates new, unique
+symbols, and which can be called by the macro code each time the
+macro is expanded.  The traditional Lisp name for this procedure
+is <CODE>gensym</CODE>, but we'll call it <CODE>generate-symbol</CODE> for
+clarity.
+
+</P>
+<P>
+Now we can write a fixed version of the two-argument <CODE>OR</CODE> macro.
+
+</P>
+
+<PRE>
+; Version of 2-arg OR with scope bug fixed
+
+(define-macro (or first-arg second-arg)
+   (let ((temp-name (generate-symbol))) 
+      `(let ((,temp-name ,first-arg)
+          (if ,temp-name
+              ,temp-name
+              ,second-arg)))
+</PRE>
+
+<P>
+              
+Notice that the outer <CODE>let</CODE> is outside the backquote--it will be
+executed when the macro is used (i.e., once each time an <CODE>or</CODE>
+expression is rewritten;  the quasiquoted part is the code to be interpreted
+or compiled (after the comma'd holes are filled in).
+
+</P>
+<P>
+Each time a call to <CODE>or</CODE> is processed by the compiler (or interpreter),
+this <CODE>let</CODE> will generate a new symbol before translating it;
+quasiquote will fill in the holes for the new symbol.  (Be sure to get
+your metalevels right here: <CODE>temp-name</CODE> is the name of a variable in
+the macro transformation procedure, whose binding will hold a pointer
+to the the actual name symbol that will be used for the variable.)
+
+</P>
+<P>
+Isn't this ugly?  To some degree, Lisp macros are nice because you
+can use the same language (Lisp) in macros as you can in normal
+code.  But due to these funky scoping issues, you effectively end
+up having to learn a new language--one with lots of generate-symbol
+calls and commas.
+
+</P>
+<P>
+On the other hand, maybe it builds character and abstract reasoning
+abilities, because you have to think a lot about names of names
+and things like that.  Fun, maybe, but not for the faint of heart.
+   
+
+
+<H2><A NAME="SEC193" HREF="schintro_toc.html#SEC193">Implementing Simple Macros and Quasiquote</A></H2>
+
+
+
+<H3><A NAME="SEC194" HREF="schintro_toc.html#SEC194">Implementing Simple Macros</A></H3>
+
+
+
+<H3><A NAME="SEC195" HREF="schintro_toc.html#SEC195">Implementing <CODE>quasiquote</CODE> and <CODE>unquote</CODE></A></H3>
+
+<P>
+[ This section is particularly rough and needs to be reworked.  Sorry. ]
+
+</P>
+<P>
+<CODE>quasiquote</CODE> is a special form that (like <CODE>quote</CODE>) has a very
+special sugared syntax.  Part of this syntax is recognized by the reader,
+rather than the compiler or interpreter proper;  the rest of the work is
+done by the compiler or interpreter.
+
+</P>
+
+
+<H4><A NAME="SEC196" HREF="schintro_toc.html#SEC196">Translating backquotes to <CODE>quasiquote</CODE></A></H4>
+
+<P>
+A backquote character is interpreted very specially by the Scheme (or
+Lisp) reader, and backquoted expressions are converted into <CODE>quasiquote</CODE>
+expressions with a normal-looking nested-prefix-expression syntax. The
+expression <CODE>`(a b c)</CODE> is actually just shorthand for
+<CODE>(quasiquote (a b c))</CODE>
+Similarly, comma'd expressions are converted, e.g. `(a ,b ,c) is
+read in as <CODE>(quasiquote (a (unquote b) (unquote c)))</CODE>.  Notice that as
+far as the reader is concerned, these are just lists--it is up to
+the compiler or interpreter to process them further, and the reader
+just preprocesses them into lists that the compiler or interpreter can
+deal with.
+
+</P>
+
+
+<H4><A NAME="SEC197" HREF="schintro_toc.html#SEC197"><CODE>quasiquote</CODE></A></H4>
+
+<P>
+The <CODE>quasiquote</CODE> special form may be built into the
+compiler or interpreter, but it can be implemented as a macro, in Scheme.
+That's the easy way to do it, and it's what we'll do.
+
+</P>
+<P>
+I'll show a simplified version of <CODE>quasiquote</CODE> that only deals with
+commas at the top level of a list, e.g.,
+
+</P>
+
+<PRE>
+(quasiquote (foo ,bar (baz x y)))
+</PRE>
+
+<P>
+but not
+
+</P>
+
+<PRE>
+(quasiquote (foo ,bar (baz ,x y)))
+</PRE>
+
+<P>
+   
+Notice that <CODE>(quasiquote (foo ,bar (baz x y)))</CODE> should expand to
+something like
+
+</P>
+
+<PRE>
+(list 'foo bar '(baz x y))
+</PRE>
+
+<P>
+   
+We'll actually generate an expression that uses <CODE>cons</CODE> instead of
+<CODE>list</CODE>, because we want to write <CODE>quasiquote</CODE> recursively;
+if its argument is a list, it will peel one element at a time of off
+the list of arguments, and either quote it or not before using it in
+the resulting expression that is the rewritten version of the
+macro call.
+
+</P>
+<P>
+Given this strategy, <CODE>(quasiquote (foo ,bar (baz x y)))</CODE> should
+expand to
+
+</P>
+
+<PRE>
+(cons 'foo
+      (cons bar
+            (cons '(baz x y))
+                  '()))
+</PRE>
+
+<P>
+Notice that what we've done is generate an expression to generate
+a list whose components are explicitly quoted where necessary,
+as opposed to the original backquoted list where things are quoted
+by default and explicitly unquoted.
+   
+And since <CODE>'</CODE><EM>thing</EM> is just a shorthand for
+<CODE>(quote </CODE><EM>thing</EM><CODE>)</CODE>, we'll really generate an ugly expression 
+like
+
+<PRE>
+(cons (quote foo)
+      (cons bar
+            (cons (quote baz x y)
+                  '())))
+</PRE>
+
+<P>
+written as a straighforward low-level macro.  We'll define it as a trivial
+macro that just calls a procedure <CODE>quasiquote1</CODE> to do the actual
+transformation.
+
+</P>
+<P>
+[ NEED TO DEBUG THIS... PRW ]
+
+</P>
+
+<PRE>
+(define-macro (quasiquote expr)
+   (quasiquote1 expr))
+</PRE>
+
+
+<PRE>
+(define (quasiquote1 expr)
+   (if (not (pair? expr)) ; if quoted expr is not a list, it's just
+       expr               ; a literal
+       ; else we'll grab a subexpression and cons it (appropriately
+       ; quoted or not) onto the result of recursively quasiquoting
+       ; the remaining arguments
+       (let ((first-subexpr (car expr))
+             (rest-subexprs (cdr expr)))
+          (if (and (pair? next-subexpr)
+                   (eq? (car first-subexpr) 'unquote)))
+              (list 'cons
+                    first-subexpr       ; gen expr to eval this subexpr
+                    (quasiquote1 rest-subexprs))                     
+              (list 'cons
+                    (list 'quote first-subexpr)    ; quote this subexpr
+                    (quasiquote1 rest-subexprs)))))
+</PRE>
+
+<P>
+A full implementation of quasiquote is a little trickier, because it
+must deal with nested uses of <CODE>quasiquote</CODE> and <CODE>unquote</CODE>;
+each subexpression that is not unquoted must be traversed and treated
+similarly to the top-level list--i.e., rather than just using the
+subexpressions as literals and quoting them, an equivalent expression
+should be constructed to create a similarly-structured list with the
+unquoted holes filled in.  Also, a full implementation should handle
+<CODE>unquote-splicing</CODE> as well as <CODE>unquote</CODE>.                   
+
+</P>
+
+
+<H4><A NAME="SEC198" HREF="schintro_toc.html#SEC198"><CODE>define-rewriter</CODE></A></H4>
+
+<P>
+In Chapter [ whatever ], I showed the code for an interpretive
+evaluator that was designed to support macros.  In this section,
+I'll explain how to implement the macro processor and install
+it in the interpreter.
+
+</P>
+<P>
+Recall that when <CODE>eval</CODE> encounters an expression that's represented
+as a list, it must determine whether the list represents a
+combination (procedure call), a built-in special form, or a
+macro call.  It calls <CODE>eval-list</CODE> to do this dispatching.
+
+</P>
+<P>
+Also recall that we implemented environments that can hold different
+kinds of bindings--of normal variables or macros.  A macro binding
+holds a transformation procedure that can be used to rewrite an
+expression before it is interpreted.
+
+</P>
+<P>
+<CODE>eval-list</CODE> checks to see if the list begins with a symbol,
+which might be the name of a macro, or the name of a procedure.
+It looks in the environment to find the current binding of
+the symbol.
+
+</P>
+<P>
+If it's a syntax (macro) binding, <CODE>eval-list</CODE> it extracts the
+transfromer procedure from the binding information, and calls
+<CODE>eval-macro-call</CODE> to evaluate the list expression. 
+
+</P>
+<P>
+Here's <CODE>eval-macro-call</CODE>:
+
+</P>
+
+<PRE>
+(define (eval-macro-call transformer expr envt)
+   (eval (transformer expr) envt))
+</PRE>
+
+<P>
+All it does is apply the transformation procedure to the expression,
+and call <CODE>eval</CODE> recursively to evaluate the result.
+
+</P>
+<P>
+This is sufficient to be able to <EM>use</EM> macros, once they're defined.
+We also need to be able to define macros, so that we can use them.
+
+</P>
+<P>
+For that, we'll add one special form to our interpreter,
+<CODE>define-rewriter</CODE>, which takes a name symbol and a transformation
+procedure as its arguments.
+
+</P>
+<P>
+[ Show <CODE>define-rewriter</CODE> ... has to accept a closure in our
+language, not the underlying Scheme ]
+
+</P>
+
+
+<H4><A NAME="SEC199" HREF="schintro_toc.html#SEC199"><CODE>define-macro</CODE></A></H4>
+
+<P>
+Once we've added define-rewriter to our interpreter, we don't have to
+modify the interpreter at all to add <CODE>define-macro</CODE>.  We can
+simply define it as a macro in the languauge we interpret, using
+<CODE>define-rewriter</CODE> "from the inside."  We had to add
+<CODE>define-rewriter</CODE> to the language implementation itself, but
+once that's done, we can bootstrap a better macro system with
+no extra help from the interpreter.
+
+</P>
+<P>
+<CODE>define-macro</CODE> does three things: 
+
+</P>
+
+<UL>
+<LI>It analyzes the calling form of a macro (the argument pattern)
+
+      and generates code to <EM>destructure</EM> expressions of that
+      form.
+<LI>it creates a procedure that will do the destructuring <EM>and</EM>
+
+      the transformation expressed in the macro body.
+<LI>it installs a new syntax binding in the current binding environment,
+
+      holding that transformation procedure.
+</UL>
+
+<P>
+Bear in mind that the following code is <EM>not</EM> code in the interpreter,
+but code to be interpreted, to create a <CODE>define-macro</CODE> macro, from
+inside our language.
+
+</P>
+<P>
+[ show <CODE>define-macro</CODE> ... pattern matching on arg form and creating
+a routine to destructure and bind... ]
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_129.html">previous</A>, <A HREF="schintro_131.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

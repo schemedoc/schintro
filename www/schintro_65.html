@@ -1,0 +1,141 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Local Definitions</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_64.html">previous</A>, <A HREF="schintro_66.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC71" HREF="schintro_toc.html#SEC71">Local Definitions</A></H3>
+
+<P>
+<A NAME="IDX73"></A>
+
+</P>
+<P>
+Scheme lets you define local procedures, scoped inside other
+procedures or blocks with local variables.  This lets you "hide"
+procedures that only make sense in a certain context, so that
+they can only be called in that context.
+
+</P>
+<P>
+You can define local procedures using <CODE>let</CODE> and <CODE>lambda</CODE>,
+like this:
+
+</P>
+
+<PRE>
+(define (quadruple x)
+   (let ((double (lambda (x)
+                    (+ x x))))
+      (double (double x))))
+</PRE>
+
+<P>
+Here we've defined a procedure named <CODE>quadruple</CODE>, with a local
+variable named <CODE>double</CODE>; its value is a procedure that will
+double its argument value, created with <CODE>lambda</CODE>.
+
+</P>
+<P>
+Notice that when we call <CODE>double</CODE> from inside the procedure
+<CODE>quadruple</CODE>, we call it by the name <CODE>double</CODE>, which is
+really the name of a local variable.  That's okay, because there's no
+difference between variable names and procedure names--a call
+to a named procedure is <EM>always</EM> a lookup of a variable
+value followed by a call to the procedure it points to.
+
+</P>
+<P>
+Also notice that the inner procedure's argument variable <CODE>x</CODE>
+shadows the outer procedure's argument variable <CODE>x</CODE>.  Inside
+the body of <CODE>double</CODE>, it refers to <CODE>double</CODE>'s argument,
+but outside it doesn't.  (The code might be easier to read if
+we chose different names for the two procedures' arguments, but
+this is just for illustration.)
+
+</P>
+<P>
+As with a top-level definition, we can write a local definition
+using <CODE>define</CODE> instead of <CODE>let</CODE>.  For example, we could
+have written the above procedure as:
+
+</P>
+
+<PRE>
+(define (quadruple x)
+   (define (double (x)
+              (+ x x))))
+   (double (double x))))
+</PRE>
+
+<P>
+A local <CODE>define</CODE> acts a lot like <CODE>let</CODE> with <CODE>lambda</CODE>.
+(Actually, it's exactly like a <CODE>letrec</CODE> with <CODE>lambda</CODE>, but
+we haven't discussed <CODE>letrec</CODE> yet;  we will later.)
+
+</P>
+<P>
+There's a restriction on internal <CODE>define</CODE>s--they must be
+at the beginning of the procedure body (or the beginning of another
+body, like a <CODE>let</CODE> body, <EM>before</EM> the normal executable
+expressions in the body.
+
+</P>
+<P>
+Local procedure definitions follow the normal lexical scope rule,
+like nested <CODE>let</CODE>s.  For example, in the above example, the
+formal argument <CODE>x</CODE> of <CODE>double</CODE> is local to
+the body of <CODE>double</CODE>---it's a different variable <CODE>x</CODE> than
+the argument <CODE>x</CODE> of <CODE>quadruple</CODE>.
+
+</P>
+
+<PRE>
+(define (quadruple x)
+   (define (double (x)
+ +--------------------------+
+ |           +--------+     |
+ |           | (+ x x)|)))  |
+ |           +--------+     |
+ |  (double (double x))     | ))
+ +--------------------------+
+</PRE>
+
+<P>
+Here the inner box is the scope of <CODE>double</CODE>'s argument <CODE>x</CODE>,
+and the outer one is the scope of the <EM>variable</EM> <CODE>double</CODE>.
+
+</P>
+<P>
+We could have used a different name for the argument to the local
+procedure, and it wouldn't change the meaning of either procedure:
+
+</P>
+
+<PRE>
+(define (quadruple x)
+   (define (double (y)   ; local defn. of double
+              (+ y y)))  ;    body of local procedure
+   (double (double x)))  ; body of quadruple
+</PRE>
+
+<P>
+On the other hand, since there are no local bindings of <CODE>+</CODE>, <CODE>+</CODE>
+refers to whatever it refers to in the context where <CODE>quadruple</CODE>
+is defined.  Assuming that <CODE>quadruple</CODE> is a top-level procedure,
+not a local procedure in some other scope, <CODE>+</CODE> refers to the top-level
+binding of <CODE>+</CODE>.  (Remember that a procedure name is really just a
+variable name, so the scope rules for variables apply to procedure names 
+too.)
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_64.html">previous</A>, <A HREF="schintro_66.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

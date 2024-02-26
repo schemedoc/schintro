@@ -1,0 +1,130 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Footnotes</TITLE>
+</HEAD>
+<BODY>
+<H1>An Introduction to Scheme and its Implementation</H1>
+<H3><A NAME="FOOT1" HREF="schintro_18.html#FOOT1">(1)</A></H3>
+<P>"Ternary"
+  just means "takes three arguments," the ternary operator in C is
+  called that because it's the <EM>only</EM> ternary operator in C;  all
+  the others take fewer than three arguments.
+<H3><A NAME="FOOT2" HREF="schintro_30.html#FOOT2">(2)</A></H3>
+<P>This also
+   has to do with what you mean by "pointer." I use the word to
+   mean pointers in the sense of building pointer-linked data structures.
+   (Scheme clearly has those.)
+   Some people use "pointers" to mean <EM>addresses</EM> that are bit patterns
+   you can manipulate directly--the way you can in C, where you can
+   "cast" (coerce) a pointer to an integer and operate on the bits.
+   Some people use "pointer" synonymously with "address", and call
+   what Scheme has <EM>object references</EM>.
+<H3><A NAME="FOOT3" HREF="schintro_34.html#FOOT3">(3)</A></H3>
+<P>An unsafe cast is one that the compiler doesn't
+  really understand.  A safe cast is one that makes sense to the
+  compiler, such as converting an integer to a floating point number.
+  With unsafe casts, you're essentially telling the compiler "trust
+  me", and bypassing the type systems.  This is what happens when
+  you cast a structure pointer to a <CODE>void*</CODE> or <CODE>char*</CODE>
+  and later cast it back to a structure pointer--you're promising
+  the compiler that the pointer will actually point to a structure
+  of the declared type, and it's up to you to make sure that's true.
+<H3><A NAME="FOOT4" HREF="schintro_68.html#FOOT4">(4)</A></H3>
+<P>Note
+  that here "variable" just means that it varies, and <EM>arity</EM>
+  means that what's varying is the number of argument <EM>variables</EM>.
+  "Arity" comes from words like "nullary," "unary," "binary,"
+  and "ternary"---these mean zero-argument, one-argument, two-argument,
+  and three-argument, respectively.  (Sometimes people say things like
+  "1-ary" for unary (one argument), "2-ary" for binary, and
+  "<EM>n</EM>-ary" for "variable arity.")
+<H3><A NAME="FOOT5" HREF="schintro_72.html#FOOT5">(5)</A></H3>
+<P>Here the analogy may not be very intuitive; 
+   it's as though you used a name like <CODE>x</CODE> to refer to different
+   "people" at different times, but <EM>those people were all alike</EM>,
+   and uninteresting except for what you call them and <EM>what they
+   point at</EM> with their index fingers.  In this analogy, <CODE>set!</CODE> is
+   like telling one of these very boring people "point at that
+   for now."
+<H3><A NAME="FOOT6" HREF="schintro_115.html#FOOT6">(6)</A></H3>
+<P>For example, we can
+  call <CODE>read</CODE> to read the list <CODE>(foo 20 (baz))</CODE>, and
+  then just use that list <EM>as a list</EM>, rather than
+  interpreting it as a piece of a program.
+<H3><A NAME="FOOT7" HREF="schintro_115.html#FOOT7">(7)</A></H3>
+<P>Unsurprisingly,
+  a <EM>bottom-up</EM> parser would do the opposite--it would recognize
+  the smaller constituents first, and then recognize the larger phrases
+  that contain them.
+<H3><A NAME="FOOT8" HREF="schintro_115.html#FOOT8">(8)</A></H3>
+<P>In the technical terminology of
+  programming language processors, the reader is a <EM>predictive</EM>
+  parser for an <EM>LL(0)</EM> grammar.  It can parse s-expressions
+  top-down in a single pass through the sequence of tokens, without
+  looking ahead past the current token, because it only needs to see
+  the current token to know what action to take.  (E.g., if it sees
+  a left parenthesis, it immediately "knows" that it is parsing
+  a nested list.)
+<H3><A NAME="FOOT9" HREF="schintro_115.html#FOOT9">(9)</A></H3>
+<P>It's often said that Lisp and Scheme have such a
+  simple syntax that they "don't need a parser," but this is just false.
+  Lisp and Scheme actually have <EM>two</EM> parsers, because their syntax
+  has a two levels.  The "surface" syntax is parenthesized prefix 
+  expressions, recognized by the reader and translated into s-expression
+  data structures.  There is a "deeper" syntax that is recognized by
+  the interpreter or compiler, which analyzes s-expressions to see what
+  kinds of Scheme program expressions they represent, in the process of
+  evaluating or compiling them.
+
+</P>
+<P>
+  As we'll see when we get to macros, Scheme syntax is even more
+  sophisticated than this, despite its simplicity.  Technically, Scheme
+  has a <EM>transformational</EM> grammar that is not "context-free," but
+  is easy to parse.  (If you don't know what that means, don't worry about
+  it.  Scheme is easy to understand without knowing the fancy technical
+  terms.)
+<H3><A NAME="FOOT10" HREF="schintro_129.html#FOOT10">(10)</A></H3>
+<P>This is
+   something of an oversimplification.  The quoted expression is generally
+   converted to a list at <CODE>read</CODE> time, and the value of the <CODE>quote</CODE>
+   expression may be the very same data structure, or it may be a copy
+   made later during compilation or interpretation.  At any rate, you
+   should only count on the <EM>structure</EM> of a quoted data structure,
+   not its identity.  A compiler or interpreter is allowed to return the
+   same list for different <CODE>quote</CODE>d data structures with the same
+   structure.
+<H3><A NAME="FOOT11" HREF="schintro_133.html#FOOT11">(11)</A></H3>
+<P>Superclasses
+    can be used to specify a class as a set of differences
+    from an existing class, rather than describing everything
+    about the class from scratch.  Here we're saying that the
+    <CODE>&#60;point&#62;</CODE> class is just like any other class of objects,
+    and does the normal things classes do, but nothing special
+    except what we specify explictily in the class definition.
+<H3><A NAME="FOOT12" HREF="schintro_133.html#FOOT12">(12)</A></H3>
+<P>The
+         object <CODE>&#60;class&#62;</CODE> is actually the class object <EM>of class
+         objects</EM>---classes are instances of the class <CODE>&#60;class&#62;</CODE>.
+         This will be explained in detail later.
+<H3><A NAME="FOOT13" HREF="schintro_133.html#FOOT13">(13)</A></H3>
+<P>Evaluating
+         the quasiquote expression <CODE>`(,&#60;object&#62;)</CODE> will create a
+         list containing the actual class object that is the value of
+         the variable <CODE>&#60;object&#62;</CODE>.
+<H3><A NAME="FOOT14" HREF="schintro_133.html#FOOT14">(14)</A></H3>
+<P>This
+   is important
+   to understand in being able to read clever macros: a quoted expression
+   isn't just a literal if it has unquoted expressions inside it,
+   because we're <EM>generating</EM> a literal with the macro.  (It's
+   not a literal in the macro, but the resulting s-expression will be
+   a literal when the interpreter or compiler sees it, after the macro
+   has done its transformation--the quoted expression is really a
+   template for a literal, which we can specialize to produce
+   the literal we want.)
+</BODY>
+</HTML>

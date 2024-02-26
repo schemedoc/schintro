@@ -1,0 +1,70 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Simple Literals and Self-Evaluation</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_51.html">previous</A>, <A HREF="schintro_53.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC58" HREF="schintro_toc.html#SEC58">Simple Literals and Self-Evaluation</A></H3>
+
+<P>
+You might have noticed by now that we've already been using literals a
+lot in our examples--numeric literals and boolean literals.  Why didn't we
+have to quote them to keep Scheme from trying to evaluate them like other
+expressions?  Because Scheme has a special rule, which is that the
+value of a number or boolean is that number or boolean.  For these
+data types, the result of attempting to evaluate
+it is the same as what you started with.  So the value of <CODE>4</CODE> is
+<CODE>4</CODE>, and the value of <CODE>#f</CODE> is <CODE>#f</CODE>.  (This also works
+for a few other types, such as characters and character strings.)
+Scheme lets you type in the text representation of a value as an
+expression, and by convention the value of that expression is the
+value you typed the printed representation of.  Such an expression is
+called <EM>self-evaluating</EM>, because it is evaluated to itself.
+
+</P>
+<P>
+What's the deep meaning of this rule?  There isn't any. It's just to
+keep you from having to type a lot of quotes to use simple literals.
+Notice that that means that you can quote a number or boolean if you
+want, and it doesn't make any difference.  The expression <CODE>'0</CODE>
+means "literally the number 0," but since Scheme defines the value
+of a number to be itself, the value of plain <CODE>0</CODE> is <CODE>0</CODE>, too.
+
+</P>
+<P>
+Likewise, the value of <CODE>'#f</CODE> or <CODE>(quote #f</CODE> is the same as
+<CODE>#f</CODE>---they're all pointers to
+the false object.  You can write a string literal <CODE>'"foo"</CODE> as 
+<CODE>"foo"</CODE>.  In either case, the value of the expression is a pointer
+to a string object with the character sequence <CODE>f</CODE> <CODE>o</CODE> <CODE>o</CODE>.
+
+</P>
+<P>
+Minor warning: don't add extra quotes <EM>inside</EM> expressions that
+are already quoted.  <CODE>'(foo 10 baz)</CODE> is <EM>not</EM> the same
+thing as <CODE>'('foo '10 'baz)</CODE>.  One quote for a whole literal expression
+is enough, and extra quotes inside quotes do something that will
+seem surprising until you understand how quoting really works.
+
+</P>
+<P>
+Expression evaluation in Scheme is simple, for the most part, but you
+must remember the rules for the special forms (which don't always evaluate
+their arguments) and self-evaluation.  Later, I'll show how an
+interpreter implements self-evaluation by analyzing expressions before
+evaluating them.  Still later, I'll show how a compiler can do the same
+work at compile time, so that using literals doesn't cost any evaluation
+overhead at run time.
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_51.html">previous</A>, <A HREF="schintro_53.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

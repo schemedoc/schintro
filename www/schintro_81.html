@@ -1,0 +1,103 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Starting Scheme</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_80.html">previous</A>, <A HREF="schintro_82.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC86" HREF="schintro_toc.html#SEC86">Starting Scheme</A></H3>
+
+<P>
+First we start up Scheme.  If we're using RScheme under UNIX, that's probably
+by typing <CODE>rs</CODE> at the UNIX <CODE>%</CODE> prompt.
+(RScheme might be installed under a different name on your system,
+perhaps <CODE>rscheme</CODE>, if so, use that name instead.  If you're not using
+UNIX, start up RScheme the way you start up any program on your system,
+perhaps by clicking on its icon.  If you're using UNIX but your shell
+has a different prompt, like <CODE>&#62;</CODE>, don't worry about it.
+
+</P>
+<P>
+<CODE>%rs</CODE>
+
+</P>
+<P>
+Now the Scheme system starts up and prints out some information about
+itself, usually including including the name and version version number,
+and then gives you a Scheme prompt. 
+We'll pretend that the prompt is <CODE>Scheme&#62;</CODE>, but on your system it's
+probably something different.  (For RScheme, it's something like
+<CODE>top[0]=&#62;</CODE>, where the first few characters give you some information
+about the state of the system, and the <CODE>=&#62;</CODE> tells you it's ready
+for input.)
+
+</P>
+<P>
+<A NAME="IDX88"></A>
+
+</P>
+<P>
+Scheme then waits for you to type in an expression and hit <CODE>&#60;RETURN&#62;</CODE>.
+(By that I mean hit the "RETURN" or "ENTER" key on the keyboard.  In some
+Scheme systems, these may be distinct keys, and you may have to hit "ENTER";
+the documentation for your system will tell you which key does what.)
+
+</P>
+<P>
+Scheme lets you type, echoing the characters to the screen, and doesn't 
+do anything else until you hit <CODE>&#60;RETURN&#62;</CODE>.  Until you hit <CODE>&#60;RETURN&#62;</CODE>,
+you can back up to correct typing mistakes (just as you can in an operating
+system's command shell), using the delete or backspace key.
+
+</P>
+<P>
+Now type in a variable definition <CODE>(define myvar 10)</CODE>, and hit 
+<CODE>&#60;RETURN&#62;</CODE>.
+What's happening on the screen looks something like this.
+
+</P>
+
+<PRE>
+Generational Real-Time Garbage Collector Version 0.5
+RScheme version 0.7
+Scheme&#62;(define myvar 10)
+#void
+Scheme&#62;
+</PRE>
+
+<P>
+Here we defined a variable named <CODE>myvar</CODE>, giving it the initial
+value <CODE>10</CODE>.  Scheme read what we typed and figured out what it meant,
+and then allocated some storage for the variable binding, and initialized
+that storage with (a pointer to) <CODE>10</CODE>.  Scheme keeps track of the
+fact that the storage it allocated is now known as <CODE>myvar</CODE>, as well
+as keeping track of the value in it.
+
+</P>
+<P>
+What Scheme prints out after evaluating this expression may be different
+on your system (you may not see <CODE>#void</CODE>).  That's because the Scheme
+standard doesn't specify what's returned as the value of a definition
+expression.  (It's possible that your Scheme system will print out something
+a little more verbose, or different, or nothing at all as the value of a
+<CODE>define</CODE> expression.  Don't worry about it.)
+
+</P>
+<P>
+You don't usually use the result value of a 
+definition--you're just defining something to use later.  Depending
+on the implementation you're using, you'll see whatever the
+implementors chose to have definitions return.  In some systems, a
+special unusable value is returned, and Scheme will suppress the
+printing of these meaningless values to avoid clutter on the screen.
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_80.html">previous</A>, <A HREF="schintro_82.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

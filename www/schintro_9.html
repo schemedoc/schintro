@@ -1,0 +1,62 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - What is Scheme?</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_8.html">previous</A>, <A HREF="schintro_10.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H2><A NAME="SEC9" HREF="schintro_toc.html#SEC9">What is Scheme? (Hunk A)</A></H2>
+
+
+<PRE>
+==================================================================
+     Hunk A starts here:
+==================================================================
+</PRE>
+
+<P>
+First, a bunch of jargon--ignore it if you want to:
+
+</P>
+<P>
+Scheme is a lexically-scoped, block structured,
+dynamically typed, mostly functional language. It is a variant of Lisp.
+It has first-class procedures with block structure and indefinite extent.
+Parameter passing is by value, but the values are references.  It has
+first-class continuations to allow the construction of new control
+abstractions.  It has lexically-scoped ("hygeinic") macros to allow
+definition of of new syntactic forms, or redefinition of old ones.
+
+</P>
+<P>
+If none of that means anything to you right now, don't worry.  Keep reading.
+
+</P>
+<P>
+Scheme is designed to be an <EM>interactive</EM> and <EM>safe</EM> language.
+A normal Scheme system is really an interactive program that you can use
+to run <EM>parts</EM> of your Scheme program in the order you want.
+When one has run, your program doesn't just terminate, and your data
+don't disappear--Scheme askes you what to do next, and you can examine
+the data or tell Scheme to run another part of the program.
+
+</P>
+<P>
+Scheme is <EM>safe</EM> in that the interactive system generally won't
+crash.  If you make a mistake that would crash the system, Scheme detects
+that, and asks you what to do about it.  It lets you examine and change
+the system's state, and go on.  This is a very different style of programming
+and debugging from the normal edit-compile-link-run-crash cycle of
+"batch" programming languages like C and C++.
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_8.html">previous</A>, <A HREF="schintro_10.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

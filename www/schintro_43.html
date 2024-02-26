@@ -1,0 +1,73 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - append</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_42.html">previous</A>, <A HREF="schintro_44.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H4><A NAME="SEC44" HREF="schintro_toc.html#SEC44"><CODE>append</CODE></A></H4>
+
+<P>
+<A NAME="IDX36"></A>
+       
+<CODE>append</CODE> takes two or more lists and constructs a new list
+with all of their elements.  For example,
+
+<PRE>
+(append '(1 2) '(3 4))
+</PRE>
+
+<P>
+returns a list <CODE>(1 2 3 4)</CODE>.
+
+</P>
+<P>
+Notice that this is different from what <CODE>list</CODE> does:
+
+<PRE>
+(list '(1 2) '(3 4))
+</PRE>
+
+<P>
+returns <CODE>((1 2) (3 4))</CODE>, a two element list of the lists
+it was given.  <CODE>list</CODE> makes its arguments
+elements of the new list, independent of whether the arguments
+are lists or something else.
+
+</P>
+<P>
+<CODE>append</CODE> requires that its
+arguments are lists, and makes a list whose elements are the
+<EM>elements</EM> of those lists--in this case, a four-element
+list.  Intuitively, it concatenates the lists it is given.
+It <EM>only</EM> concatenates the top-level structure, however--it
+doesn't "flatten" nested structures.  For example
+
+<PRE>
+(append '((1 2) (3 4))
+        '((5 6) (7 8)))
+</PRE>
+
+<P>
+returns <CODE>((1 2) (3 4) (5 6) (7 8))</CODE>
+
+</P>
+<P>
+<CODE>append</CODE> doesn't modify any of its arguments, but
+the result of <CODE>append</CODE> generally shares structure with the
+last list it's given.  (It effectively conses the elements of
+the other lists onto the last list to create the result list.)
+It's therefore dangerous to make a "new" list with append
+and then modify the "old" list.  This is one of the reasons
+side effects are discouraged in Scheme.
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_42.html">previous</A>, <A HREF="schintro_44.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

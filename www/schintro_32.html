@@ -1,0 +1,134 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Objects on the Heap</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_31.html">previous</A>, <A HREF="schintro_33.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H4><A NAME="SEC32" HREF="schintro_toc.html#SEC32">Objects on the Heap</A></H4>
+
+<P>
+<A NAME="IDX20"></A>
+
+</P>
+<P>
+Most Scheme objects only have fields that are general-purpose <EM>value
+cells</EM>---any field can hold any Scheme value, whether it's a tagged immediate
+value or a tagged pointer to another heap-allocated object.  (Of course,
+conceptually they're all pointers, so the type of a field is just
+"pointer to anything.")
+
+</P>
+<P>
+So, for example, a <EM>pair</EM> (also known in Lisp terminology as a "cons
+cell") is a heap-allocated object with two fields.  Either field can hold any
+kind of value, such as a number, a text character, a boolean, or
+a pointer to another heap object.
+
+</P>
+<P>
+The first field of a pair is called the <CODE>car</CODE> field, and the second
+field is called the <CODE>cdr</CODE> field.  These are among the dumbest names
+for anything in all of computer science.  (They are just a historical
+artifact of the first Lisp implementation and the machine it ran on.) 
+
+</P>
+<P>
+Pairs can be created using the procedure <CODE>cons</CODE>.  For example, to
+create a pair with the number 22 as the value of its <CODE>car</CODE> field,
+and the number 15 as the value of its <CODE>cdr</CODE> field, you can
+write the procedure call <CODE>(cons 22 15)</CODE>.
+
+</P>
+<P>
+<A NAME="IDX21"></A>
+
+</P>
+<P>
+The fields of a pair are like variable bindings, in that they can
+hold any kind of Scheme value.  Both bindings and fields are called
+<EM>value cells</EM>---i.e., they're places you can put any kind of
+value.
+
+</P>
+<P>
+In most implementations, each heap-allocated object has a hidden
+"header" field that you, as a Scheme programmer, are not supposed to
+know about.  This extra field holds type information, saying exactly what
+kind of heap allocated object it is.  So, laid out in memory, the pair
+looks something like this:
+
+</P>
+
+<PRE>
+        +-----------+
+  header| &#60;PAIR-ID&#62; |
+        +===========+
+     car|     +-----+-----&#62;22
+        +-----------+
+     cdr|     +-----+-----&#62;15
+        +-----------+
+</PRE>
+
+<P>
+In this case, the <CODE>car</CODE> field of the pair (cons cell) holds the
+integer <CODE>22</CODE>, and the cdr field holds the integer <CODE>15</CODE>.
+
+</P>
+<P>
+The values stored in the fields of the pair are drawn as arrows,
+because they are pointers to the numbers 22 and 15.
+
+</P>
+<P>
+(The actual representation of these values might be a 30-bit binary number
+with a two-bit tag field used to distinguish integers from real pointers,
+but you don't have to worry about that.)
+
+</P>
+<P>
+Scheme provides a built-in procedure <CODE>car</CODE> to get the value of the
+car field of a pair, and <CODE>set-car!</CODE> to set that field's value.
+Likewise there are functions <CODE>cdr</CODE> and <CODE>set-cdr!</CODE> to get and set
+the <CODE>cdr</CODE> field's values.
+
+</P>
+<P>
+Suppose we have a top-level variable binding for the variable <CODE>foo</CODE>,
+and its value is a pointer to the above pair.  We would draw
+that situation something like this:
+
+</P>
+
+<PRE>
+                                       +---------+ 
+              +---------+        header| &#60;PAIR&#62;  |
+          foo |    *----+-------------&#62;+=========+
+              +---------+           car|    *----+----&#62;22
+                                       +---------+
+                                    cdr|    *----+----&#62;15
+                                       +---------+
+</PRE>
+
+<P>
+Most other objects in Scheme are represented similarly.  For example,
+a vector (one-dimensional array) is typically represented as a linear 
+array of value cells, which can hold any kind of value.
+
+</P>
+<P>
+Even objects that aren't actually represented like this can be <EM>thought
+of</EM> this way, since conceptually, everything's on the heap and
+referred to via a pointer.
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_31.html">previous</A>, <A HREF="schintro_33.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

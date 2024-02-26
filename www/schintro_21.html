@@ -1,0 +1,251 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - cond</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_20.html">previous</A>, <A HREF="schintro_22.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H4><A NAME="SEC21" HREF="schintro_toc.html#SEC21"><CODE>cond</CODE></A></H4>
+
+<P>
+In most procedural programming languages, you can write a sequence of
+<CODE>if</CODE> tests using a an extended version of <CODE>if</CODE>, something like
+this:
+
+</P>
+
+<PRE>
+if test1 then
+   action1();
+else if test2 then
+   action2();
+else if test3 then
+   action3();
+else
+   action4();
+</PRE>
+
+<P>
+Scheme has a similar construct, a special form called <CODE>cond</CODE>.  The
+above example might be written in Scheme as
+
+</P>
+
+<PRE>
+(cond (test1
+       (action1))
+      (test2
+       (action2))
+      (test3
+       (action3))
+      (else
+       (action4)))
+</PRE>
+
+<P>
+Notice that each test-and-action pair is enclosed in parentheses.  In
+this example, <CODE>test1</CODE> is just a variable reference, not a procedure
+call, i.e., we're testing to see if the value of the variable <CODE>test1</CODE>
+is <CODE>#f</CODE>;  if not, we'll execute <CODE>(action1)</CODE>, i.e., call the procedure
+<CODE>action1</CODE>.  If it is false, control "falls through" to the next
+test, and keeps going until one of the tests evaluates to a true
+value (anything but <CODE>#f</CODE>).
+
+</P>
+<P>
+Notice that we indent the actions corresponding to a test by one
+character.  This lines the actions up directly under the tests,
+rather than under the opening parenthesis that groups them together.
+
+</P>
+<P>
+The <CODE>else</CODE> clause of a <CODE>cond</CODE> is optional;  if present,
+that branch will be taken "by default"---if none of the other
+conditions evaluates to a true value, the <CODE>else</CODE> branch will
+be taken.
+
+</P>
+<P>
+We don't really need the else clause, because we could get the same
+effect by using a test expression that always evaluates to a true
+value.  One way of doing this is to use the literal <CODE>#t</CODE>, the true
+boolean, because it's always true.
+
+</P>
+
+<PRE>
+(cond (test1
+       (action1))
+      (test2
+       (action2))
+      (test3
+       (action3))
+      (#t            ; literal #t is always true, so
+       (action4)))   ; this branch is taken if we get this far
+</PRE>
+
+<P>
+The code above is equivalent to a nested set of <CODE>if</CODE>
+expressions:
+
+</P>
+
+<PRE>
+(if test1
+    (action1)
+    (if test2
+        (action2)
+        (if test3
+            (action3)
+            (if #t
+                (action4)))))
+</PRE>
+
+<P>
+Like an <CODE>if</CODE>, a <CODE>cond</CODE> returns the value of whatever "branch"
+it executes.  If <CODE>test1</CODE> is true, for example, the above <CODE>cond</CODE>
+will return the value returned from the procedure call <CODE>(action1)</CODE>.
+
+</P>
+<P>
+Remember that each branch of an <CODE>if</CODE> is a <EM>single</EM> expression;
+if you want to execute more than one expression in a branch,
+you have to wrap the expressions in a <CODE>begin</CODE>.  With <CODE>cond</CODE>,
+you don't have to do this.  You can follow a test expression with more
+than one action expression, and Scheme will evaluate all of them,
+in order, and return the value of the last one, just like a <CODE>begin</CODE>
+or a procedure body.
+
+</P>
+
+<P>
+Suppose we want to modify the above <CODE>cond</CODE> example so that it
+prints out the branch it's taking, as well as evaluating the action
+expression and returning its value.  We can do this:
+
+<PRE>
+(cond (test1
+       (display "taking first branch")
+       (action1))
+      (test2
+       (display "taking second branch")
+       (action2))
+      (test3
+       (display "taking third branch")
+       (action3))
+      (else
+       (display "taking fourth (default) branch")
+       (action4)))
+</PRE>
+
+<P>
+This <CODE>cond</CODE> will return the same value as the original, because
+it always returns the value of the last expression in a branch.  As
+it executes, however, it also displays what it's doing.  We can use
+the <CODE>cond</CODE> both for <EM>value</EM> and for <EM>effect</EM>.
+
+</P>
+<P>
+Be particularly careful about parentheses with <CODE>cond</CODE>.  You
+<EM>must</EM> enclose each branch with a pair of parentheses around the test
+expression and the corresponding sequence of action expressions.  If
+you want to call a procedure in any of those expressions, you must
+<EM>also</EM> put parentheses around the procedure call.   In the above
+example, if we wanted the first test to be a call to a procedure
+<CODE>test1</CODE>---rather than just fetching the value of the variable
+<CODE>test1</CODE>---we'd write
+
+</P>
+
+<PRE>
+(cond ((test1)
+       (display "taking first branch")
+       (action1))
+      ...)
+</PRE>
+
+<P>
+instead of 
+
+</P>
+
+<PRE>
+(cond (test1
+       (display "taking first branch")
+       (action1))
+      ...)
+</PRE>
+
+<P>
+(Note the indenting here.  We usually line up a test and the corresponding
+sequence of actions vertically, whether or not the expression starts
+with a parentheses.  That is, we indent one space past the opening
+parenthesis of the pair of parentheses that goes around them all.)
+
+</P>
+<P>
+Don't be afraid to use <CODE>cond</CODE> for conditionals with only one
+or two branches.  <CODE>cond</CODE> is often more convenient than <CODE>if</CODE>
+because it can execute a sequence of expressions, instead of just
+one.  It's not uncommon to see things like this:
+
+</P>
+
+<PRE>
+...
+(cond ((foo)
+       (bar)
+       (baz)))
+...
+</PRE>
+
+<P>
+Don't be confused by this--there's only one branch to this <CODE>cond</CODE>,
+like a one-branch <CODE>if</CODE>.  We could have written it
+
+</P>
+
+<PRE>
+...
+(if (foo)
+    (begin (bar)
+           (baz)))
+...
+</PRE>
+
+<P>
+It's just more convenient to use <CODE>cond</CODE>
+so that we can call <CODE>bar</CODE> before calling <CODE>baz</CODE> and returning
+its result, without explicitly writing a <CODE>begin</CODE> expression
+to sequence them.
+
+</P>
+<P>
+<A NAME="IDX13"></A>
+
+</P>
+<P>
+We say that <CODE>cond</CODE> is <EM>syntactic sugar</EM> for nested <CODE>if</CODE>s
+with <CODE>begin</CODE>s around the branches.  There's nothing we can do
+with <CODE>cond</CODE> that we can't do straightforwardly with <CODE>if</CODE>
+and <CODE>begin</CODE>---<CODE>cond</CODE> just gives us a "sweetened" syntax,
+i.e., one that's more convenient.
+
+</P>
+<P>
+Most of the special forms in Scheme are like this--they're just a
+convenient way of writing things that you <EM>could</EM> write using
+more basic special forms.  (There are only five "core" special forms
+that are really necessary, and the others are equivalent to combinations
+of those special forms.)
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_20.html">previous</A>, <A HREF="schintro_22.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

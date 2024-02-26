@@ -1,0 +1,145 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - lambda and Lexical Scope</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_63.html">previous</A>, <A HREF="schintro_65.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC70" HREF="schintro_toc.html#SEC70"><CODE>lambda</CODE> and Lexical Scope (Hunk M)</A></H3>
+
+
+<PRE>
+==================================================================
+Hunk M starts here:
+==================================================================
+</PRE>
+
+<P>
+<CODE>lambda</CODE> creates a procedure that will execute in the
+scope where the <CODE>lambda</CODE> expression was evaluated.
+
+</P>
+<P>
+Except for local variables of the procedure itself, including
+its arguments, names in the body of the procedure refer to whatever
+they refer to at the point where the procedure is created by
+<CODE>lambda</CODE>. 
+
+</P>
+<P>
+This is necessary for preserving lexical scope--the meanings of
+variable names must be obvious at the point where the procedure
+is defined.
+
+</P>
+<P>
+Local variables created by the procedure have the
+usual scope rule within the body.  (Argument variables are just
+a special kind of local variable, which get their initial values
+from the caller.)  Other variables are called <EM>free</EM> variables--that
+is variables defined outside the procedure, but referred to from 
+inside it. 
+
+</P>
+<P>
+We say that <CODE>lambda</CODE> creates a <EM>closure</EM>, a procedure
+whose free variable references are "fixed" at the time the procedure
+is created.  Whenever the procedure references a free variable, it
+will will refer to the bindings of those variables in the environment
+where the procedure was created.
+
+</P>
+<P>
+Consider the following small program
+
+</P>
+
+<PRE>
+(define foo 1)
+
+(define (baz)
+   foo)
+
+(define (quux)
+   (let ((foo 6))
+      (baz)))
+
+(quux)
+</PRE>
+
+<P>
+When <CODE>quux</CODE> is called, it will bind its local variable <CODE>foo</CODE>
+and then call <CODE>baz</CODE>.  When <CODE>baz</CODE> is called from <CODE>quux</CODE>,
+however, it will still see the top level binding of <CODE>foo</CODE>, whose
+value is <CODE>1</CODE>.  The result of the call to <CODE>baz</CODE> will be
+<CODE>1</CODE>, and that value will be returned as the value of the call to
+<CODE>quux</CODE> as well.
+
+</P>
+<P>
+There is a very good reason for this, and it's the rule used by most
+programming languages.  It is important that the meaning of a
+procedure be fixed where it is defined, rather than having the
+meaning depend on where it is called from.  You want to be able to
+look at the code, and see that the name <CODE>foo</CODE> refers to particular
+variable, namely the one that's visible there, at the top level.
+You don't want to have to worry about the meaning of the procedure
+<CODE>baz</CODE> changing, depending on where it's called from.
+
+</P>
+<P>
+A block structure diagram may make this clearer.  I'll just show the
+part for the procedure <CODE>baz</CODE>:
+
+</P>
+
+<PRE>
+(define (quux)
+   (let ((foo 6))
+     +---------------------------+
+     | (baz)        scope of foo | ))
+     +---------------------------+
+</PRE>
+
+<P>
+This emphasizes the fact that the local <CODE>foo</CODE> really is local.
+The definition of <CODE>baz</CODE> is not inside the box, so it can't
+ever see <CODE>foo</CODE>'s local variable <CODE>foo</CODE>.  (The fact that
+<CODE>baz</CODE> is <EM>called</EM> from inside the box doesn't matter.)
+
+</P>
+<P>
+Conceptually, the procedure <CODE>baz</CODE> <EM>returns to the environment
+where it was created</EM> before it executes, and even before it binds its
+arguments.
+
+</P>
+<P>
+<A NAME="IDX72"></A>
+
+</P>
+<P>
+In early Lisps, a different rule was used, called <EM>dynamic scope</EM>.
+In those Lisps, the call to <CODE>baz</CODE> <EM>would</EM> see the <EM>most
+recent</EM> binding of <CODE>foo</CODE>.  In this case, it would see the
+binding created by <CODE>quux</CODE> just before the call to <CODE>foo</CODE>.
+This led to very inscrutable bugs, because a procedure would work
+sometimes, and not others, depending on the names of variables
+bound in <EM>other</EM> procedures. 
+
+</P>
+<P>
+(Dynamic scoping is generally considered to have been a big mistake,
+and was fixed in recent versions of Lisp, such as Common Lisp, which
+were influenced by Scheme.)
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_63.html">previous</A>, <A HREF="schintro_65.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

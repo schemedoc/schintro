@@ -1,0 +1,94 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Dynamic Typing</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_33.html">previous</A>, <A HREF="schintro_35.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC34" HREF="schintro_toc.html#SEC34">Objects Have Types, Variables Don't</A></H3>
+
+<P>
+If I use my finger as a pointer, I can use it to point to all kinds
+of things--a computer, a painting, a motorcycle, or any number of
+things.  Variables in Scheme are like this, too. 
+
+</P>
+
+
+<H4><A NAME="SEC35" HREF="schintro_toc.html#SEC35">Dynamic typing</A></H4>
+
+<P>
+In Scheme, all variables have the same type: "pointer to anything."
+
+</P>
+<P>
+Scheme is <EM>dynamically typed</EM>, meaning that variables don't have fixed
+types, <EM>but objects do</EM>.  An object carries its type around with it--an
+integer is an integer forever, but a variable may refer to an integer
+at some times, and a string (or something else) at other times.  The
+language provides type-checking at run time to ensure that you don't
+perform the wrong operations on objects--if you attempt to add two
+strings, for example, the system will detect the error and notify you.
+
+</P>
+<P>
+Sometimes, people refer to languages like Scheme (and Lisp and Smalltalk)
+as <EM>untyped</EM>.  This is very misleading.  In a truly untyped language
+(like FORTH and most assembly languages), you can interpret a value any
+way you want--as an integer, a pointer, or whatever.  (You can also do
+this in C, using unsafe casts, which is a source of many time-consuming 
+bugs.<A NAME="FOOT3" HREF="schintro_foot.html#FOOT3">(3)</A>
+)
+
+</P>
+<P>
+In dynamically typed systems, types are enforced at runtime.  If you
+try to use the numeric procedure <EM>+</EM> to add two lists together, for
+example, the system will detect the error and halt gracefully--it
+won't blithely assume you know what you're doing and corrupt your
+data.  You also can't misinterpret a nonpointer value as a pointer,
+and generate fatal segmentation violations that kill your program.
+
+</P>
+<P>
+You might think that dynamic typing is expensive, and it can be.  But
+good Scheme compilers can remove most of the overhead by inference
+at compile time, and most advanced implementations also let you declare
+types in performance-critical places so that the compiler can generate
+code similar to that for C or Pascal.
+
+</P>
+<P>
+<EM>[ I've left out some text from my course notes about
+  tagging and immediate values (more detailed)... put back in,
+  maybe in an appendix ]</EM>
+
+</P>
+
+
+<PRE>
+==================================================================
+This is the end of Hunk C
+
+TIME TO TRY IT OUT
+
+At this point, you should go read Hunk D of the next chapter
+and work through the examples using a running Scheme system.
+Then return here and resume this chapter.
+==================================================================
+</PRE>
+
+<P>
+(Go to Hunk D, which starts at section <A HREF="schintro_92.html#SEC97">Making Some Objects (Hunk D)</A>.)
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_33.html">previous</A>, <A HREF="schintro_35.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

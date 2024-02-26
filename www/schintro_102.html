@@ -1,0 +1,154 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Strings</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_101.html">previous</A>, <A HREF="schintro_103.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC111" HREF="schintro_toc.html#SEC111">Strings</A></H3>
+
+<P>
+<A NAME="IDX103"></A>
+
+</P>
+<P>
+Character strings in Scheme are written between double quotes.  For example,
+suppose we want an object that represents the text "Hello world!"
+We can just write that in a program, in between double quotes:
+<CODE>"Hello, world!"</CODE>.
+
+</P>
+<P>
+You can use a string as an expression--the value of a string is
+the string itself, just as the value of an integer is the integer
+itself.  Like numeric literals and booleans, strings are "self-evaluating,"
+which just means that if you have an expression in your program that
+consists of just a string, Scheme assumes you mean the value to be literally
+that string.  There's nothing deep about this--it just turns out to be handy,
+because it makes it easy to use strings as literals.
+
+</P>
+<P>
+Try typing the string <CODE>"Hello, world."</CODE> at the Scheme prompt.
+
+</P>
+
+<PRE>
+Scheme&#62;"Hello, world!"
+"Hello, world!"
+</PRE>
+
+<P>
+What happened here is that Scheme recognized the sequence of characters
+between double quotes as a string literal.  The value of a literal
+string expression (in double quotes) is a (pointer to) a string object.
+A string object is a normal first-class object like a pair or a number,
+conceptually like an array that can only hold characters.
+
+</P>
+<P>
+This value is what scheme printed out.  The standard printed
+representation of a string object is the sequence of characters,
+with double quotes around it. 
+
+</P>
+<P>
+So what happened here is that Scheme read the sequence of characters
+in double quotes, constructed an array-like object of type string,
+then printed out the printed representation of that object.  
+
+</P>
+<P>
+If you want to print out a string, but without the double quotes, you
+can use the standard procedure <CODE>display</CODE>.  If you pass <CODE>display</CODE> 
+a string, it just prints out the characters in the string, without any 
+double quotes.
+
+</P>
+<P>
+<CODE>display</CODE> is useful in programs that print information out for
+normal users.  Another useful procedure is <CODE>newline</CODE>, which prints
+a newline character, ending a line and starting a new one.
+
+</P>
+<P>
+Try typing a <CODE>(display "Hello, world!") (newline)</CODE> at the Scheme prompt.
+What you get may look like this:
+
+</P>
+
+<PRE>
+Scheme&#62;(display "Hello, world!") (newline)
+Hello, world!
+#void
+</PRE>
+
+<P>
+You might see something slightly different on your screen, depending
+on the return value of <CODE>newline</CODE>, which is unspecified in
+the Scheme standard.
+
+</P>
+<P>
+If you type in an expression using a string literal like <CODE>"foo"</CODE>
+at the Scheme prompt, Scheme may construct a new string object with
+that character sequence each time.
+
+</P>
+<P>
+Try this:
+
+</P>
+
+<PRE>
+Scheme&#62;(define foo1 "foo")
+#void
+Scheme&#62;(define foo2 "foo")
+#void
+Scheme&#62;foo1
+"foo"
+Scheme&#62;foo2
+"foo"
+Scheme&#62;(eq? foo1 foo2)
+#f
+Scheme&#62;(equal? foo1 foo2)
+#t
+</PRE>
+
+<P>
+For each of the <CODE>define</CODE> forms, Scheme has constructed a string
+with the character sequence <CODE>f</CODE>-<CODE>o</CODE>-<CODE>o</CODE>, and saved it
+in a new variable binding.  When we ask the value of each variable,
+Scheme prints out the usual text representation of the string.  The 
+printed representations are the same, since each string has the same 
+structure, but they're two different objects--when we ask if they're
+<CODE>eq?</CODE>, i.e., the very same object, the answer is no (<CODE>#f</CODE>).
+
+</P>
+<P>
+It's possible that in your system the <CODE>eq?</CODE> comparison will
+return <CODE>#t</CODE>, because Scheme implementations are allowed to
+use pointers to the same string if you type in two strings with
+the same character sequence.  For that reason, you should be careful
+not to depend on whether Scheme strings are <CODE>eq?</CODE>; you should
+only distinguish whether they're <CODE>equal?</CODE>.  You can also use
+the predicate <CODE>string-equal?</CODE> if you know the arguments are
+supposed to be strings.  This has the advantage of signaling an
+error if the arguments are of unexpected type.
+
+</P>
+<P>
+Strings can be used as one-dimensional arrays (vectors) of characters.
+There are procedures for accessing their elements by an integer index,
+extracting substrings given two indices, and so on.
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_101.html">previous</A>, <A HREF="schintro_103.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

@@ -1,0 +1,404 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Lists</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_92.html">previous</A>, <A HREF="schintro_94.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC98" HREF="schintro_toc.html#SEC98">Lists (Hunk F)</A></H3>
+
+
+<PRE>
+==================================================================
+Hunk F starts here:
+==================================================================
+</PRE>
+
+<P>
+<A NAME="IDX99"></A>
+
+</P>
+<P>
+We usually use pairs in Scheme in a particular, stereotyped way,
+to build <EM>lists</EM>.
+
+</P>
+<P>
+Pairs are really like binary tree nodes--you <EM>can</EM> use the car
+and cdr fields in the same ways.  The <EM>normal</EM> way of using them
+treats the car and the cdr differently, however.
+
+</P>
+<P>
+The cdr field of a pair is used to hold a pointer to another pair,
+or a pointer to the empty list, i.e., a null pointer.  This lets you
+string pairs to gether to make linked lists of pairs.  The car fields
+of the pairs hold pointers to any kind of object you want to put in
+a list.
+
+</P>
+<P>
+We can therefore define the term <EM>list</EM> recursively as
+
+</P>
+
+<UL>
+<LI>
+
+  an empty list, i.e., the null pointer object <CODE>()</CODE>, <EM>or</EM>
+<LI>
+
+  a pair whose <CODE>cdr</CODE> value is a list.
+</UL>
+
+<P>
+Think about this, and make sure that you understand why this covers
+all null-terminated lists strung together by the <CODE>cdr</CODE>s, and
+nothing else.  Lists of this form are also called <EM>proper</EM> lists,
+and that's usually what we mean when we say "list."  The important
+fact about a proper list is that it is a linear sequence of pairs
+<EM>ending with the empty list</EM>.
+
+</P>
+<P>
+We usually think of lists as holding a sequence of values--we ignore
+the actual pairs, and think about their <CODE>cdr</CODE> values.
+
+</P>
+<P>
+Because this is how lists are usually used, Scheme has a special way
+of printing lists.  In the earlier examples, I showed that the
+result of <CODE>(cons 1 2)</CODE> prints as <CODE>(1 . 2)</CODE>.
+
+</P>
+<P>
+You might think that the result of <CODE>(cons 1 (cons 2 '()))</CODE>
+would print as (1 . (2 . '())), but it doesn't.  It prints as
+<CODE>(1 2)</CODE>.  
+
+</P>
+<P>
+The reason is that when Scheme encounters a pair whose <CODE>cdr</CODE>
+points to another pair or the empty list, it assumes you want
+to think of it as a list of pairs strung together by the <CODE>cdr</CODE>s,
+and it only shows you the <CODE>car</CODE> values.  This is because
+we usually ignore the actual structure of a list--the sequence
+of pairs--and think about the values the list holds.
+
+</P>
+<P>
+Try this in your system:
+
+</P>
+
+<PRE>
+Scheme&#62;'()
+()
+Scheme&#62;(cons 1 '())
+(1)
+Scheme&#62;(cons 1 (cons 2 '()))
+(1 2)
+Scheme&#62;(cons 1 (cons 2 (cons 3 '())))
+(1 2 3)
+</PRE>
+
+<P>
+Notice that the data structure that prints as <CODE>(1 2 3)</CODE> is really
+a binary tree, and we <EM>could</EM> draw it like this:
+
+</P>
+
+<PRE>
+      \
+       \
+        +---+---+
+        | * | * |
+        +/--+---\
+        /        \
+       1          +---+---+
+                  | * | * |
+                  +/--+---\
+                  /        \
+                 2          +---+---+
+                            | * | * |
+                            +/--+---+
+                            /
+                           3
+</PRE>
+
+<P>
+We generally wouldn't, though, because we think of it as a sequence
+of numbers, and the pairs are just there to string them together in
+order.  We'd draw it more like this, using the box-and-arrow notation
+from the previous chapter:
+
+</P>
+
+<PRE>
+       +---+---+    +---+---+   +---+---+
+   ---&#62;| * | *-+---&#62;| * | *-+--&#62;| * | * |
+       +-+-+---+    +-+-+---+   +-+-+---*
+         |            |           |
+         |            |           |
+         1            2           3
+</PRE>
+
+<P>
+We've really just rotated the picture 45 degrees, so that "down and
+to the right" in the tree goes straight right, and looks more like
+"next" in a linear list.
+
+</P>
+<P>
+(The arrow coming in from the left represents the pointer value that was
+returned, which the read-eval-print loop handed to <CODE>write</CODE> so that
+we could see the printed representation of the data structure.)
+
+</P>
+<P>
+Drawing things this way lets us show shared structure, if a list overlaps
+with another list, e.g, if one list joins with the other because some
+car in each list points at the same object.
+
+</P>
+<P>
+<A NAME="IDX100"></A>
+
+</P>
+<P>
+Note that a list of this form always ends with a pair whose <CODE>cdr</CODE>
+is <CODE>()</CODE>, (i.e., the empty list, a.k.a. the null pointer).
+
+</P>
+<P>
+If we had forgotten that, we might have tried to construct the list
+this way, with the innermost <CODE>cons</CODE> just consing two numbers
+together:
+
+</P>
+
+<PRE>
+Scheme&#62;(cons 1 (cons 2 3))
+(1 2 . 3)
+</PRE>
+
+<P>
+This is a common beginning mistake.  We have constructed an <EM>improper
+list</EM>---one which is not null-terminated.  It doesn't end with <CODE>()</CODE>.
+
+</P>
+<P>
+We could draw the list this way:
+
+</P>
+
+<PRE>
+      +---+---+      +---+---+  
+  ---&#62;| * | *-+-----&#62;| * | *-+----&#62;3
+      +-+-+---+      +-+-+---+
+        |              |    
+       \|/            \|/  
+        1              2 
+</PRE>
+
+<P>
+Notice the dot in <CODE>(1 2 . 3)</CODE>---that's like the dot in
+<CODE>(2 . 3)</CODE>, saying that the cdr of a pair points to <CODE>3</CODE>, not
+another pair or <CODE>'()</CODE>.  That is, it's an <EM>improper list</EM>,
+not just a list of pairs.  It doesn't fit the recursive definition
+of a list, because when we get to the second pair, its cdr isn't a
+list--it's an integer.
+
+</P>
+<P>
+Scheme printed out the first part of the list as though
+it were a normal <EM>cdr</EM>-linked list, but when it got to the
+end, it couldn't do that, so it used "dot notation."
+
+</P>
+<P>
+You generally shouldn't need to worry about dot notation, because
+you should use normal lists, not improper list.  But if you see
+an unexpected dot when Scheme prints out a data structure, it's a
+good guess that you used <CODE>cons</CODE> and gave it a non-list as
+its second argument--something besides another pair or <CODE>()</CODE>.
+
+</P>
+<P>
+Scheme provides a handy procedure that creates proper lists, called
+<CODE>list</CODE>.  <CODE>list</CODE> can take any number of arguments, and
+constructs a proper list with those elements in that order.  You
+don't have to remember to supply the empty list---<CODE>list</CODE>
+automatically terminates the list that way.
+
+</P>
+
+<PRE>
+Scheme&#62;(list 1 2 3 4)
+(1 2 3 4)
+</PRE>
+
+<P>
+We could draw the result like this:
+
+</P>
+
+<PRE>
+    +---+---+      +---+---+      +---+---+      +---+---+
+---&#62;| * | *-+-----&#62;| * | *-+-----&#62;| * | *-+-----&#62;| * | * |
+    +-+-+---+      +-+-+---+      +-+-+---+      +-+-+---+
+      |              |              |              |
+     \|/            \|/            \|/            \|/
+      1              2              3              4
+</PRE>
+
+<P>
+Like any other procedure, <CODE>list</CODE> can be used with arguments
+that are procedure calls, such as calls to <CODE>list</CODE> itself.
+
+</P>
+
+<PRE>
+Scheme&#62;(list (list 1 2) (list 3 4))
+((1 2) (3 4))
+</PRE>
+
+<P>
+We can draw the result like this:
+
+</P>
+
+<PRE>
+    +---+---+                     +---+---+
+---&#62;| * | *-+--------------------&#62;| * | * |
+    +-+-+---+                     +-+-+---+ 
+      |                             | 
+     \|/                           \|/ 
+    +---+---+      +---+---+      +---+---+      +---+---+
+    | * | *-+-----&#62;| * | * |      | * | *-+-----&#62;| * | * |
+    +-+-+---+      +-+-+---+      +-+-+---+      +-+-+---+
+      |              |              |              |
+     \|/            \|/            \|/            \|/
+      1              2              3              4
+</PRE>
+
+<P>
+While Scheme prints lists in normal list notation when it can (and
+only uses dot notation when it has to), it can read either one.
+
+</P>
+<P>
+We can type in literal lists using the <CODE>quote</CODE> special form,
+which just returns a list of the form we typed:
+
+</P>
+
+<PRE>
+Scheme&#62;(quote (1 2 3 4))
+(1 2 3 4)
+</PRE>
+
+<P>
+Since Scheme can read dot notation, we can do this in an equivalent
+way, using parentheses around the contents of each pair, and a
+dot to separate the car and cdr values:
+
+</P>
+
+<PRE>
+Scheme&#62; (quote (1 . (2 . (3 . ( 4 . ())))))
+(1 2 3 4)
+</PRE>
+
+<P>
+The difference between <CODE>list</CODE> and <CODE>quote</CODE> is that <CODE>list</CODE>
+is just a procedure, and each time you call it, it creates a new list.
+The arguments to <CODE>list</CODE> can be any expressions you like, and their
+results are what's put in the list.
+
+</P>
+
+<PRE>
+Scheme&#62;(list (double 1) (double 2) (double 3) (double 4))
+(2 4 6 8)
+</PRE>
+
+<P>
+On the other hand, <CODE>quote</CODE> is a special form.  It always takes
+exactly takes one argument, which is <EM>not evaluated at all</EM>---it's
+just a textual representation of a data structure.
+
+</P>
+
+<PRE>
+Scheme&#62;(quote (double 1))
+(double 1)
+</PRE>
+
+<P>
+What happened here is that quote just returned a data structure, the
+list <CODE>(double 1)</CODE>.  It did not try to interpret it as an expression
+and give its value.
+
+</P>
+<P>
+(The first item in the list is the <EM>symbol</EM> <CODE>double</CODE>.  A symbol
+is just another kind of data object, roughly like a string, which we'll
+discuss later.  It's not the same thing as a variable, even though it
+prints like a variable name.)
+
+</P>
+<P>
+Quoting is so common that Scheme provides a special bit of syntactic
+sugar to make it easier.  In instead of writing out <CODE>(quote</CODE>
+before an expression, and a closing parenthesis after, you can just use
+the special character <CODE>'</CODE>.  Whatever follows should be the
+textual representation of a data structure, and Scheme constructs
+that literal data structure.
+
+</P>
+
+<PRE>
+Scheme&#62;'(1 2 3 4)
+(1 2 3 4)
+
+Scheme&#62;'((1 2) (3 4) (5 6))
+((1 2) (3 4) (5 6))
+
+Scheme&#62;'(#f #t)
+(#f #t)
+</PRE>
+
+<P>
+Later, I'll talk about quoting things besides lists.  Quoted lists
+are enough for now--we'll use them a lot in examples.
+
+</P>
+<P>
+<EM>[ Should demonstrate list, length append, reverse, and
+        member here, combining them in various ways. ]</EM>
+        
+
+<PRE>
+==================================================================
+This is the end of Hunk F.
+
+At this point, you should go back to the previous chapter and
+read Hunk G before returning here and continuing this tutorial.
+==================================================================
+</PRE>
+
+<P>
+(Go BACK to read Hunk G, which starts at section <A HREF="schintro_47.html#SEC53">Type and Equality Predicates (Hunk G)</A>.)
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_92.html">previous</A>, <A HREF="schintro_94.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

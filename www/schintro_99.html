@@ -1,0 +1,229 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Using and Writing Higher-Order Procedures</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_98.html">previous</A>, <A HREF="schintro_100.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC105" HREF="schintro_toc.html#SEC105">Using and Writing Higher-Order Procedures</A></H3>
+
+<P>
+A <EM>higher-order</EM> procedure is one that can take procedures as arguments
+and/or return them as values.  We can use that to write general procedures
+that do a basic kind of thing, and take arguments that specialize their
+behavior.  The arguments are themselves procedures, which will do
+specialized things withing the general pattern that the general procedure
+implements.
+
+</P>
+<P>
+Here's a simple example.
+
+</P>
+<P>
+Scheme provides a procedure <CODE>display</CODE>, which
+can write textual representation of a data object on the screen, much like
+the way the read-eval-print loop displays results of expressions you type
+in.  (This is a very handy procedure for debugging, as well as for programs
+that interact with users.)
+
+</P>
+<P>
+Suppose, though, that you want to display a list of objects, not just
+one.  You want a routine <CODE>list-display</CODE> to iterate over a list, and
+display each item in it.  The obvious way to write it is to just call
+<CODE>display</CODE> from inside your <CODE>list-display</CODE> routine.
+
+</P>
+<P>
+(Actually, <CODE>display</CODE> can display a list of items, but it puts
+parentheses around the items in the list.  Let's suppose we don't want
+those parentheses around the <CODE>display</CODE>ed items.  Writing our
+own <CODE>list-display</CODE> will give us the freedom to make it do whatever
+we want it to, rather than what <CODE>display</CODE> does automatically for
+lists.)
+
+</P>
+<P>
+Here's a version like that:
+
+</P>
+
+<PRE>
+Scheme&#62;(define (list-display lis)
+          (if (null? lis)
+              #f
+              (begin (display (car lis))
+                     (list-display (cdr lis)))))
+</PRE>
+
+<P>
+I've written this procedure recursively, because it's easy to use
+recursion over lists--usually it's easier than using an iteration
+construct.  This procedure checks to see if the list it got
+was empty, and if so, it returns #f.  (That's a reasonable value
+to return from a procedure that's used for effect, rather than
+for value.)  Otherwise, it displays the first item, and then calls itself
+recursively to display the rest of the list.  I used a <CODE>begin</CODE>
+to sequence the displaying and the recursive call.
+
+</P>
+<P>
+It would be cleaner to use <CODE>cond</CODE>, so here's an equivalent
+version using <CODE>cond</CODE>:
+
+</P>
+
+<PRE>
+Scheme&#62;(define (list-display lis)
+          (cond ((null? lis)
+                 #f)
+                (else
+                 (display (car lis))
+                 (list-display (cdr lis)))))
+</PRE>
+
+<P>
+Notice that this is a two-branch conditional, but we use <CODE>cond</CODE>
+instead of <CODE>if</CODE> because a <CODE>cond</CODE> branch can be a sequence.
+(We need a sequence because we want to use display to create a side-effect,
+i.e., writing to the user's screen, as well as calling list-display
+recursively to do the rest of the work.)
+
+</P>
+<P>
+Now try it out:
+
+<PRE>
+Scheme&#62;(list-display '(1 2 3))
+123#void
+</PRE>
+
+<P>
+What happened here is that it displayed each item in the list as it
+was evaluated, and then Scheme printed out the return value.
+
+</P>
+<P>
+(We hadn't specified a return value--the procedure stops when it
+gets to an the end of the list, and doesn't take the first branch
+of the one-branch <CODE>cond</CODE> The return value is whatever your Scheme
+system uses as the result of a one branch <CODE>cond</CODE> when the branch
+is not taken.  It may suppress the printing of an unspecified
+value, so you may not see it at all.)
+
+</P>
+<P>
+This works, but the procedure is not very general.  Iterating over
+lists is very common, so it would be nice to have a more general
+procedure that iterates over lists, and applies whatever procedure
+you want.
+
+</P>
+<P>
+We can modify our procedure to do this.  Instead of taking just a
+list argument, it can take an argument that's a procedure, and
+apply that procedure to each element of the list.  
+
+</P>
+<P>
+We'll call our procedure <CODE>list-each</CODE>, because it iterates
+over a list and does whatever you want to each element.
+
+</P>
+
+<PRE>
+Scheme&#62;(define (list-each proc lis)
+          (cond ((null? lis)
+                 #f)
+                (else
+                 (proc (car lis))
+                 (list-each proc (cdr lis)))))
+</PRE>
+
+<P>
+The only change we made was to add an argument <CODE>proc</CODE>, to accept
+(a pointer to) a procedure, and to change the call to <CODE>display</CODE>
+into a call to <CODE>proc</CODE>.
+
+</P>
+<P>
+Remember that procedure names are really just names of variables that
+hold pointers to procedures, so this works---<CODE>(proc (car lis))</CODE>
+is just a combination whose first expression is <CODE>proc</CODE>, which
+looks up the value of the local variable <CODE>proc</CODE>.
+
+</P>
+<P>
+Now we can call this general procedure with the argument <CODE>display</CODE>,
+to tell it to <CODE>display</CODE> each thing in the list.
+
+</P>
+
+<PRE>
+Scheme&#62;(list-each display '(1 2 3))
+123#void
+</PRE>
+
+<P>
+But maybe this isn't what we want.  We might want to print each item,
+and then a newline (go to the next line), to spread things out vertically.
+We could write a procedure <CODE>display-with-newline</CODE> to do that,
+but it's easier just to use a <CODE>lambda</CODE> expression to create the
+procedure we need.
+
+</P>
+<P>
+Try this:
+
+</P>
+
+<PRE>
+Scheme&#62;(list-each (lambda (x)
+                     (display x)
+                     (newline))
+                  '(1 2 3))
+1
+2
+3
+#void
+</PRE>
+
+<P>
+The <CODE>lambda</CODE> expression creates a one-argument procedure that will
+<CODE>display</CODE> its argument and then call <CODE>newline</CODE>.  We pass the
+procedure that results from this <CODE>lambda</CODE> directly to <CODE>list-each</CODE>,
+without ever giving it a name, or saving a pointer to it anywhere.
+(After list-each is through with it, the procedure will become garbage
+and its space can be reclaimed by the garbage collector.)
+
+</P>
+<P>
+(Scheme has a standard procedure similar to our <CODE>list-each</CODE>,
+but more general, called <CODE>for-each</CODE>.)
+
+</P>
+
+<PRE>
+==================================================================
+This is the end of Hunk L
+
+At this point, you should go back to the previous chapter and
+read Hunk M before returning here and continuing this tutorial.
+==================================================================
+</PRE>
+
+<P>
+(Go BACK to read Hunk M, which starts at section <A HREF="schintro_64.html#SEC70"><CODE>lambda</CODE> and Lexical Scope (Hunk M)</A>.)
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_98.html">previous</A>, <A HREF="schintro_100.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

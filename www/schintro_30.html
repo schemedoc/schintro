@@ -1,0 +1,122 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - All Values are Pointers</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_29.html">previous</A>, <A HREF="schintro_31.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H4><A NAME="SEC30" HREF="schintro_toc.html#SEC30">All Values are Pointers</A></H4>
+
+<P>
+[ some of this needs to be moved up: ]
+
+</P>
+<P>
+Conceptually, all Scheme objects are allocated on the heap, and referred
+to via pointers.  This actually makes life simple, because you don't have
+to worry about whether you should dereference a pointer when you want
+to use a value--you always do.  Since pointer dereferencing is uniform,
+procedures <EM>always</EM> dereference a pointer to a value when they really
+use the value, and you never have to explicitly force the dereferencing.  
+
+</P>
+<P>
+For example, the predefined Scheme procedure <CODE>+</CODE> takes two pointers
+to numbers, and automatically dereferences both pointers before doing the 
+addition.  It returns a pointer to the number that's the result of
+the addition. 
+
+</P>
+<P>
+So when we evaluate the expression <CODE>(+ 2 3)</CODE> to add two to three, we are
+taking a pointer to the integer <CODE>2</CODE> and a pointer to integer <CODE>3</CODE>,
+and passing those as arguments to the procedure <CODE>+</CODE>.  <CODE>+</CODE> returns
+a pointer to the integer <CODE>5</CODE>.  We can nest expressions,
+e.g., <CODE>(* (+ 2 3) 6)</CODE>, so that the pointer to five is passed,
+in turn, to the procedure <CODE>*</CODE>.  Since these functions all accept
+pointers as arguments and return pointers as values, you can just ignore
+the pointers, and write arithmetic expressions the way you would in
+any other language.
+
+</P>
+<P>
+When you think about it, it doesn't make any sense to change
+the value of an integer, in a mathematical sense.  For example,
+what would it mean to change the integer <CODE>6</CODE>'s value to be
+<CODE>7</CODE>? It wouldn't mean anything sensible, for sure.   <CODE>6</CODE>
+is a unique, abstract mathematical object that doesn't have any state 
+that can be changed---<CODE>6</CODE> is <CODE>6</CODE>, and behaves like <CODE>6</CODE>,
+forever.
+
+</P>
+<P>
+What's going on in conventional programming languages is <EM>not</EM>
+really changing the value of an integer--it's replacing one
+(copy of an) integer value with (a copy of) another.  That's 
+because most programming languages have both pointer semantics
+(for pointer variables) and <EM>value</EM> semantics (for nonpointer
+variables, like integers).  You make multiple copies of values,
+and then clobber the copies when you perform an assignment.
+
+</P>
+<P>
+In Scheme, we don't need to clobber the value of an integer,
+because we get the effect we want by replacing pointers with
+other pointers.  An integer in Scheme is a unique entity, just
+as it is in mathematics.  We don't have multiple copies of
+a particular number, just multiple references to it.
+(Actually, Scheme's treatment of numbers is not quite this simple and
+pretty, for efficiency reasons I'll explain later, but it's close.)
+
+</P>
+<P>
+As we'll see later, an implementation is free to optimize away these 
+pointers if it doesn't affect the programmer's view of things--but when
+you're trying to understand a program, you should always think of values
+as pointers to objects.
+
+</P>
+<P>
+The uniform use of pointers makes lots of things simpler.  In C or Pascal,
+you have to be careful whether you're dealing with a raw value or a pointer.
+If you have a pointer and you need the actual value, you have to explictly
+dereference the pointer (e.g., with C's prefix operator <CODE>*</CODE>, or Pascal's
+postfix operator <CODE>^</CODE>).
+If you have a value and you need a pointer to it, you have to take its 
+address (e.g., with C's prefix <CODE>&#38;</CODE> operator, or Pascal's prefix operator
+<CODE>^</CODE>).
+
+</P>
+<P>
+In Scheme, none of that mess is necessary.  User-defined routines pass
+pointers around, consistently, and when they bottom out into predefined
+routines (like the built-in <CODE>+</CODE> procedure or <CODE>set!</CODE> special
+form) those low-level built-in operations do any dereferencing that's 
+necessary.
+
+</P>
+<P>
+(Of course, when traversing lists and the like, the programmer has
+to ask for pointers to be dereferenced, but from the programmer's
+point of view, that just means grabbing another pointer value out of
+a field of an object you already have a pointer to.)
+
+</P>
+<P>
+It is sometimes said that languages like Scheme (and Lisp, Smalltalk,
+Eiffel, and Java) "don't have pointers."  It's at least as reasonable
+to say that the opposite is true--everything's a pointer.  What they 
+don't have is a distinction between pointers and nonpointers that you
+have to worry about.<A NAME="FOOT2" HREF="schintro_foot.html#FOOT2">(2)</A>
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_29.html">previous</A>, <A HREF="schintro_31.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

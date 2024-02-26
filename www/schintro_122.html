@@ -1,0 +1,421 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Understanding lambda</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_121.html">previous</A>, <A HREF="schintro_123.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC149" HREF="schintro_toc.html#SEC149"><CODE>lambda</CODE></A></H3>
+
+<P>
+Recall that in Scheme, we can create anonymous (unnamed) procedures any
+time we want, using the <CODE>lambda</CODE> special form.
+
+</P>
+<P>
+For example, suppose you want to write a piece of code that needs to
+double the values of the items in a list.  You could do what we did
+before, and define a named <CODE>double</CODE> procedure, but if you only
+need to use the procedue in one place, it's easier to use an anonymous
+procedure created with <CODE>lambda</CODE>.
+
+</P>
+<P>
+Instead of writing
+
+</P>
+
+<PRE>
+(define (double x)
+   (+ x x))
+</PRE>
+
+<P>
+and then using it like this
+
+</P>
+
+<PRE>
+   ...
+   (map double mylist)
+   ...
+</PRE>
+
+<P>
+You can simply define it where it's used, using <CODE>lambda</CODE>.
+
+</P>
+
+<PRE>
+   ...
+   (map (lambda (x) (+ x x)) mylist)
+   ...
+</PRE>
+
+<P>
+This can help avoid cluttering your code with lots of auxiliary procedures.
+(Don't overdo it, though--if a procedure is nontrivial, it's good to
+give it a name that reflects what it does.)  This is very convenient
+when using higher-order procedures like <CODE>map</CODE>, or higher-order
+procedures you come up with for your own programs.
+
+</P>
+<P>
+[ As we'll see in a little while, <CODE>lambda</CODE> has some very interesting
+properties that make it more useful than it might seem right now. ]
+
+</P>
+<P>
+[ point out that variable arity works with lambda arg lists just
+  like with define arg lists ]
+
+</P>
+
+
+
+<H4><A NAME="SEC150" HREF="schintro_toc.html#SEC150">Procedures are Closures</A></H4>
+
+<P>
+Scheme procedure's aren't really just pieces of code you can execute;
+they're <EM>closures</EM>.
+
+</P>
+<P>
+A closure is a procedure that records what environment it was created
+in.  When you call it, that environment is restored before the actual
+code is executed.  This ensures that when a procedure executes, it
+sees the exact same variable bindings that were visible when it
+was created--it doesn't just remember variable names in its code,
+it remembers what <EM>storage</EM> each name referred to when it was
+created.
+
+</P>
+<P>
+Since variable bindings are allocated on the heap, not on a stack,
+this allows procedures to remember binding environments even after
+the expressions that created those environments have been evaluated.
+For example, a closure created by a <CODE>lambda</CODE> inside a <CODE>let</CODE>
+will remember the <CODE>let</CODE>'s variable bindings even after we've
+exited the <CODE>let</CODE>.  As long as we have a pointer to the procedure
+(closure), the bindings it refers to are guaranteed to exist.  (The
+garbage collector will not reclaim the procedure's storage, or the 
+storage for the <CODE>let</CODE> bindings.)
+
+</P>
+<P>
+Here's an example that may clarify this, and show one way of taking
+advantage of it.
+
+</P>
+<P>
+Suppose we type the following expression at the Scheme prompt,
+to be interpreted in a top-level environment:
+
+</P>
+
+<PRE>
+Scheme&#62; (let ((count 0))
+           (lambda ()
+              (set! count (+ count 1))
+              count)))
+#&#60;proc ....&#62;# 
+</PRE>
+
+<P>
+[ need picture here ]
+
+</P>
+<P>
+Evaluating this <CODE>let</CODE> expression first creates a binding environment
+with a binding for count.  The initial value of this binding is 0.
+In this environment, the lambda expression creates a closure.  When
+executed, this procedure will increment the count, and then return its
+value.  (Note that the procedure is not executed yet, however--it's just 
+created.)  This procedure, returned by the lambda expression, is also
+returned as the value of the let expression, because a <CODE>let</CODE> returns
+the value of its last body expression.  The read-eval-print loop therefore
+prints a representation of the (anonymous) procedure.
+
+</P>
+<P>
+Unfortunately, we didn't do anything with the value, like give it a
+name, so we can't refer to it anymore, and the garbage collector will
+just reclaim it.  (OOPS.)  Now suppose we want to do the same thing,
+but hold onto the closure so that we can do something with it.
+We'll bind a new variable <CODE>my-counter</CODE>, and use the above <CODE>let</CODE>
+expression to create a new environment and procedure, just like before.
+
+</P>
+
+<PRE>
+Scheme&#62; (define my-counter
+                (let ((count 0))
+                   (lambda ()
+                      (set! count (+ count 1))
+                      count))))
+#void
+</PRE>
+
+<P>
+Now we have a top-level binding of <CODE>my-counter</CODE>, whose value is
+the procedure we created.  
+
+</P>
+<P>
+(The crucial trick here relies on the fact
+that thet let expression not only creates the local variable
+binding for <CODE>count</CODE>, but returns the value returned by the lambda
+expression.  The pointer to the procedure created by lambda is passed
+along by the let to become the initial value for the binding of
+<CODE>my-counter</CODE>.) 
+
+</P>
+<P>
+The procedure keeps a pointer to the
+environment created by the <CODE>let</CODE>, which in turn has a pointer to
+the top-level environment, thus:
+
+</P>
+<P>
+[ should simplify this picture and use it earlier, for the simpler
+  example where we don't keep a pointer to the closure.  Should
+  show the envt register pointing to the <CODE>let</CODE> envt at the moment the
+  closure is created. ]
+
+</P>
+
+<PRE>
+                    [envt]
+         +--&#62;+------------+-----+             
+         |   |      car   |  *--+--&#62; ...    
+         |   +------------+-----+            
+         |   |      cons  |  *--+--&#62; ...   
+         |   +------------+-----+        
+         |   |        *         |  
+         |            *         
+         |   |        *         |   
+         |   +------------+-----+
+         |   | my-counter |  *--+------------+
+         |   +------------+-----+            |
+         |                  /|\              |
+         |                   |               |
+         |     [envt]        |               |
+         |   +------------+--+--+            |
+         |   |   [scope]  |  *  |            |
+         |   +------------+-----+            |
+         |   |      count |  *--+--&#62;10       |
+         |   +------------+-----+           \|/
+         |            /|\                [closure]
+         |             |                +---------+
+         |             +----------------+----*    |
+         |                              +---------+ 
+         |                              |    *    |
+         |                              +----+----+ 
+         |                                   |
+         |                                  \|/
+         |                                 [code]
+         |                          +--------------------+
+     +---+---+                      | (set! count        |
+envt |   *   |                      |       (+ count 1)) |
+     +-------+                      | count              |
+                                    +--------------------+
+</PRE>
+
+<P>
+Now if we call the procedure <CODE>my-counter</CODE>, it will execute in its own
+"captured" environment (created by the <CODE>let</CODE>).  It will increment the
+binding of count in that environment, and return the result.  The
+environment will continue to exist as long as the procedure does,
+and will store the latest value until next time <CODE>my-counter</CODE>
+is called:
+
+</P>
+
+<PRE>
+Scheme&#62;(my-counter)
+1
+Scheme&#62;(my-counter)
+2
+Scheme&#62;(my-counter)
+3
+</PRE>
+
+<P>
+Notice that if we evaluate the let form again, we will get a <EM>new</EM>
+<CODE>let</CODE> environment, and a new procedure that will increment and return
+its <CODE>count</CODE> value--in effect, each procedure has its own little
+piece of state which only it can see (because only it was created
+in that particular environment).
+
+</P>
+<P>
+If we want, we can define a procedure that will create new environments,
+and new procedures that capture those environments--we can generate
+new counter procedures just by calling that "higher-order" procedure.
+(Recall that a higher-order procedure is just a procedure that manipulates
+other procedures.  In this case, we're making a procedure that
+<EM>generates</EM> procedures.)
+
+</P>
+<P>
+Each time <CODE>make-counter</CODE> is called, it will execute a <CODE>let</CODE>,
+creating an environment, and inside that it will use <CODE>lambda</CODE> to create
+a counter procedure.
+
+</P>
+
+<PRE>
+Scheme&#62; (define (make-counter)
+           (let ((count 0))
+              (lambda ()
+                 (set! count (+ count 1))
+                 count)))
+make-counter
+</PRE>
+
+<P>
+Each of the resulting procedures will have its own captured count
+variable, and keep it independently of the other procedures.
+
+</P>
+<P>
+Make sure you understand that the above procedure definition could
+have used an explicit <CODE>lambda</CODE> to create the procedure
+<CODE>make-counter</CODE>, rather than the special procedure definition
+syntax:
+
+</P>
+
+<PRE>
+Scheme&#62; (define make-counter
+                (lambda ()
+                   (let ((count 0))
+                      (lambda ()
+                         (set! count (+ count 1))
+                         count)))
+</PRE>
+
+<P>
+You may actually find this easier to understand, because it shows you
+exactly what's going on:  binding <CODE>make-counter</CODE> and creating a 
+procedure (with the outer <CODE>lambda</CODE>) that <EM>when called</EM>, will
+evaluate a <CODE>let</CODE> to create an environment, and a <CODE>lambda</CODE>
+(the inner one) to create a new procedure that captures that
+particular environment.)
+
+</P>
+<P>
+Now we'll call the procedure created by the above definition, three times,
+and each time it will create a new procedure:
+
+</P>
+
+<PRE>
+Scheme&#62; (define c1 (make-counter))
+C1
+Scheme&#62; (define c2 (make-counter))
+C2
+Scheme&#62; (define c3 (make-counter))
+C3
+</PRE>
+
+<P>
+Now we'll call those procedures and look at their return values, to
+illustrate that they're independent counters:
+
+</P>
+
+<PRE>
+Scheme&#62; (c1)
+1
+Scheme&#62; (c1)
+2
+Scheme&#62; (c2)
+1
+Scheme&#62; (c2)
+2
+Scheme&#62; (c1)
+3
+Scheme&#62; (c1)
+4
+Scheme&#62; (c3)
+1
+</PRE>
+
+<P>
+Neat, huh?  The combination of block structure (local environments)
+with first-class procedures (closures), allows us to associate state
+with procedures.  Garbage collection makes this very convenient,
+because we know that the environments will hang around as long
+as the procedures do.
+
+</P>
+<P>
+If you're familiar with object-oriented programming, you may
+notice a resemblance between closures and "objects" in the
+object-oriented sense.   A closure associates data with a procedure,
+where an object associates data with multiple procedures.  After we get
+to object-oriented programming, we'll explain how object-oriented
+programming facilities can be implemented in Scheme using closures.
+
+</P>
+<P>
+If you're familiar with graphical user interface systems, you may
+notice that GUI's often use "callbacks," which are procedures that
+are executed in response to user input events like button clicks and
+menu selections, and do something application-specific.  (The application
+"registers" callback procedures with the GUI system, which then calls
+them when the user clicks on the specified buttons.)  Closures make
+excellent GUI callback procedures, because the application can 
+create a closure for a specific context by capturing variable bindings,
+to customize the behavior of the procedure.
+
+</P>
+
+
+<H2><A NAME="SEC151" HREF="schintro_toc.html#SEC151">Lambda is cheap, and Closures are Fast</A></H2>
+
+<P>
+It may seem that <CODE>lambda</CODE> is an expensive operation--after all,
+it creates procedure objects on the fly.  At first glance, you might
+think that executing lambda would require a call to the compiler
+each time.  This is not the case, though, and lambda is actually
+a fairly cheap constant-time operation.
+
+</P>
+<P>
+Notice that the procedure part of a <CODE>lambda</CODE> expression is known at
+compile time--each time the <CODE>lambda</CODE> is executed at run time, it
+will create a new closure, and may capture a new environment, but
+the expression closed in that environment is determined solely
+by the body of the lambda expression.  A compiler for scheme will
+therefore compile the <CODE>lambda</CODE> like any other procedure, when it
+compiles the enclosing procedure.  So, for example, when our
+example procedure make-counter is compiled, the compiler will
+also compile the code for the <CODE>lambda</CODE> body.  This code will be
+kept around for use by <CODE>make-counter</CODE>.
+
+</P>
+<P>
+The actual run-time code for <CODE>lambda</CODE> just consists of fetching
+the address of the code, and the current environment pointer,
+and putting them in a closure object on the heap.  <CODE>lambda</CODE> is
+therefore about as fast as <CODE>cons</CODE>---all that's really happening
+is the creation of the closure object itself, not anything
+expensive like calling the compiler at run-time.
+
+</P>
+<P>
+[ cost of lambda calling is a handful of instructions...]
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_121.html">previous</A>, <A HREF="schintro_123.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

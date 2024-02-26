@@ -1,0 +1,62 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Booleans</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_18.html">previous</A>, <A HREF="schintro_20.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC19" HREF="schintro_toc.html#SEC19">The Boolean Values <CODE>#t</CODE> and <CODE>#f</CODE></A></H3>
+
+<P>
+<A NAME="IDX11"></A>
+<A NAME="IDX12"></A>
+
+</P>
+<P>
+Scheme provides a special unique object, whose written
+representation is <CODE>#f</CODE>, called <EM>false</EM>.  This object counts as
+false if it's the result of a condition expression in an <CODE>if</CODE>
+(or <CODE>cond</CODE>) expression.  In most Schemes, this is the <EM>only</EM>
+value that counts as false, and all others count as true. 
+
+</P>
+<P>
+The false object is <EM>not</EM> the same thing as the integer zero (as it is
+in C), and it's not the same thing as a null pointer (as it is in Lisp).
+The false object is a unique object.
+
+</P>
+<P>
+For convenience and clarity, Scheme also provides another boolean
+value, written <CODE>#t</CODE>, which can be used as a true value.  Note that
+in general, any value other than false is true, but the special boolean 
+object <CODE>#t</CODE> is a good one to use when all you want to say is that
+something is true--returning the true boolean makes it clear that all
+you're returning is a true value, not some other value that conveys more
+information.
+
+</P>
+<P>
+Like other objects, Booleans are conceptually objects on the heap,
+and when you write <CODE>#t</CODE> or <CODE>#f</CODE>, it means "a pointer to the
+canonical true object" or "a pointer to the false object." 
+
+</P>
+<P>
+Scheme provides a few procedures and special forms for operation on
+booleans.  The procedure <CODE>not</CODE> acts as a <CODE>not</CODE> operator,
+and always returns true or false (<CODE>#t</CODE> or <CODE>#f</CODE>).  If applied
+to <CODE>#f</CODE>, it returns <CODE>#t</CODE>.  Since all other values count as
+true, applying <CODE>not</CODE> to anything else returns <CODE>#f</CODE>.
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_18.html">previous</A>, <A HREF="schintro_20.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

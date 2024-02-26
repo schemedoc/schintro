@@ -1,0 +1,83 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Choosing Equality Predicates</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_49.html">previous</A>, <A HREF="schintro_51.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC56" HREF="schintro_toc.html#SEC56">Choosing Equality Predicates  (Hunk I)</A></H3>
+
+
+<PRE>
+==================================================================
+Hunk I starts here:
+==================================================================
+</PRE>
+
+<P>
+<A NAME="IDX51"></A>
+
+</P>
+<P>
+The reason that the <CODE>=</CODE> and <CODE>eqv?</CODE> predicates are needed is
+that the numeric system of Scheme is not quite as clean as it could be, 
+for efficiency reasons.
+
+</P>
+<P>
+Ideally, there would be exactly one copy of any
+numeric value, and all occurrences of that value would really be
+pointers to the same unique object.  Then you could use <CODE>eq?</CODE>
+to compare numbers for identity, just as you can for other kinds
+of values.  (For example, there would be just one floating-point number
+with the value 2.36529, and any computation that returned that
+floating-point value would return a pointer to that unique object.
+(<CODE>(eq? 2.36529 2.36529)</CODE> would return <CODE>#t</CODE>.)
+
+</P>
+<P>
+Unfortunately, for numbers it would be too expensive to do this--it
+would require keeping a table of all of the numbers in the system, and 
+probing that table to eliminate duplicate copies of the same values. 
+As a concession to efficiency, Scheme allows multiple copies of the
+same number, and the <CODE>=</CODE> and <CODE>eqv?</CODE> predicates mask this
+wart in the language--they perform numeric comparisons when faced
+with numbers, so that you don't have to worry about whether two
+numbers with the same value are literally the same object.
+
+</P>
+<P>
+<CODE>eqv?</CODE> thus tests whether two values are "equivalent," when
+two objects with the same numeric value are treated as "the same,"
+like <CODE>=</CODE>, but all other objects are distinguished by their
+object identity, like <CODE>eq?</CODE>.  In general,
+
+</P>
+
+<UL>
+<LI>
+
+<CODE>eq?</CODE> is useful for fast identity (same object) comparisons
+of non-numbers,
+<LI>
+
+<CODE>=</CODE> performs numeric comparisons on numbers,
+<LI>
+
+<CODE>eqv?</CODE> is like <CODE>eq?</CODE>, but treats copies of the same number as
+though they were the same object, and
+<LI>
+
+<CODE>equal?</CODE> performs a "deep" comparison of the structure of
+data structures.  (It uses <CODE>eqv?</CODE> for components that are numbers.)
+</UL>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_49.html">previous</A>, <A HREF="schintro_51.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

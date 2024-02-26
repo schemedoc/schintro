@@ -1,0 +1,131 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Parentheses and Indenting</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_23.html">previous</A>, <A HREF="schintro_25.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC24" HREF="schintro_toc.html#SEC24">A Note about Parentheses and Indenting</A></H3>
+
+<P>
+<A NAME="IDX14"></A>
+<A NAME="IDX15"></A>
+
+</P>
+<P>
+The two biggest barriers to learning Scheme are probably parentheses
+and indenting.  In Scheme, parentheses are used a little differently
+than in most programming languages.  Indenting is also very important,
+because the surface syntax of the language is so regular.  When reading
+Scheme code, experienced programmers read the indenting structure as
+much as the tokens.  If you don't parenthesize correctly, your programs
+won't run correctly.  And if you don't indent them correctly, they'll
+be hard to understand.
+
+</P>
+<P>
+The syntax of Scheme is more similar to that of C or Pascal than
+it may appear at first glance.  After all, almost all programming languages
+are based on nested (statements or) expressions.  Like C or Pascal,
+Scheme is free-form, and you can indent it any way you want.
+
+</P>
+<P>
+Some people write Scheme code indented like C, with closing parentheses
+lined up under opening parentheses to show nesting.  (People who do
+this are usually beginners who haven't learned to use an editor
+properly, as I'll explain later.)  They might write
+
+</P>
+
+<PRE>
+;; A poorly indented if expression
+(if a
+    (if b
+        c
+        d
+    )
+    e
+)
+</PRE>
+
+<P>
+rather than
+
+</P>
+
+<PRE>
+;; a nicely-indented if expression
+(if a
+    (if b
+        c
+        d)
+    e))
+</PRE>
+
+<P>
+The first version looks a little more like C, but it's not really easier
+to read.  The second example shows its structure just as clearly if you
+know how to read Scheme, and is in fact easier to read because it's
+not all stretched out.  The second example takes up less space on the
+page or a computer screen.  (This is important when editing code in a
+window and doing other things in another window--you can see more of 
+your program at a time.)
+
+</P>
+<P>
+There are a couple of things to keep in mind about parentheses in Scheme.
+The first thing is that <EM>parentheses are significant</EM>.  In C or Pascal, 
+you can often leave parentheses out, because of "operator precedence
+parsing," where the compiler figures out the grouping.  More importantly,
+you can often add extra parentheses around expressions without affecting their
+meanings.
+
+</P>
+<P>
+This is not true in Scheme!  In Scheme, the parentheses are not just
+there to clarify the association of operators.  In Scheme, parentheses
+are not optional, and <EM>putting extra parentheses around things changes
+their meaning</EM>.  For example, the expression <CODE>foo</CODE> is a variable
+reference, whose effect is to fetch the value of the variable <CODE>foo</CODE>.
+On the other hand, the expression <CODE>(foo)</CODE> is a call to the procedure
+named <CODE>foo</CODE> with zero arguments.
+
+</P>
+<P>
+(Notice that even in C, it's not generally acceptable to write a procedure
+call with too few parentheses or too many: a call <CODE>foo(a, b)</CODE> can't be
+written just <CODE>foo a, b</CODE> or as <CODE>foo((a, b))</CODE>.)
+
+</P>
+<P>
+In general, you have to know where parentheses are needed and where they
+are not, which requires understanding Scheme's rules.  Some parentheses
+indicate procedure calls, while others are just delimiters of special
+forms.  Luckily, the rules are simple;  they should become very clear
+in the next chapter or two.
+
+</P>
+<P>
+The other thing to know about parentheses is that they have to match.
+For every opening parenthesis there has to be a closing parenthesis, and
+of course it must be in the right place.  
+
+</P>
+
+<UL>
+<LI><A HREF="schintro_25.html#SEC25">Let Your Editor Help</A>: Editors Make Parenthesis Matching Easy
+<LI><A HREF="schintro_26.html#SEC26">Indenting Simple Things</A>: Procedure calls and simple control constructs
+<LI><A HREF="schintro_27.html#SEC27">Indenting cond</A>: Cond is unreadable without proper indenting
+<LI><A HREF="schintro_28.html#SEC28">Indenting Procedure Definitions</A>
+</UL>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_23.html">previous</A>, <A HREF="schintro_25.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

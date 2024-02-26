@@ -1,0 +1,76 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Block Structure Diagrams</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_57.html">previous</A>, <A HREF="schintro_59.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H4><A NAME="SEC64" HREF="schintro_toc.html#SEC64">Block Structure Diagrams for <CODE>let</CODE>s</A></H4>
+
+<P>
+<A NAME="IDX61"></A>
+
+</P>
+<P>
+We can make environments and contours clearer by drawing a block diagram
+showing where the different variables are visible:
+
+</P>
+
+<PRE>
+(let ((x 10)    ; bindings of x
+      (a 20))   ; and a 
+ +----------------------------------------------------------+
+ | (foo x)                                 scope of outer x |
+ | (let ((x (bar))                           and a          |
+ |       (b (baz x x)))                                     |
+ |  +------------------------------------------------+      |
+ |  | (quux x a)                    scope of inner x |      |
+ |  | (quux y b)                    and b            | )    |
+ |  +------------------------------------------------+      |
+ | (baz x a)                                                |
+ | (baz x b)                                                | )
+ +----------------------------------------------------------+
+</PRE>
+
+<P>
+(This kind of block diagram is the origin of the term "block structure.")
+
+</P>
+<P>
+Each box represents a contour: it shows where in the program each
+variable binding will be visible.
+
+</P>
+<P>
+We can interpret a block structure diagram by looking outward from
+an occurrence of a variable name, and using the nearest enclosing
+box that corresponds to a binding of that name.  Now we can see
+that the final call <CODE>(baz x b)</CODE> does not refer to the <CODE>let</CODE>
+variable <CODE>b</CODE>---it's not inside the box corresponding to that
+variable.  We can also see that the occurrence of <CODE>x</CODE> in that
+expression refers to the outer <CODE>x</CODE>.  The occurrence of <CODE>x</CODE>
+in the calls to <CODE>quux</CODE> refer to the inner <CODE>x</CODE>, because
+they're inside its box, and inner definitions shadow outer ones.
+
+</P>
+<P>
+There's something a little tricky to notice here.  When we evaluate
+the initial value expressions for the inner <CODE>let</CODE>, the inner
+bindings <EM>are not visible yet</EM>.  <CODE>x</CODE> still refers to
+the <EM>outer</EM> binding of <CODE>x</CODE>, not the inner one that we are
+about to create.  Sometimes this is exactly what you want, but
+sometimes it's not.  Because it isn't always what you want, Scheme
+provides two variants of <CODE>let</CODE>, called <CODE>let*</CODE> and
+<CODE>letrec</CODE>.
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_57.html">previous</A>, <A HREF="schintro_59.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

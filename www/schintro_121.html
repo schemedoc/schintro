@@ -1,0 +1,224 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Understanding let</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_120.html">previous</A>, <A HREF="schintro_122.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC148" HREF="schintro_toc.html#SEC148"><CODE>let</CODE></A></H3>
+
+<P>
+One difference between C or Pascal blocks and Scheme <CODE>let</CODE>'s
+is that <CODE>let</CODE> variable bindings don't necessarily cease
+to exist when the <CODE>let</CODE> is exited, and the bindings therefore
+can't be allocated on a stack in the general case.  (The
+reason for this will become clear when we talk about <CODE>lambda</CODE>
+and closures.)
+
+</P>
+<P>
+One way to visualize the creation of block variables is
+to see it as the creation of a new table mapping names
+to storage, like the toplevel environment in our interpreter.
+
+</P>
+<P>
+Except for the new variables, the new environment (table) is the same 
+as the one that was in use when the block was entered.  We say that
+the <CODE>let</CODE> expression "extends" the "outer" environment with
+bindings for the <CODE>let</CODE> variables.
+
+</P>
+<P>
+Suppose we type a <CODE>let</CODE> expression at the Scheme prompt,
+(Assume we we're just doing the usual expression evaluation in
+the usual top-level environment.)
+
+</P>
+
+<PRE>
+Scheme&#62;(let ((x 10) (y 20))
+          (+ x y))
+30
+</PRE>
+
+<P>
+The interpreter maintains a pointer to the "current environment"
+when evaluating an expression.  This pointer always points
+to the environment the currently-executing code must execute
+in, i.e., the variable bindings it must see for the variables
+it uses.
+
+</P>
+<P>
+Before evaluating the <CODE>let</CODE> expression, Scheme's environment 
+pointer points to the top-level environment, which contains
+the usual bindings holding the built-in Scheme procedures, plus
+any top-level variables we've defined.  Supposing we've defined
+a variable <CODE>foo</CODE>, we can draw the top-level environement
+like this:
+
+</P>
+
+<PRE>
+     +-----+        +------+-----+
+envt |  * -+-------&#62;|  car |  *--+----&#62; #&#60;proc ...&#62;#
+     +-----+        +------+-----+
+                    | cons |  *--+----&#62; #&#60;proc ...&#62;#
+                    +------+-----+
+                    |   +  |  *--+----&#62; #&#60;proc ...&#62;#
+                    +------+-----+
+                    |      *     |
+                           * 
+                    |      *     |
+                    +------+-----+
+                    |  foo |  +--+----&#62; #&#60;proc ...&#62;#
+                    +------+-----+
+</PRE>
+
+<P>
+(Here' we've drawn the environment as a simple table of names and
+bindings.  It might actually be implemented as an association list,
+as in our simple example interpreter, or more likely as a hash table.)
+
+</P>
+<P>
+After entering the <CODE>let</CODE> and creating the bindings for <CODE>x</CODE>
+and <CODE>y</CODE>, the interpreter changes the environment pointer to
+point to the resulting new environment.  This is typically
+implemented by representing the environment as a chain of
+tables called <EM>frames</EM>, rather than a simple flat table.
+The newest frame is searched first, and so on down the chain, to
+find the appropriate bindings.  This environment chain is used as a
+pointer-linked stack, for the most part, with new frames
+being pushed onto the stack when a <CODE>let</CODE> is entered, and popped
+off the stack when a <CODE>let</CODE> is exited.
+
+</P>
+<P>
+Each frame holds binds created by a particular binding contour
+in the program, e.g., on entering a <CODE>let</CODE>.  A whole environment
+consists not only of one frame, but of the chain of frames starting
+at a particular frame.
+
+</P>
+
+
+<PRE>
+                    +-------+-----+
+                    |  car  |  +--+----&#62; #&#60;proc ...&#62;#
+                    +-------+-----+
+                    | cons  |  +--+----&#62; #&#60;proc ...&#62;#
+                    +-------+-----+
+                    |   +   |  +--+----&#62; #&#60;proc ...&#62;#
+                    +-------+-----+
+                    |       *     |
+                            *
+                    |       *     |
+                    +-------+-----+
+                    |  foo  |  +--+----&#62; #&#60;proc ...&#62;#
+                    +-------+-----+
+                              /|\
+                               |
+                               |
+                               |
+     +-----+        +-------+--+--+
+envt |  +--+-------&#62;|[scope]|  *  |
+     +-----+        +-------+-----+
+                    |   x   |  10 |
+                    +-------+-----+    
+                    |   y   |  20 |    
+                    +-------+-----+    
+</PRE>
+
+<P>
+                                              
+The link that connects the two frames (tables) is called a <EM>scope</EM> link.
+It reflects the nesting of naming scopes in the program.  In this
+case, when a variable is referenced inside the <CODE>let</CODE>, the search
+for a binding begins at the new frame (table).  If it is not
+found, the search follows the scope link to the next frame
+and looks there.  This can continue for as many levels as there
+are nested scopes in the program.
+
+</P>
+<P>
+While we're executing in the new environment, bindings in the
+new frame <EM>shadow</EM> (hide) any bindings of variables with the same
+name in the outer environment.
+For example, if there's a top-level variable named <CODE>x</CODE> bound in the
+top-level environment, they won't be seen by code executing in the
+<CODE>let</CODE> environment.
+
+</P>
+<P>
+When we exit the <CODE>let</CODE>, the current environment pointer is set back 
+to point to the same environment frame as before entering the <CODE>let</CODE>.
+In the usual case, that environment becomes garbage because there are no
+pointers to it, and the garbage collector will eventually reclaim
+its space.
+
+</P>
+<P>
+Keep in mind that an <EM>environment</EM> is a language-level entity,
+and just consists of a set of bindings.  Our chain of frames is
+a convenient and efficient data structure we've chosen to <EM>implement</EM>
+this abstraction, so that environments nest properly.
+
+</P>
+<P>
+The difference between frames and environments is similar to the
+difference between pairs and lists.  A pointer to a pair
+that begins a list may be thought of as pointer to the pair itself,
+or as a pointer to the whole list of pairs connected by their
+cdr's.  Likewise, a pointer to an environment frame points to that
+frame, but also points to the sequence of environment frames connected
+by their scope links.
+
+</P>
+<P>
+As with pairs and lists, environment frames can share structure,
+and the same frame may be part of several (nested) environments.
+
+</P>
+<P>
+Unlike pairs and lists, however, a particular environment doesn't
+necessarily include <EM>all</EM> of the parts of all of the frames in
+the sequence.  The scope rules of the language allow shadowing
+of bindings in outer environments by bindings in inner environments;
+our lookup routine implements this by searching an environment
+chain in inner-to-outer order, and taking the first binding of the
+name.
+
+</P>
+<P>
+If we think of
+environments as sets of bindings, the act of pushing an environment
+frame on the front of an environment creates a new environment
+with new bindings added--and with any shadowed bindings <EM>removed</EM>.
+
+</P>
+<P>
+As we will see later, it's significant that we never actually modify
+the structure of an environment chain once it's created--we never
+clobber the scope links.  This allows us to save a pointer to an
+environment by saving a pointer to the first frame in the chain,
+and restore that environment later by simply setting our environment
+pointer to point to that frame.  In effect, we can switch from one
+whole environment (set of bindings) to another just by changing
+a pointer.  It also lets us have environments that share structure--nested
+environments simply have more frames in their chains, and the chains
+share structure with they're nested in.  These properties of environment
+chains turn out to be very convenient when implementing procedure calling.
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_120.html">previous</A>, <A HREF="schintro_122.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

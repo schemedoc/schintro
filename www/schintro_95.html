@@ -1,0 +1,137 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Using Type Predicates</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_94.html">previous</A>, <A HREF="schintro_96.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC100" HREF="schintro_toc.html#SEC100">Using Type Predicates</A></H3>
+
+<P>
+<A NAME="IDX101"></A>
+
+</P>
+<P>
+We can easily write a procedure <CODE>pair-tree-sum</CODE> to give us the sum
+of a binary tree of integers, whose interior nodes are pairs and
+whose leaves are the integers.
+
+</P>
+<P>
+<EM>[ blah blah blah... rewrite some of the following, simplifying
+        to only handle trees, not proper lists. ]</EM>
+
+</P>
+<P>
+Our notion of a "pair tree" is a binary tree of pairs.  Here
+we're doing something a little strange, because in general we're
+improper lists.  We'll regard the <CODE>car</CODE> and <CODE>cdr</CODE> fields
+of a pair as the "left child" and "right child" fields of
+a tree node.  A proper list wouldn't be a pair tree, because it
+the last pair in the list would point to the empty list object,
+not a number.
+
+</P>
+<P>
+(Later, I'll show a record facility that allows
+us to build "tree node" records that are not pairs.  That's nicer,
+because it doesn't confuse pairs' roles in improper lists with their
+roles in trees.  For now, we'll stick with pairs, because the point
+of this example is recursion, not the details of records.)
+
+</P>
+<P>
+Just as we did for proper lists, we start by characterizing this
+data structure recursively.  We'll consider any subtree of a
+pair-tree to be a pair-tree.  This includes the leaves, e.g.,
+the numbers in a tree of numbers.  (This is analogous to the
+way we considered the empty list to be a kind of list in the
+recursive characterization of lists.)
+
+</P>
+<P>
+A pair tree is either
+
+</P>
+
+<UL>
+<LI>a leaf (not a pair), <EM>or</EM>
+
+<LI>a pair, whose car and cdr values are pair-trees.
+
+</UL>
+
+<P>
+Our recursive summing procedure will have to deal with these two cases: 
+
+</P>
+
+<UL>
+
+<LI>a numbers, i.e., leaves of a tree of numbers, and
+
+<LI>pairs, in which case it should sum the left and right subtrees,
+
+      and add those sums together.
+</UL>
+
+<P>
+The first case is the base case for the recursion.  The sum of
+a leaf is the numeric of that leaf.
+
+</P>
+<P>
+The second case is the recursive case, where we have a subtree to
+sum.
+
+</P>
+
+<PRE>
+Scheme&#62;(define (pair-tree-sum pair-tree)
+          (cond ((number? pair-tree)
+                 pair-tree)
+                (else
+                 (+ (pair-tree-sum (car pair-tree))
+                    (pair-tree-sum (cdr pair-tree))))))
+</PRE>
+
+<P>
+Try this out, and make sure you understand why it works.
+
+</P>
+
+<PRE>
+Scheme&#62;(pair-tree-sum 1)
+1
+Scheme&#62;(pair-tree-sum '(1 . 2))
+3
+Scheme&#62;(pair-tree-sum '((40 . 30) . (20 . 10)))
+100
+</PRE>
+
+<P>
+Notice how simple <CODE>pair-tree-sum</CODE> is, and how it depends
+on getting the base case for the recursion right.  If we hadn't
+considered the leaves to be pair-trees in their own right,
+it would have gotten much uglier.  For example, if we'd "bottomed
+out" at pairs whose left and right children weren't both pairs,
+we'd have had more cases to deal with--cases where one child
+is a leaf but the other's not.
+
+</P>
+<P>
+Add <CODE>display</CODE> and <CODE>newline</CODE> expressions at the beginning of
+<CODE>pair-tree-sum</CODE>, as we did for <CODE>list-sum</CODE>, and try it out
+again.  Be sure you understand the output in terms of the recursive
+call pattern.
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_94.html">previous</A>, <A HREF="schintro_96.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

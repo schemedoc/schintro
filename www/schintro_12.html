@@ -1,0 +1,96 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Prefix Expressions</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_11.html">previous</A>, <A HREF="schintro_13.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H4><A NAME="SEC12" HREF="schintro_toc.html#SEC12">Parenthesized Prefix Expressions</A></H4>
+
+<P>
+In C or Pascal, a call to procedure <CODE>foo</CODE> with arguments <CODE>bar</CODE>
+and <CODE>baz</CODE> is written
+
+</P>
+
+<PRE>
+foo(bar,baz);
+</PRE>
+
+<P>
+but in Scheme it's written 
+
+</P>
+
+<PRE>
+(foo bar baz)
+</PRE>
+
+<P>
+Note that the procedure name goes <EM>inside</EM> the parentheses, along
+with the arguments.  Get used to it.  It may seem less odd if you think
+of it as being like a operating system shell command--e.g., <CODE>rm foo</CODE>,
+or <CODE>dir bar</CODE>---but delimited by parentheses.
+
+</P>
+<P>
+Just as in C, expressions can be nested.  Here's a call to a procedure
+<CODE>foo</CODE>, with nested procedure call expressions to compute the arguments.
+
+</P>
+
+<PRE>
+(foo (bar x) (baz y))
+</PRE>
+
+<P>
+This is pretty much equivalent to C's
+
+</P>
+
+<PRE>
+foo(bar(x),baz(y));
+</PRE>
+
+<P>
+As in C or Pascal, the argument expressions in a procedure call
+are evaluated <EM>before</EM> actually calling the procedure;
+the resulting values are what's passed to the procedure.  In Scheme
+terminology, we say that the procedure is <EM>applied</EM> to the
+actual argument values.
+
+</P>
+<P>
+You'll notice soon that Scheme has very few special characters, and
+that expressions are generally delimited by parentheses or spaces.
+For example, <CODE>a-variable</CODE> is a single identifier, not a subtraction
+expression.  Identifiers in Scheme can include not only alphabetic
+characters and digits, but several other characters, such as <CODE>!</CODE>,
+<CODE>?</CODE>, <CODE>-</CODE>, and <CODE>_</CODE>.  Long identifiers are often
+constructed from phrases, to make it clear what they mean, using hyphens
+to separate words;  for example, you can have a variable named
+<CODE>list-of-</CODE><CODE>first-ten-</CODE><CODE>lists</CODE>.  You can use characters
+like <CODE>+</CODE>, <CODE>-</CODE>, <CODE>*</CODE>, and <CODE>/</CODE> within an identifier,
+as in <CODE>before-tax-total+tax</CODE>, or <CODE>estimate+epsilon</CODE>.
+
+</P>
+<P>
+One consequence of Scheme's liberal rules for constructing identifiers
+is that <EM>spaces are important</EM>.  You must put one or more spaces
+(or carriage returns) between identifiers except where special characters
+(usually parentheses) make the divisions obvious.  For example, the
+addition expression <CODE>(+ 1 a)</CODE> can't be written <CODE>(+1 a)</CODE> or
+<CODE>(+1a)</CODE> or <CODE>(+ 1a)</CODE>.  (It <EM>can</EM> be written <CODE>( +  1  a )</CODE>,
+because extra whitespace between tokens is ignored.)
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_11.html">previous</A>, <A HREF="schintro_13.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

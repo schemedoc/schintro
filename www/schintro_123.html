@@ -1,0 +1,518 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - An Interpreter with let and lambda</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_122.html">previous</A>, <A HREF="schintro_124.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H2><A NAME="SEC152" HREF="schintro_toc.html#SEC152">An Interpreter with <CODE>let</CODE> and <CODE>lambda</CODE></A></H2>
+
+<P>
+In this section, I'll present a new interpreter for a bigger subset
+of Scheme;  it handles all of the essential special forms of Scheme,
+except for macro definitions.  (A macro facility would be easy to add,
+as well, and would make it easy to implement the remaining special
+forms by automatic transformation, in terms of the special forms
+the interpreter "understands" directly.)
+
+</P>
+<P>
+The new interpreter is very much like the one from the last chapter,
+with three important differences:
+
+</P>
+
+<UL>
+<LI>
+
+  It implements local binding environments as well as a top-level environment.
+  Evaluating an expression (such as a <CODE>let</CODE>) may create a new
+  environment, and subexpressions (such as the <CODE>let</CODE> body) can simply
+  be evaluated in the new environment by recursive calls to <CODE>eval</CODE>
+<LI>
+
+  It allows new procedures to be defined, creating closures.  Closures
+  pair environments with code bodies that are interpreted by the interpreter.
+  Calling a closure is much like evaluating a <CODE>let</CODE>.  The arguments
+  are bound in a local environment (like <CODE>let</CODE> variables), and the
+  body is interpreted in that environment.
+<LI>
+
+  We will treat special forms differently, binding special form names
+  in much the same way as normal variable names.  This will make the
+  interpreter cleaner and more extensible.
+</UL>
+
+<P>
+Here is our new <CODE>eval</CODE>:
+
+</P>
+
+<PRE>
+(define (eval expr envt)
+   (cond ((symbol? expr)
+          (eval-symbol expr envt))
+         ((pair? expr)
+          (eval-list expr envt))
+         ((self-evaluating? expr)
+          expr)
+         (#t
+          (error "Illegal expression form" expr))))
+</PRE>
+
+<P>
+Notice that not much has changed---<CODE>eval</CODE> still just analyzes
+expressions and dispatches to more specialized helper procedures that
+handle particulr kinds of expressions.
+
+</P>
+<P>
+The important difference is that <CODE>eval</CODE> expects an environment
+argument <CODE>envt</CODE>, which represents the binding environment in
+which to evaluate an expression.
+
+</P>
+
+
+<H3><A NAME="SEC153" HREF="schintro_toc.html#SEC153">Nested Environments and Recursive Evaluation</A></H3>
+
+<P>
+Instead of using the old "flat" representation of an environment,
+which was just a table of name-value pairs, we'll represent nested
+environments as a list of tables, or <EM>environment chain</EM>.
+
+</P>
+<P>
+When we begin interpretering, the environment chain will consist
+of one table, the top-level environment.  When we evaluate a binding
+construct such as a <CODE>let</CODE>, we will create a new table, or
+<EM>environment frame</EM>, which binds the local variables.  This
+frame will contain the name-value pairs bound locally, plus a pointer
+to the next enclosing environment.  The environment chain is thus
+a linked list that acts like a stack, for the most part--new enviornment
+frames are pushed on the front of the list when entering a binding
+construct, and popped off the front of the list when exiting it.
+
+</P>
+<P>
+We could implement this stack-like behavior with an explicit stack
+data structure in the interpreter, but it's easier to use the
+activation "stack" of the language we're using to implement the
+interpreter.  (In this case, that happens to be Scheme, but if we
+were implementing the interpreter in C, we could use C's activation
+stack.)
+
+</P>
+<P>
+At any given point during evaluation, the <EM>current environment</EM>
+is the environment referred to by the interpreter's internal
+variable <CODE>envt</CODE>, an in particular the most recent binding of 
+<CODE>envt</CODE>.
+
+</P>
+<P>
+When we evaluate an expression that doesn't change the interpretive
+environment, and call <CODE>eval</CODE> recursively to evaluate subexpressions,
+we simply pass the <CODE>envt</CODE> variable's value to the recursive
+calls.  This will ensure that the subexpressions execute in the
+same environement as the containing expression.
+
+</P>
+<P>
+When we evaluate a binding construct, and evaluate subexpressions in
+that environment, we create a new environment and pass <EM>that</EM>
+to the recursive calls to <CODE>eval</CODE>, so the subexpressions will
+execute in the new enviornment instead.
+
+</P>
+<P>
+Notice that we don't actually modify the environment chain when creating
+a new environment--we simply create a new frame which holds a pointer
+to the old environment, and pass it to the recursive <CODE>eval</CODE>.  The
+fact that we don't actually modify the structure of the environment
+is important--it's will let us implement closure correctly.
+
+</P>
+<P>
+When the interpreter returns from evaluating a subexpression, it
+returns to an enclosing invocation of <CODE>eval</CODE>;  the old
+environment will become visible again because we return to
+an <CODE>eval</CODE> where that environment is the value of the <CODE>envt</CODE>
+argument.
+
+</P>
+<P>
+For example, consider what happens when we interpret the following
+expression, starting at the top level
+
+</P>
+
+<PRE>
+(let ((foo 1))
+   (if (a)
+       (let ((bar 2))
+          (if (b)
+              (c)
+              (d))
+          (e))
+       (f)
+   (g))
+</PRE>
+
+<P>
+[ We'll focus on the nested calls to eval corresponding to the
+  nesting of let, if, let, if ]
+
+</P>
+<P>
+If we look at the nested calls to <CODE>eval</CODE>, we first see a call
+that evaluates the whole expression in the top-level environment:
+
+<PRE>
+                            +-----+
+eval  expr: (let...)  envt: |  *--+--&#62; [toplevel envt]
+                            +-----+
+</PRE>
+
+<P>
+(I've given a textual representation of the <CODE>expr</CODE> argument, but
+a pictorial representatio of the <CODE>envt</CODE> argument.)
+
+</P>
+<P>
+<CODE>eval</CODE> will dispatch to <CODE>eval-let</CODE>, passing it the same environment.
+<CODE>eval-let</CODE> will evaluate the initial value expression <CODE>1</CODE> in
+that environment, and create a new environment binding <CODE>foo</CODE>.
+(I'll ignore the recursive call to eval to evaluate the argument.)
+It will then call <CODE>eval</CODE> recursively to evaluate the <CODE>let</CODE>
+body in that environment.
+
+</P>
+<P>
+I'll depict the nested invocations of <CODE>eval</CODE> and <CODE>eval-let</CODE>
+top-to-bottom, showing the stack growing twoard the bottom of the
+picture.  (This just turns out to be simpler than drawing the stack
+growing up.)
+
+</P>
+
+<PRE>
+                                +-----+
+eval     expr: (let...)   envt: |  *--+--&#62; [toplevel envt]
+                                +-----+      /|\     /|\
+                                              |       |
+                                +-----+       |       |
+eval-let expr: (let...)   envt: |  *--+-------+       |
+                                +-----+               |
+                                                      |
+                                +-----+               |
+eval     expr: (if...)    envt: |  *--+--&#62;  [ [foo 1] * ]
+                                +-----+  
+</PRE>
+
+<P>
+<CODE>eval-if</CODE> will evaluate the condition expression <CODE>(a)</CODE>
+in the given environment.  We'll ignore that recursive call to
+<CODE>eval</CODE>, but assume it returns a true value.  In that case,
+<CODE>eval-if</CODE> will evaluate its consequent, the inner <CODE>let</CODE>
+expression, by another recursive call to <CODE>eval</CODE>.
+
+</P>
+<P>
+At this point, the "stack" of invocations of <CODE>eval</CODE>,
+<CODE>eval-let</CODE>, and <CODE>eval-if</CODE> looks like this:
+
+</P>
+
+<PRE>
+                                +-----+
+eval     expr: (let...)   envt: |  *--+--&#62; [toplevel envt]
+                                +-----+      /|\     /|\
+                                              |       |
+                                +-----+       |       |
+eval-let expr: (let...)   envt: |  *--+-------+       |
+                                +-----+               |
+                                                      |
+                                +-----+               |
+eval     expr: (if...)    envt: |  *--+---&#62; [ [foo 1] * ]
+                                +-----+      /|\  
+                                              | 
+                                              | 
+                                +-----+       |   
+eval-if  expr: (if...)    envt: |  *--+-------+       
+                                +-----+       |       
+                                              |      
+                                +-----+       |        
+eval     expr: (let...)   envt: |  *--+-------+
+                                +-----+
+</PRE>
+
+<P>
+Again, the <CODE>let</CODE> will evaluate the intial value expression, <CODE>2</CODE>,
+by a recursive call to <CODE>eval</CODE>, which we will ignore here.  Then
+it will bind <CODE>bar</CODE> in a new environment frame, and call <CODE>eval</CODE>
+recursively to evaluate the body in that environment.  The body consists
+of another if, so <CODE>eval-if</CODE> will be called, and it will evaluate
+its argument expression and either the consequent or the alternative
+in that environment.
+
+</P>
+<P>
+Assuming the condition returns true and it evaluates the consequent,
+<CODE>(c)</CODE>, here's the "stack" of invocations of <CODE>eval</CODE>,
+<CODE>eval-let</CODE>, and <CODE>eval-if</CODE> at the point where <CODE>(c)</CODE> is
+evaluated:
+
+</P>
+
+<PRE>
+                                +-----+
+eval     expr: (let...)   envt: |  *--+--&#62; [toplevel envt]
+                                +-----+      /|\     /|\
+                                              |       |
+                                +-----+       |       |
+eval-let expr: (let...)   envt: |  *--+-------+       |
+                                +-----+               |
+                                                      |
+                                +-----+               |
+eval     expr: (if...)    envt: |  *--+---&#62; [ [foo 1] * ]
+                                +-----+      /|\     /|\
+                                              |       |
+                                              |       |
+                                +-----+       |       |
+eval-if  expr: (if...)    envt: |  *--+-------+       |
+                                +-----+       |       |
+                                              |       |
+                                +-----+       |       | 
+eval     expr: (let...)   envt: |  *--+-------+       |
+                                +-----+               |
+                                                      |
+                                +-----+               |
+eval     expr: (if...)    envt: |  *--+---&#62; [ [bar 2] * ]
+                                +-----+      /|\  
+                                              | 
+                                +-----+       | 
+eval     expr: (c)        envt: |  *--+-------+    
+                                +-----+    
+</PRE>
+
+<P>
+[ Note that the pictures above all depict evaluation of nested <EM>non-tail</EM> 
+expressions.  In the case of tail expressions, the "stack" will not
+include as much information, because the state of the calls to <CODE>eval</CODE>,
+etc., will not be saved before the calls that evaluate subexpressions.
+
+</P>
+<P>
+  Our interpreter is written in good tail-recursive style, with tail
+calls to evaluate expressions that are tails of expressions in the
+language we're interpreting.  This means that the intepreter is
+tail-recursive wherever the program it's implementing is tail-recursive,
+and since it's implemented in a tail-recursive language (Scheme), we
+preserve the tail-recurson of the program we're interpreting.  In effect,
+we snarf tail-call optimization from the underlying Scheme system.  If
+we were implementing our interpreter in C, we'd have to use special
+tricks to preserve tail recursion.  We'll show how this can be done
+later, when we discuss our compiler.  ]
+
+</P>
+
+
+<H3><A NAME="SEC154" HREF="schintro_toc.html#SEC154">Integrated, Extensible Treatment of Special Forms</A></H3>
+
+<P>
+In the interpreter in the last chapter, we implemented special forms
+directly in the interpreter---<CODE>eval-list</CODE> checked compound
+expressions to see if they began with a special form name.  In effect,
+we hardcoded the meanings of special form names in the procedure
+<CODE>eval-special-form</CODE>.
+
+</P>
+<P>
+In our new interpreter, we'll use a cleaner approach, which treats
+special form definitions pretty much like variable definitions.  This
+will let us put special forms in particular environments, and use
+the normal scoping mechanisms to look up the routines that compile
+them.
+
+</P>
+<P>
+This has several advantages.  The first is that it makes our interpreter
+more modular.  We can create different environments with different
+special forms, and use the same interpreter to interpret different
+languages.  That is, we separate out the basic operation of the
+interpreter from the particular special forms we decide on.
+
+</P>
+<P>
+The second advantage is that it will allow us to build an elegant
+macro facility, so that new special forms can be defined in terms of
+old ones.  (This will be described in detail in [ a later chapter ].)
+
+</P>
+<P>
+[ this is out of place, but fwd ref idea anyway? Shorten? Or just move?]
+
+</P>
+<P>
+A Scheme interpreter or compiler only needs to "understand"
+procedure calling and a few basic special forms---<CODE>if</CODE>, <CODE>lambda</CODE>,
+<CODE>set!</CODE>, <CODE>quote</CODE>, [did I leave one out?], and one very special
+special form for defining new special forms (macros).  (We can write
+<CODE>cond</CODE> as a macro using <CODE>if</CODE>, <CODE>let</CODE> as a macro using
+<CODE>lambda</CODE>, <CODE>letrec</CODE> as a macro using <CODE>let</CODE>, <CODE>lambda</CODE>,
+and <CODE>set!</CODE>, and so on.)
+
+</P>
+<P>
+The third advantage is that we can use the same scoping rules for
+special forms that we use for variables.  This will be very convenient
+later, because we will be able to define local macros, in much the
+same way we define local procedures.
+
+</P>
+<P>
+To support this, we need to represent bindings slighly differently.
+In the simple interpreter from the last chapter, each binding was
+just a name-value pair.  Now we'll have a third part to each binding,
+telling what kind of binding it is--a variable binding, a special
+form binding, or a macro binding.
+
+</P>
+<P>
+We can still use associations to represent the bindings.  Where the
+simpler interpreter representing each binding as an association of
+the form <CODE>(name value)</CODE>, the new one will use bindings of
+the form <CODE>(name type whatever)</CODE>.   In the case of a normal
+variable binding, the "whatever" is the actual value of the variable.
+In the case of a special form, the "whatever" is the information
+the interpreter needs to interpret that particular special form,
+including the procedure to evaluate it.   For example, when binding
+the name <CODE>let</CODE>, we can store a pointer to the procedure <CODE>eval-let</CODE>
+right there in the binding information.
+
+</P>
+<P>
+Since the exact representation of bindings is irrelevant, and we may
+want to change it, we'll call the whole thing a <CODE>binding-info</CODE>
+data structure.  This reflects that fact that it may not hold just
+a binding, but also any auxiliary information we want to store.
+
+</P>
+<P>
+To abstract away from exactly how bindings are implemented, we'll define
+several procedures that operate on <CODE>binding-info</CODE>'s.  These include:
+
+</P>
+
+<UL>
+<LI>
+
+  <CODE>bdg-type</CODE>, which returns a symbol saying what kind of binding
+  it is: <CODE>&#60;variable&#62;</CODE> for a normal variable, <CODE>&#60;special-form&#62;</CODE>
+  for a built-in special form binding, and <CODE>&#60;syntax&#62;</CODE> for a syntax
+  (macro) binding.
+<LI>
+
+  <CODE>bdg-variable-ref</CODE>, which returns the value of a normal variable
+  binding.
+<LI>
+
+  <CODE>bdg-special-form-evaluator</CODE>, which returns an evaluation procedure
+  for a special form binding.
+</UL>
+
+<P>
+For now we'll ignore <CODE>&#60;syntax&#62;</CODE> bindings, which will be discussed
+in a later chapter.
+
+</P>
+<P>
+[ give actual code for accessors, etc? ]
+
+</P>
+<P>
+Here's our new <CODE>eval-list</CODE> for handling compound expressions:
+
+</P>
+
+<PRE>
+(define (eval-list list-expr envt)
+   ; only try to consider it specially if the head is a symbol
+   (if (symbol? (car list-expr))
+
+       ; look it up in the current lexical environment
+       (let ((binding-info (envt-lexical-lookup envt (car list-expr))))
+
+          ; switch on the type of thing that it is
+          (cond ((not binding-info)
+                 (error "Unbound symbol" (car list-expr)))
+                (else
+                 (cond
+                    ; special forms just call the special-form
+                    ; evaluator, which is stored in the binding-info
+                    ; object itself
+                   ((eq? (binding-type binding-info) '&#60;special-form&#62;)
+                    ((bdg-special-form-evaluator binding-info) list-expr
+                                                               envt))
+
+                   ((eq? (binding-type binding-info) '&#60;variable&#62;)
+                    (eval-combo (bdg-variable-ref binding-info)
+                                (cdr list-expr)
+                                envt))
+                   ((eq? (binding-type binding-info) '&#60;syntax&#62;)
+                    (eval-macro-call (bdg-syntax-transformer binding-info)
+                                     list-expr
+                                     envt))
+                   (else
+                    (error "Unrecognized binding type"))))))
+
+         ; the head of the list is not a symbol, so evalute it
+         ; and then do an eval-combo to evaluate the args and
+         ; call the procedure
+         (eval-combo (eval (car list-expr) envt)
+                     (cdr list-expr)
+                     envt)))
+</PRE>
+
+<P>
+<CODE>eval-list</CODE> first checks to see whether the head of the list
+is a symbol;  if not, it's just a combination (procedure call expression),
+and is handled by <CODE>eval-combo</CODE>.  (Remember that a combination
+can have an arbitrary expression as its operator, and that expression
+is assumed to return a procedure to call.)
+
+</P>
+<P>
+If it is a symbol, the binding of the variable is looked up.  If it's
+a special from binding, the evaluation procedure is extracted from
+the binding info, and called to evaluate the expression.
+
+</P>
+<P>
+If the head of the list is just the name of a normal variable, that's
+also just a combination, and <CODE>eval-combo</CODE> is called in that
+case, too.
+
+</P>
+<P>
+If the head of the list is the name of a syntax binding (macro), we
+call <CODE>eval-macro-call</CODE> to deal with it;  don't worry about
+this for now--it will be discussed in detail in Chapter [ whatever ].
+
+</P>
+<P>
+Notice that in all cases, the environment is passed along unchanged
+to whatever procedure handles the expression.
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_122.html">previous</A>, <A HREF="schintro_124.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

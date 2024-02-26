@@ -1,0 +1,42 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - apply</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_68.html">previous</A>, <A HREF="schintro_70.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC75" HREF="schintro_toc.html#SEC75"><CODE>apply</CODE></A></H3>
+
+<P>
+<A NAME="IDX80"></A>
+
+</P>
+<P>
+The procedure <CODE>apply</CODE> allows you to call any procedure, and
+specify a list of values to be passed as arguments.  <CODE>apply</CODE>
+takes a procedure and a list of values, and then calls the procedure
+with those values as arguments.
+
+</P>
+<P>
+For example, <CODE>(apply + '(1 2))</CODE> passes the values <CODE>1</CODE> and
+<CODE>2</CODE> to <CODE>+</CODE>, and is equivalent to <CODE>(+ 1 2)</CODE>.
+
+</P>
+<P>
+You'll seldom need to use <CODE>apply</CODE>, because normal procedure
+calling works fine in most situations.  Occasionally, though, it is
+convenient to be able to apply a procedure to a list of values
+that have already been computed.  (I'll show an example in [ chapter 4? ].)
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_68.html">previous</A>, <A HREF="schintro_70.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

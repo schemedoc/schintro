@@ -1,0 +1,230 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Local Procedures and letrec</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_65.html">previous</A>, <A HREF="schintro_67.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC72" HREF="schintro_toc.html#SEC72">Recursive Local Procedures and <CODE>letrec</CODE></A></H3>
+
+<P>
+<A NAME="IDX74"></A>
+<A NAME="IDX75"></A>
+<A NAME="IDX76"></A>
+
+</P>
+<P>
+Using <CODE>let</CODE> and <CODE>lambda</CODE> to define local procedures will often
+work, but generally we use <CODE>letrec</CODE> rather than <CODE>let</CODE>, because
+it supports <EM>recursive</EM> local procedures.  (That's why it's called
+<CODE>letrec</CODE>---it means <CODE>let</CODE> with <EM>rec</EM>ursive definitions.)
+
+</P>
+<P>
+Suppose we tried to use <CODE>let</CODE> and <CODE>lambda</CODE> to define
+a recursive local procedure:
+
+</P>
+
+<PRE>
+(define (foo x)
+   (let ((local-proc (lambda (y)
+                        ...
+                        (local-proc ...)   ; recursive call?  No.
+                        ...))) 
+      ...
+      (local-proc x)
+      ...)
+</PRE>
+
+<P>
+The problem with this example is that what appears to be a recursive
+call to <CODE>local-proc</CODE> from inside <CODE>local-proc</CODE> actually
+isn't.  Remember that <CODE>let</CODE> computes the initial values of
+variables, then initializes all of the variables' storage, and
+only <EM>then</EM> do any of the bindings become visible--when
+we enter the body of the <CODE>let</CODE>.  In the example above, that means
+that the local variable <CODE>local-proc</CODE> <EM>isn't visible to
+the <CODE>lambda</CODE> expression</EM>.  The procedure created by <CODE>lambda</CODE>
+will not see its own name--the name <CODE>local-proc</CODE> in the body
+of the procedure will refer to whatever binding of <CODE>local-proc</CODE>
+exists in the enclosing environment, if there is one.
+
+</P>
+<P>
+A block structure diagram may make this clearer:
+
+</P>
+
+<PRE>
+(define (foo x)
+   (let ((local-proc (lambda (y)
+                      +--------------------------+
+                      | ...                scope |
+                      | (local-proc ...)   of y  | 
+                      | ...                      | )))
+                      +--------------------------+
+    +------------------------------------------+
+    | ...                         scope of     |
+    | (local-proc x)              local-proc   |
+    | ...                                      | )
+    +------------------------------------------+
+</PRE>
+
+<P>
+Unlike <CODE>let</CODE>, <CODE>letrec</CODE> makes new bindings visible <CODE>before</CODE>
+they're initialized.  Storage is allocated, and the meanings of names
+are changed to refer to the new local variable bindings, and <EM>then</EM> the
+initial values of those variables are computed and the variables
+are initialized.
+
+</P>
+<P>
+For most purposes, this wouldn't make any sense at all--why would you
+want variable bindings to be visible before they have had their initial
+values installed?  For local procedure definitions, however, it makes
+perfect sense--we want to use <CODE>lambda</CODE> to create a procedure
+that can operate on the variables <EM>later</EM>, when it's called.
+
+</P>
+<P>
+<CODE>lambda</CODE> creates a procedure that will start executing in the scope
+where the <CODE>lambda</CODE> expression is evaluated, so we need to make the
+bindings visible before we evaluate the <CODE>lambda</CODE> expression.
+
+</P>
+<P>
+If we use <CODE>letrec</CODE> in our example, instead of <CODE>let</CODE>, it works.
+The procedure <CODE>local-proc</CODE> can see the <EM>variable</EM> <CODE>local-proc</CODE>,
+so it can call itself by its name.
+
+</P>
+<P>
+The block structure diagram looks like this:
+
+</P>
+
+<PRE>
+(define (foo x)         +-----------------------------------+
+   (letrec ((local-proc | (lambda (y)                       |
+                        |  +--------------------------+     |
+                        |  | ...                scope |     |
+                        |  | (local-proc ...)   of y  |     |
+                        |  | ...                      | ))) |
+                        |  +--------------------------+     |
+    +-------------------+                                   |
+    | ...                                  scope of         |
+    | (local-proc x)                       local-proc       |
+    | ...)                                                  |
+    +-------------------------------------------------------+
+</PRE>
+
+<P>
+The recursive call to <CODE>local-proc</CODE> will work, because the
+call is inside the box that corresponds to the scope of the variable
+<CODE>local-proc</CODE>.
+
+</P>
+<P>
+<CODE>letrec</CODE> works for multiple <EM>mutually recursive</EM> local procedures,
+too.  You can define several local procedures that can call each other,
+like this:
+
+</P>
+
+<PRE>
+(define (my-proc)
+   (letrec ((local-proc-1 (lambda ()
+                             ...
+                             (local-proc-2)
+                             ...))
+            (local-proc-2 (lambda ()
+                             ...
+                             (local-proc-1)
+                             ...)))
+      (local-proc-1))) ; start off mutual recursion by calling local-proc-1
+</PRE>
+
+<P>
+A block structure diagram shows that each local procedure definition can see
+the bindings of the other's names:
+
+</P>
+
+<PRE>
+(define (my-proc)
+             +--------------------------------------------------------+
+   (letrec ( | (local-proc-1 (lambda ()        scope of local-proc-1  |
+             |                ...                and local-proc-2     |
+             |                (local-proc-2)                          |
+             |                ...))                                   |
+             | (local-proc-2 (lambda ()                               |
+             |               ...                                      |
+             |               (local-proc-1)                           |
+    +--------+               ...)))                                   |
+    | (local-proc-1)                                                  | ))
+    +-----------------------------------------------------------------+
+</PRE>
+
+<P>
+You can also define plain variables while you're at it, in the
+same <CODE>letrec</CODE>, but <CODE>letrec</CODE> is mostly interesting for defining
+local procedures.
+
+</P>
+<P>
+When the initial value of a <CODE>letrec</CODE> variable is not a procedure,
+you must be careful that the expression does not depend on the
+values of any of the other <CODE>letrec</CODE> variables.  Like <CODE>let</CODE>,
+the order of initialization of the variables is undefined.
+
+</P>
+<P>
+For example, the following is illegal:
+
+</P>
+
+<PRE>
+(letrec ((x 2)
+         (y (+ x x)))
+   ...)
+</PRE>
+
+<P>
+In this case, the attempt to compute <CODE>(+ x x)</CODE> may fail,
+because the value of <CODE>x</CODE> may not have been computed yet.
+For this example, <CODE>let*</CODE> would do the job--the
+second initialization expression needs to see the result of
+the first, but not vice versa:
+
+</P>
+
+<PRE>
+(let* ((x 2)
+       (y (+ x x)))
+   ...)
+</PRE>
+
+<P>
+Be sure you understand why this is illegal, but the <CODE>lambda</CODE> expressions
+in the earlier examples are not.  When we create recursive procedures
+using <CODE>letrec</CODE> and <CODE>lambda</CODE>, the <CODE>lambda</CODE> expressions can
+be evaluated without actually using the <EM>values</EM> of the bindings they
+reference.  We are creating procedures that <EM>will</EM> use the values
+in the bindings <EM>when those procedures are called</EM>, but just creating
+the procedure objects themselves doesn't require the bindings to have values
+yet.  It does require that the bindings exist, because each <CODE>lambda</CODE>
+expression creates a procedure that "captures" the currently visible
+bindings--the procedure remembers what environment it was created in.
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_65.html">previous</A>, <A HREF="schintro_67.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

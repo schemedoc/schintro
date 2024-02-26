@@ -1,0 +1,352 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Lists Again</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_104.html">previous</A>, <A HREF="schintro_106.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC114" HREF="schintro_toc.html#SEC114">Lists Again</A></H3>
+
+<P>
+Suppose we want to make a list of symbols whose print names are the English
+words for the first five integers.  We could do it using quoting,
+of course, like this:
+
+</P>
+
+<PRE>
+Scheme&#62;(define firstfive '(one two three four five))
+#void
+Scheme&#62;firstfive
+(one two three four five)
+</PRE>
+
+<P>
+We don't have to quote each symbol individually.  Within a <CODE>quote</CODE>
+expression, everything is assumed to be literal data, not expressions to evaluate.
+
+</P>
+<P>
+We could also do it by calling <CODE>list</CODE> to construct the list, and
+handing it each of the five symbols as literals.  To do that, we
+have to quote them, so that Scheme won't think we're referring to
+variables named <CODE>one</CODE>, <CODE>two</CODE>, etc.
+
+</P>
+
+<PRE>
+Scheme&#62;(define firstfive (list 'one 'two 'three 'four 'five))
+#void
+Scheme&#62;firstfive
+(one two three four five)
+</PRE>
+
+<P>
+Since <CODE>list</CODE> is a procedure, its argument expressions are evaluated.
+We use a <CODE>quote</CODE> around each expression, so that it will return
+a pointer to the appropriate symbol, rather than the value of the variable
+by the same name.
+
+</P>
+<P>
+This works whether or not there <EM>is</EM> a variable by that name, because
+names of symbols and names of variables are completely different things.
+
+</P>
+<P>
+For example, even after evaluating the above expressions, attempting to
+evaluate the expression <CODE>four</CODE> will be an error, unless we've defined
+a variable named <CODE>four</CODE>.  The existence of a symbol with a given print
+name doesn't say anything about the existence of a variable with that name.
+
+</P>
+
+
+<H4><A NAME="SEC115" HREF="schintro_toc.html#SEC115">Heterogeneous Lists</A></H4>
+
+<P>
+<A NAME="IDX106"></A>
+
+</P>
+<P>
+Since Scheme is dynamically typed, we can put any kind of object in a list.
+So far, we've made a list of integers and a list of symbols.  We can also
+make a list of different kinds of things, such as a list of integers,
+symbols, and lists.
+
+</P>
+
+<PRE>
+Scheme&#62;(define mixed5 '(one 2 (three and a) "four" 5))
+#void
+Scheme&#62;mixed5
+(one 2 (three and a) "four" 5) 
+</PRE>
+
+<P>
+Here we've constructed a mixed list whose first element is a symbol,
+the second is an integer, the third is a list of symbols, the fourth
+is a string, and the fifth is another integer.  (The technical term
+for a mixed list is a "heterogeneous list.")
+
+</P>
+<P>
+We can draw it like this:
+
+</P>
+
+<PRE>
+       +-----+
+mixed5 |  +--+--&#62;+---+---+  +---+---+  +---+---+  +---+---+  +---+---+
+       +-----+   | + | +-+-&#62;| + | +-+-&#62;| + | +-+-&#62;| + | +-+-&#62;| + | * |
+                 +-+-+---+  +-+-+---+  +-+-+---+  +-+-+---+  +-+-+---+
+                   |          |          |          |          |
+                  \|/        \|/         |         \|/        \|/
+                  one         2          |        "four"       5
+                                         |
+                                        \|/
+                                       +---+---+  +---+---+  +---+---+
+                                       | + | +-+-&#62;| + | +-+-&#62;| + | * |
+                                       +-+-+---+  +-+-+---+  +-+-+---+
+                                         |          |          |
+                                        \|/        \|/        \|/
+                                       three       and         a
+
+</PRE>
+
+<P>
+Notice that we draw the symbols (<CODE>one</CODE>, <CODE>three</CODE>, <CODE>and</CODE>, and
+<CODE>a</CODE>) as simple sequences of characters.  This is just a drawing
+convention.  They're really objects, like pairs are.  We draw strings
+similarly, but with double quotes around them.  Don't be fooled--these
+are objects on the heap, too.   We just draw them this way to keep
+the picture from getting cluttered up.
+
+</P>
+
+
+<H4><A NAME="SEC116" HREF="schintro_toc.html#SEC116">Operations on Lists</A></H4>
+
+<P>
+We've already seen two list-processing procedures that you'll use a lot,
+<CODE>car</CODE> and <CODE>cdr</CODE>.  <CODE>car</CODE> takes a pointer to a pair, and
+extracts the value of its first (<CODE>car</CODE>) field.  <CODE>cdr</CODE> takes
+a pointer to a pair and returns the value of its second (<CODE>cdr</CODE>) field.
+
+</P>
+<P>
+(It might have been better if <CODE>car</CODE> had been called <CODE>first</CODE>
+and <CODE>cdr</CODE> had been called <CODE>rest</CODE>, since that's more
+suggestive of how they're used: a pointer to the first item in a
+list, and a pointer to the pair that heads the rest of the list.)
+
+</P>
+<P>
+Given our list stored in <CODE>mixed5</CODE>, we can extract parts of the
+list using <CODE>car</CODE> and <CODE>cdr</CODE>.
+
+</P>
+
+<PRE>
+Scheme&#62;(car mixed5)
+one
+Scheme&#62;(cdr mixed5)
+(2 (three and a) "four" five)
+</PRE>
+
+<P>
+By using <CODE>car</CODE> and <CODE>cdr</CODE> multiple times, we can extract
+things beyond the first element.  For example, taking the <CODE>cdr</CODE>
+of the <CODE>cdr</CODE> of a list skips the first two elements, and returns
+the rest:
+
+</P>
+
+<PRE>
+Scheme&#62;(cdr (cdr mixed5))
+((three and a) "four" 5)
+</PRE>
+
+<P>
+Taking the car of that list (that is, the <CODE>car</CODE> of the <CODE>cdr</CODE>
+of the <CODE>cdr</CODE>) returns the first item in that list:
+
+</P>
+
+<PRE>
+Scheme&#62;(car (cdr (cdr mixed5)))
+(three and a)
+</PRE>
+
+<P>
+We can keep doing this, for example taking the second element of that
+sublist by taking the car of its cdr.
+
+</P>
+
+<PRE>
+Scheme&#62;(car (cdr (car (cdr (cdr mixed5)))))
+and
+</PRE>
+
+<P>
+<A NAME="IDX107"></A>
+<A NAME="IDX108"></A>
+
+</P>
+<P>
+This starts to get tedious and confusing--too many nestings of procedures
+that do too little at each step--so Scheme provides a handful of procedures
+that do two list operations at a whack.  The two most important ones
+are <CODE>cadr</CODE> and <CODE>cddr</CODE>. 
+
+</P>
+<P>
+<CODE>cadr</CODE> takes the <CODE>car</CODE> of the <CODE>cdr</CODE>, which gives you the
+second item in the list.  <CODE>cddr</CODE> takes the <CODE>cdr</CODE> of the <CODE>cdr</CODE>,
+skipping the first two pairs in a list and returning the rest of the list.
+
+</P>
+<P>
+This lets us do the same thing we did above, a little more concisely
+and readably:
+
+</P>
+
+<PRE>
+Scheme&#62;(cadr (car (cddr mixed5)))
+and
+</PRE>
+
+<P>
+With a little practice, it's not hard to read a few nested expressions
+like this.  In this example, taking the <CODE>cddr</CODE> of <CODE>mixed5</CODE>
+skips down the list two places, giving us the list that starts with
+the sublist we want.  Then taking the <CODE>car</CODE> of that gives us
+the sublist itself off the front of that list, and taking the <CODE>cadr</CODE>
+of that gives us the second item in the sublist.
+
+</P>
+<P>
+Of course, even if Scheme didn't provide <CODE>cadr</CODE> and <CODE>cdr</CODE>,
+you could write them yourself in terms of <CODE>car</CODE> and <CODE>cdr</CODE>:
+
+</P>
+
+<PRE>
+(define (cadr x)
+   (car (cdr x)))
+
+(define (cddr x)
+   (cdr (cdr x)))
+</PRE>
+
+<P>
+Scheme actually provides predefined list operations for all combinations
+of up to four <CODE>car</CODE>'s and <CODE>cdr</CODE>'s.  For example, <CODE>cadadr</CODE>
+takes the <CODE>cadr</CODE> of the <CODE>cadr</CODE>.  (The naming scheme is
+that the pattern of <CODE>a</CODE>'s and <CODE>d</CODE>'s reflects the equivalent
+nesting of calls to <CODE>car</CODE> and <CODE>cdr</CODE>.)
+
+</P>
+<P>
+<A NAME="IDX109"></A>
+<A NAME="IDX110"></A>
+
+</P>
+<P>
+You probably won't want to bother with most of those, because the
+names aren't very intuitive.  Two procedures that are worth knowing
+are <CODE>list-ref</CODE> and <CODE>list-tail</CODE>.
+
+</P>
+<P>
+<CODE>(list-ref</CODE> <EM>list</EM>  <EM>n</EM><CODE>)</CODE> extracts the <EM>n</EM>th
+element of a list <CODE>list</CODE>, which is equivalent to <EM>n-1</EM> 
+applications of <CODE>cdr</CODE> followed by <CODE>car</CODE>.  For example,
+<CODE>(list-ref '(a b c d e) 3)</CODE> is equivalent to
+<CODE>(car (cdr (cdr '(a b c d e))))</CODE>, and returns <CODE>d</CODE>.)
+
+</P>
+<P>
+In effect, you can index into a list as though it were an array, using
+<CODE>list-ref</CODE>.  (Of course, the access time for an element of a list
+is linear in the index of the element.  If you need constant-time
+access, you can use vectors, i.e., one-dimensional arrays.)  Notice that
+the numbering is zero-based, which is why <CODE>(list-ref lis 3)</CODE> returns
+the <EM>fourth</EM> element of a <CODE>lis</CODE>.  This is consistent with
+the indexing of vectors, which are also zero-based, as well as reflecting
+the number of <CODE>cdr</CODE> operations.
+
+</P>
+<P>
+<CODE>(list-tail</CODE> <EM>list</EM> <EM>n</EM><CODE>)</CODE> skips the first <EM>n</EM> 
+elements of a list and returns a pointer to the rest, which is equivalent
+to repeated applications of <CODE>cdr</CODE>.  (This is standard R4RS Scheme,
+but not IEEE Scheme.  If your Scheme doesn't provide <CODE>list-tail</CODE>,
+you can easily write your own.)
+
+</P>
+<P>
+These two procedures can make it much clearer what you're doing
+when you extract elements from nested lists.  Suppose that we have
+a list <CODE>foo</CODE>, which is a triply-nested list--a list of
+lists of lists, and we want to extract the second element of the
+bottom-level list that is the third element of the middle-level
+list that is the fourth element of the outermost list.
+
+</P>
+<P>
+We could write <CODE>(car (cdr (car (cdr (cdr (car (cdr (cdr (cdr foo)))))))))</CODE>,
+but that's pretty hard to read.  If we use <CODE>cadr</CODE>, <CODE>caddr</CODE>, and
+<CODE>cadddr</CODE>, we can make it somewhat more readable by using one function
+call at each level of structure: <CODE>(cadr (caddr (cadddr foo)))</CODE>.
+But it's still clearer to write
+<CODE>(list-ref (list-ref (list-ref foo 4) 3) 2)</CODE>
+
+</P>
+<P>
+or (indented)
+
+</P>
+
+<PRE>
+(list-ref (list-ref (list-ref foo 4)
+                    3)
+          2)
+</PRE>
+
+<P>
+<CODE>list-ref</CODE> and <CODE>list-tail</CODE> are much more convenient than
+things like <CODE>caddr</CODE> when the indexes into a list vary at run
+time.   For example, we might use an index variable <CODE>i</CODE> (or
+some other expression that returns an integer) to pick out the
+<EM>i</EM>th member of a list: <CODE>(list-ref foo i)</CODE>.  Writing
+this with <CODE>car</CODE> and <CODE>cdr</CODE> would require writing a loop
+or recursion to perform <EM>n-1</EM> <CODE>cdr</CODE>'s and a <CODE>car</CODE>.
+
+</P>
+
+<PRE>
+==================================================================
+This is the end of Hunk N
+
+At this point, you should go back to the previous chapter and
+read Hunk O before returning here and continuing this tutorial.
+==================================================================
+</PRE>
+
+<P>
+(Go BACK to read Hunk O, which starts at section <A HREF="schintro_73.html#SEC79">Tail Recursion (Hunk O)</A>.)
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_104.html">previous</A>, <A HREF="schintro_106.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

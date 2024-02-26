@@ -1,0 +1,281 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Interactively Changing a Program</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_99.html">previous</A>, <A HREF="schintro_101.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H2><A NAME="SEC106" HREF="schintro_toc.html#SEC106">Interactively Changing a Program (Hunk N)</A></H2>
+
+
+<PRE>
+==================================================================
+Hunk N starts here:
+==================================================================
+</PRE>
+
+
+
+<H3><A NAME="SEC107" HREF="schintro_toc.html#SEC107">Replacing Procedure Values</A></H3>
+
+<P>
+Earlier we showed how to replace normal data values in variable
+bindings, using the side-effecting special form <CODE>set!</CODE>.
+
+</P>
+<P>
+We can also change procedure values.  One way of doing this is just
+to change the value of the procedure variable.  (Remember that a
+"named" procedure is really just a first-class procedure object that
+happens to be referred to via a pointer stored in a variable binding.)
+
+</P>
+<P>
+Just as we changed the value of the variable <CODE>myvar</CODE> using <CODE>set!</CODE>,
+we can change the value of the procedure variable <CODE>quadruple</CODE>.
+Try this:
+
+</P>
+
+<PRE>
+Scheme&#62;(quadruple 3)
+12
+Scheme&#62;(set! quadruple double)
+#&#60;procedure&#62;
+Scheme&#62;(quadruple 3)
+6
+</PRE>
+
+<P>
+What happened here is that when we evaluated the expression
+<CODE>(set! quadruple double)</CODE> it just did the usual thing <CODE>set!</CODE>
+does when both of its arguments are variables--it computed the
+value of the expression on the right, in this case by fetching
+the value from the binding of <CODE>double</CODE>, and stored it into
+the (binding of) the variable on the left.  In this case, the value
+of <CODE>double</CODE> is (a pointer) to a procedure--the one that we
+created when we <CODE>define</CODE>'d <CODE>double</CODE>.  This pointer was
+copied into <CODE>quadruple</CODE>, so that it now contains a pointer to
+the very same procedure.
+
+</P>
+<P>
+Calling <CODE>quadruple</CODE> now has the same effect as calling <CODE>double</CODE>,
+because either way, a pointer is fetched from the variable, and whatever
+it procedure it points to is called.
+
+</P>
+<P>
+Note that while this illustrates how Scheme works, and we'll show
+why it's handy later, it's not usually a great idea to go around changing
+the values of procedure variables by side-effecting them with
+<CODE>set!</CODE>.
+
+</P>
+<P>
+Usually, once a program has been developed, you don't
+want to clobber named procedures, because it makes the code hard
+to understand--you don't want your finished program to go around
+changing the meaning of procedure names as it runs.  You normally 
+want to be able to look at your program and see the definitions, and
+not have to worry that some other part of the program may change
+the procedures at odd moments.
+
+</P>
+<P>
+During interactive development of a program, however, it's often
+very convenient to be able to change a procedure's behavior at will.
+We're not really modifying a procedure, though--we're changing a
+variable binding's value to affect which procedure is called.  We
+don't have to actually modify any procedure objects, because we
+can replace a pointer to one procedure with a pointer to another.
+
+</P>
+<P>
+Usually you'll want to do this by <EM>redefining</EM> the procedure
+with another <CODE>define</CODE> expression.
+
+</P>
+<P>
+For example, suppose we want to restore the old behavior of
+<CODE>quadruple</CODE>, which we foolishly clobbered above.  We can
+simply <CODE>define</CODE> it again, the old way:
+
+</P>
+
+<PRE>
+Scheme&#62;(define (quadruple x) (double (double x)))
+#void
+</PRE>
+
+<P>
+In a finished program, you generally shouldn't have multiple definitions of
+the same thing--a <CODE>define</CODE> form should define something that doesn't
+change during program execution.  If you want to change the state of
+a binding, use <CODE>set!</CODE> to make it clear that's what's going on, and
+put a comment at the definition of the variable warning that it is likely
+to be changed at runtime.
+
+</P>
+<P>
+Most interactive Scheme systems let you <CODE>define</CODE> the same variables
+multiple times, though, so that you can change things during program
+development.  (Note that we're talking about redefining the same program
+variable here, not defining different variables with the same name in
+different scopes.)
+
+</P>
+
+
+
+<H3><A NAME="SEC108" HREF="schintro_toc.html#SEC108">Loading Code from a File</A></H3>
+
+<P>
+When you're actually developing a program, you often want to save the
+text in a file, rather than just typing it in and losing it when
+you exit the Scheme system.
+
+</P>
+<P>
+The simplest way of doing this is to use an editor in one window and
+Scheme in another.  From the editor, save your program text into a
+file, and then load it into Scheme with the <CODE>load</CODE> procedure.
+<CODE>load</CODE> takes a string as an argument, which is the name of the
+file to load, and reads it in just as though you had typed it in
+by hand, at the prompt.  (A string literal is written with double
+quotes around it;  there'll be more about strings more later.)
+
+</P>
+<P>
+Type the following text into your editor and
+save it into a file named <CODE>triple.scm</CODE>.
+
+</P>
+
+<PRE>
+(define (triple x)
+   (+ x (+ x x)))
+</PRE>
+
+<P>
+Now, at the Scheme prompt, load the file and call the procedure:
+
+</P>
+
+<PRE>
+Scheme&#62;(load "triple.scm")
+loading...triple...done
+Scheme&#62;(triple 3)
+9
+</PRE>
+
+<P>
+(Notice that in the above example, there's no connection between the
+string we used to name the file, <CODE>"triple.scm"</CODE>, and the name of
+the procedure, <CODE>triple</CODE>.  We just chose to call the file
+<CODE>"triple.scm"</CODE> to remind us what's in it.)
+
+</P>
+<P>
+Usually, when you're developing a program, you should put only a few
+definitions in a file--maybe just one.  This lets you change small
+parts of your program, saved the changed file, and reload the file to
+change the definitions in your running Scheme system.
+
+</P>
+<P>
+Good editors also have packages that allow you to run Scheme and use
+an editor command to send the contents of a file (or a selected region
+of a file) to Scheme, as though you'd typed it in.  (Emacs has excellent
+facilities for this.)
+
+</P>
+<P>
+If you're using a graphical user interface, you may be able to simply
+cut text from your editor, and paste it into the window you have
+Scheme running in, so that it appears to Scheme as though you'd
+just typed it in.  
+
+</P>
+<P>
+Be careful about reloading definitions.  When you load a file, the Scheme
+system will reuse the same top-level bindings, and reinitialize them.
+In general, new objects will be constructed, even if the textual definitions
+haven't changed.
+
+</P>
+<P>
+For example, suppose we have the following code in a file, which we've
+already loaded once:
+
+</P>
+
+<PRE>
+(define my-list (list 1 2))
+
+(define my-other-list (cdr my-list))
+</PRE>
+
+<P>
+If we reload this file, all three definitions will be processed again.
+A new list will be constructed and the existing binding of <CODE>my-list</CODE>
+will be updated to point at the new list.
+
+</P>
+<P>
+Likewise, the existing binding of <CODE>my-other-list</CODE> will be updated with
+the <CODE>cdr</CODE> of that new list.  Each time we reload the file, we'll recreate
+the intended data structure, including the sharing relationship between
+the two lists.
+
+</P>
+<P>
+But now consider what happens if this code is spread across two files,
+with the definition of <CODE>my-other-list</CODE> in a different file, which
+we don't reload.  If we just reload the first definition, then the binding
+<CODE>my-other-list</CODE> will still refer to the <CODE>cdr</CODE> of the <EM>old</EM> list,
+not the new one.  If your code depends on the two lists sharing structure,
+it not behave as expected, because the two variables' bindings will refer to
+distinct lists.
+
+</P>
+<P>
+Procedures can cause the same sorts of problems.  If you have a pointer to a procedure
+in a data structure, and then you redefine the procedure by modifying the definition
+and reloading it, a <EM>new</EM> procedure object will be created, but the old data
+structure will still hold a pointer to the old procedure object.
+
+</P>
+<P>
+In general, you should be careful to recreate any data structures holding procedures
+if you redefine those procedures.  This is usually easy, if you reload the code
+that creates the data structures, after reloading the new definitions of the procedures.
+
+</P>
+<P>
+Notice that this is <EM>not</EM> necessary if you just call top-level procedures (or look up
+variable values) in the usual way.  For example, given our earlier definitions of
+<EM>double</EM> and <CODE>quadruple</CODE>, changing <CODE>double</CODE> affects <CODE>quadruple</CODE>
+immediately.  Every time we call <CODE>quadruple</CODE>, it fetches the <EM>current</EM> value
+of the binding of <CODE>double</CODE>, which ensures that it sees the most recent version.
+We can reload the code for <CODE>double</CODE>, without reloading the code for <CODE>quadruple</CODE>.
+
+</P>
+
+
+<H3><A NAME="SEC109" HREF="schintro_toc.html#SEC109">Loading and Running Whole Programs</A></H3>
+
+<P>
+  [ to be written ]
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_99.html">previous</A>, <A HREF="schintro_101.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

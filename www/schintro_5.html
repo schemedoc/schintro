@@ -1,0 +1,125 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Why Scheme?</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_4.html">previous</A>, <A HREF="schintro_6.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H2><A NAME="SEC4" HREF="schintro_toc.html#SEC4">Why Scheme?</A></H2>
+
+<P>
+[ Warn people that this is partisan propaganda... ]
+
+</P>
+<P>
+Scheme is a very nice language for implementing languages, or for
+transformational programming in general--that is, writing programs that
+write programs--or for writing programs that can easily be extended
+or customized.  The features that make Scheme attractive for implementing
+Scheme also make it good for all kinds of things, including scripting,
+the construction of new languages and application-specific programming
+environments, and so on.
+
+</P>
+<P>
+[  As you learn Scheme, you'll probably realize that all interesting
+   programs end up being, in effect, application-specific programming
+   environments...]
+
+</P>
+<P>
+Most Scheme systems are interactive, allowing you to incrementally develop
+and test parts of your program.  In this respect, it is much like BASIC or
+Tcl--but a far cleaner and more expressive language.  Scheme can also be
+compiled, to make programs run fast.  This makes it easy to develop in, like 
+BASIC or Tcl, but still fast, like C.  (Scheme isn't usually quite as fast
+as C, but it's usually not too much slower, if you get a good Scheme
+compiler.)  So if you're a Tcl or BASIC programmer looking for a less
+crufty and/or fossilized language, Scheme may be for you.
+
+</P>
+<P>
+Unlike most interactive languages, Scheme is well-designed: it's not
+a kludge cobbled up by some people with very limited applications in
+mind, and later extended past its reasonable scope of application.  It was
+designed from the outset as a general-purpose language, combining the
+best features of two earlier languages.  It is fairly radical revision of
+Lisp, incorporating the best features of both Lisp and Algol (the ancestor
+of C, Pascal, et al.).
+
+</P>
+<P>
+(This is why Scheme has been adopted by several groups as an alternative
+to kludgey languages like Tcl and Perl.  The Free Software Foundation's Guile
+extension language is based on Scheme.  So is the Scheme Shell (<CODE>scsh</CODE>),
+which is a scripting language for UNIX.  The CAD Framework Initiative
+has adopted Scheme as the glue for controlling Computer-Aided Design tools.
+The Dylan language is also based on Scheme, though with a different syntax
+and many extensions.)
+
+</P>
+<P>
+If you want to learn Lisp, Scheme is a good place to start.  Common Lisp
+is a big, somewhat messy language, which is probably easiest to learn by
+starting with Scheme.  Then you can understand Common Lisp as a series of
+extensions (and significant obfuscations) of Scheme.  Some of the best
+features of Common Lisp were copied from Scheme.
+
+</P>
+<P>
+If you want to get something of the flavor of functional programming,
+you can do that in Scheme--most well-written Scheme programs are largely
+functional, because that's simply the easiest way to do many interesting
+things.
+
+</P>
+<P>
+And if you just want to learn to program better, Scheme may open your
+eyes to new ways of thinking about programs.  Many people prototype 
+programs in Scheme, because it's so easy, even if they eventually have
+to recode them in other languages to satisfy their employers.
+
+</P>
+
+
+<H2><A NAME="SEC5" HREF="schintro_toc.html#SEC5">Why Scheme Now?</A></H2>
+
+<P>
+Scheme is not a new language--it's been around and evolving slowly for
+20 years.
+
+</P>
+<P>
+The evolution of Scheme has been slow, because the people who standardize
+Scheme have been very conservative--features are only standardized
+when there is a near-universal consensus on how they should work.  The
+focus has been on quality, not industrial usability.
+
+</P>
+<P>
+This policy has had two consequences.  The first is that Scheme is a
+beautiful, extremely well-designed language.  The second is that Scheme
+has been "behind the curve," lacking several features that are useful
+in general-purpose languages.  Gradually, though, Scheme has grown from
+a very small language, suitable only for teaching concepts, to
+a very useful language.
+
+</P>
+<P>
+The most important new feature of Scheme (in my view) is lexically-scoped
+("hygeinic") macros, which allow the implementation of many language
+features in a portable and fairly efficient way.  This allows Scheme to 
+remain small, but also allows useful extensions to the base language to be
+written as libraries, without a significant performance penalty.
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_4.html">previous</A>, <A HREF="schintro_6.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

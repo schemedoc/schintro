@@ -1,0 +1,90 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Higher-Order Procedures</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_61.html">previous</A>, <A HREF="schintro_63.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC68" HREF="schintro_toc.html#SEC68">Higher-Order Procedures</A></H3>
+
+<P>
+<A NAME="IDX67"></A>
+<A NAME="IDX68"></A>
+
+</P>
+<P>
+Scheme is designed to make it easy to use <EM>higher-order</EM> procedures,
+i.e., procedures that may take other procedures as arguments or return
+them as values.
+
+</P>
+<P>
+For example, you can easily write a <CODE>sort</CODE> procedure that takes a
+comparison procedure as an argument, and uses whatever procedure you
+hand it to determine the sorted order.
+
+</P>
+<P>
+To sort a list in ascending order, you can then call <CODE>sort</CODE> with
+(a pointer to) the procedure <CODE>&#60;</CODE> ("less than") as its argument,
+like this:
+
+</P>
+
+<PRE>
+(sort &#60; '(5 2 3))
+</PRE>
+
+<P>
+and you'll get back a sorted list <CODE>(2 3 5)</CODE>.
+
+</P>
+<P>
+Note that the expression <CODE>&#60;</CODE> here is just a variable reference.
+We're fetching the value of the variable <CODE>&#60;</CODE> and passing it to
+<CODE>sort</CODE> as an argument.
+
+</P>
+<P>
+If you'd rather sort the list in descending order, you can pass it the
+procedure <CODE>&#62;</CODE> ("greater than") instead:
+
+<PRE>
+(sort &#62; '(5 2 3))
+</PRE>
+
+<P>
+and get back a sorted list <CODE>(5 3 2)</CODE>.
+
+</P>
+<P>
+The same procedure can be used with lists of different kinds of objects,
+as long as you supply a comparison operator that does what you want.
+
+</P>
+<P>
+For example, to sort a list of character strings into alphabetic order,
+you can pass <CODE>sort</CODE> a pointer to the standard string-comparison
+procedure <CODE>string&#60;?</CODE>,
+
+<PRE>
+(sort string&#60;? '("foo" "bar" "baz" "quux"))
+</PRE>
+
+<P>
+and get back a list <CODE>("bar" "baz" "foo" "quux")</CODE>.
+
+</P>
+<P>
+ [ give <CODE>map</CODE> example here? ]
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_61.html">previous</A>, <A HREF="schintro_63.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

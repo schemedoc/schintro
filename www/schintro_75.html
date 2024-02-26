@@ -1,0 +1,68 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Continuations</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_74.html">previous</A>, <A HREF="schintro_76.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H2><A NAME="SEC81" HREF="schintro_toc.html#SEC81">Continuations</A></H2>
+
+<P>
+Scheme has the usual control constructs that most languages have--conditionals
+(if statements), loops, and recursion--but it also has a very special
+control structure called <CODE>call-with-current-continuation</CODE>.
+
+</P>
+<P>
+(Warning: <CODE>call-with-current-continuation</CODE> is <EM>weird</EM>.)
+
+</P>
+<P>
+<CODE>call-with-current-continuation</CODE> allows you to save the state of
+a computation, package it up as a data structure, and go off and do 
+something else.  Whenever you want, you can restore the old saved state,
+abandoning the current computation and and picking up where the saved
+computation left off.
+
+</P>
+<P>
+This is far more powerful than normal procedure calling and returning,
+and allows you to implement advanced control structures such as
+backtracking, cooperative multitasking, and custom exception-handling.
+
+</P>
+<P>
+You won't use <CODE>call-with-current-continuation</CODE> most of the time, because
+more conventional control structures are usually sufficient.  But if
+you need to customize Scheme with a special control structure to
+solve a particular kind of problem, you can do it with
+<CODE>call-with-current-continuation</CODE>.
+
+</P>
+
+<PRE>
+==================================================================
+This is the end of Hunk O.
+
+TIME TO TRY IT OUT
+
+At this point, you should go read Hunk P of the next chapter
+and work through the examples using a running Scheme system.
+Then return here and resume this chapter.
+==================================================================
+</PRE>
+
+<P>
+(Go to Hunk P, which starts at section <A HREF="schintro_106.html#SEC117">Basic Programming Examples (Hunk P)</A>.)
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_74.html">previous</A>, <A HREF="schintro_76.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

@@ -1,0 +1,91 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Sequencing</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_87.html">previous</A>, <A HREF="schintro_89.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC93" HREF="schintro_toc.html#SEC93">Sequencing</A></H3>
+
+<P>
+The Scheme system lets you type one expression, then it evaluates it, 
+prints the result, and prompts you for another expression.  What if
+you want to type two or three expressions and have them executed
+sequentially, i.e., in the written order?  You can use a <CODE>begin</CODE>
+expression, which just sequences its subexpressions, and returns the
+value of the last subexpression in the sequence.
+
+</P>
+<P>
+First let's define a flag variable, which we'll use to hold a boolean value.
+
+<PRE>
+Scheme&#62; (define flag #f)
+#void
+</PRE>
+
+<P>
+Now a sequence to "toggle" (reverse) the value of the flag and return the
+new value.  If the flag holds <CODE>#f</CODE>, we set it to <CODE>#t</CODE>, and vice
+versa.
+
+</P>
+
+<PRE>
+Scheme&#62; (begin (if flag
+                   (set! flag #f)
+                   (set! flag #t))
+               flag)
+#t
+</PRE>
+
+<P>
+This evaluated the <CODE>if</CODE> expression, which toggled the flag, and then
+the expression <CODE>flag</CODE>, which fetched the value of the variable
+<CODE>flag</CODE>, and returned that value.
+
+</P>
+<P>
+We can also write a procedure to do this, so that we don't have to
+write this expression out next time we want to do it.  We won't
+need a <CODE>begin</CODE> here, because the body of a procedure is
+automatically treated like a <CODE>begin</CODE>---the expressions are
+evaluated in order, and the value of the last one is returned as
+the return value of the procedure.
+
+</P>
+
+<PRE>
+Scheme&#62; (define (toggle-flag)
+           (if flag
+               (set! flag #f)
+               (set! flag #t))
+           flag)
+#void
+</PRE>
+
+<P>
+Now try using it.
+
+</P>
+
+<PRE>
+Scheme&#62;flag
+#t
+Scheme&#62;(toggle-flag)
+#f
+Scheme&#62;flag
+#f
+Scheme&#62;(toggle-flag)
+#t
+</PRE>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_87.html">previous</A>, <A HREF="schintro_89.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

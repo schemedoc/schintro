@@ -1,0 +1,82 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Some Other Useful Data Types</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_100.html">previous</A>, <A HREF="schintro_102.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H2><A NAME="SEC110" HREF="schintro_toc.html#SEC110">Some Other Useful Data Types</A></H2>
+
+<P>
+<EM>[ Parts of this should probably be moved into the previous
+        chapter, and new examples put in this section.  ]</EM>
+
+</P>
+<P>
+Scheme has several important kinds of data objects that are useful
+in programming in general, and particularly for writing an interpreter,
+as we'll do in the next chapter.  These include character strings, symbols,
+and lists.
+
+</P>
+<P>
+Scheme has two data types that represent sequences of characters,
+called <EM>strings</EM> and <EM>symbols</EM>.  Strings are pretty much like
+character strings in most programming languages--they represent a
+sequence of text characters.  Symbols are sort of like strings, but
+have a very special property--there's only one symbol object with any
+particular sequence of characters.
+
+</P>
+<P>
+Symbols have a special role in the implementation of Scheme, because
+they're part of the normal representation of source code;  symbols
+are used to represent names of variables, procedures, special forms, and 
+macros.  They're really just a kind of data object, though--you can
+use them in your programs, whether or not you want to represent code.
+
+</P>
+<P>
+Lists are used in interpreters and compilers to represent compound
+expressions in the source code;  nested expressions are generally
+represented by nested lists.
+
+</P>
+<P>
+<A NAME="IDX102"></A>
+
+</P>
+<P>
+More generally, there's a category of Scheme data structures called
+<EM>s-expressions</EM>, which consist of basic types including
+symbols, strings, numbers, booleans, and characters, and list of
+those simple types, or lists of such lists.
+
+</P>
+<P>
+"S-expression" is short for "symbolic expression," but it's something
+of a misnomer.  An <EM>expression</EM> is really a
+piece of a program.  An "s-expression " is just a data structure, which
+may or may not represent an expression in a programming language, although
+interpreters and compilers often happen to use them that way.
+
+</P>
+
+<UL>
+
+<LI><A HREF="schintro_102.html#SEC111">Strings</A>: Character Strings
+<LI><A HREF="schintro_103.html#SEC112">Symbols</A>: Symbols are like Strings, but Unique
+<LI><A HREF="schintro_104.html#SEC113">Identifiers</A>: A Note on Identifiers
+<LI><A HREF="schintro_93.html#SEC98">Lists</A>: Lists
+
+</UL>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_100.html">previous</A>, <A HREF="schintro_102.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

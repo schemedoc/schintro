@@ -1,0 +1,50 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Definitions vs. Assignments</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_15.html">previous</A>, <A HREF="schintro_17.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H4><A NAME="SEC16" HREF="schintro_toc.html#SEC16">Definitions vs. Assignments</A></H4>
+
+<P>
+Notice that we can give a variable a value in two ways: we can define
+it, specifying an initial value, or we can use <CODE>set!</CODE> to change
+its value.
+
+</P>
+<P>
+The difference between these two is that <CODE>define</CODE> allocates storage
+for a variable, and gives that storage a name.  <CODE>set!</CODE> does not.
+You must always <CODE>define</CODE> a variable before <CODE>set!</CODE> will work
+on it. 
+
+</P>
+<P>
+For example, if there's not already a definition of <CODE>quux</CODE>, the
+expression <CODE>(set! quux 15)</CODE> is an error, and Scheme will complain.
+You're asking Scheme to put (a pointer to) 15 in the storage named by
+<CODE>quux</CODE>---but <CODE>quux</CODE> doesn't name any storage yet, so it
+makes no sense.
+
+</P>
+<P>
+It's rather like I'd told you, "give this to Philboyd" and handed
+you some object, (say, a pencil).  If you don't know anybody named Philboyd,
+you're probably going to complain.  <CODE>set!</CODE> is like that.  We have
+to agree on what the word "Philboyd" means to before it makes sense to
+ask you to do something to Philboyd.  <CODE>define</CODE> is a way of giving
+meaning to an identifier--making it refer to a piece of storage--as
+well as giving a value to put there.
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_15.html">previous</A>, <A HREF="schintro_17.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

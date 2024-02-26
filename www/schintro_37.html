@@ -1,0 +1,256 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - cdr-linked lists</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_36.html">previous</A>, <A HREF="schintro_38.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC38" HREF="schintro_toc.html#SEC38"><CODE>cdr-</CODE>linked lists</A></H3>
+
+<P>
+In Lisp and Scheme, you don't typically string objects
+together into a list by giving each one a "next" field that points
+right to the next object.  Instead, you create a list of pairs
+whose <CODE>car</CODE> fields hold the pointers to the objects, and whose
+<CODE>cdr</CODE> fields link the pairs together into a "spine."
+
+</P>
+<P>
+There isn't really a special <CODE>list</CODE> data type in Scheme.  A list
+is really just a sequence of pairs, ending with a null pointer.  A
+null pointer is a list, too--it's a sequence of <EM>zero</EM> pairs
+ending in a null pointer.  We sometimes talk about "the car of a list"
+or "the cdr of a list," but what that really means is "the car
+of the first pair in the list" and "the cdr of the first pair in
+the list."
+
+</P>
+<P>
+Suppose we have a variable <CODE>foo</CODE> holding a pointer to a list
+containing the integers <CODE>22</CODE>, <CODE>15</CODE>, and <CODE>6</CODE>.
+Here's one way of drawing this situation.
+
+</P>
+
+<PRE>
+                    +---------+          +---------+        +---------+
+     +---------+    | &#60;PAIR&#62;  |          | &#60;PAIR&#62;  |        | &#60;PAIR&#62;  |
+ foo |    *----+---&#62;+=========+      +--&#62;+=========+    +--&#62;+=========+
+     +---------+    |       22|     /    |       15|   /    |        6|
+                    +---------+    /     +---------+  /     +---------+
+                    |    *----+---+      |    *----+-+      |    *    |
+                    +---------+          +---------+        +---------+
+</PRE>
+
+<P>
+This shows something pretty close to the way things are likely to actually
+represented in memory.  But there's usually a better way of drawing
+the list, which emphasizes the fact that number values are conceptually
+pointers to numbers, and which corresponds to the way we usually think
+about lists:
+
+</P>
+
+<PRE>
+     +---+    +---+---+      +---+---+      +---+---+
+ bar | *-+---&#62;| * | *-+-----&#62;| * | *-+-----&#62;| * | * |
+     +---+    +-+-+---+      +-+-+---+      +-+-+---+
+                |              |              |
+               \|/            \|/            \|/
+               22             15              6       
+</PRE>
+
+<P>
+I've left off the header fields of objects, which are not visible to
+a Scheme programmer.
+
+</P>
+<P>
+I've also drawn pairs in a special way, with the <CODE>car</CODE> and <CODE>cdr</CODE>
+fields side-by-side.  I've drawn the integers outside the pairs,
+with pointers to them from the <CODE>car</CODE> fields, because that's the
+way things look at the language level.
+
+</P>
+<P>
+This emphasizes the fact that lists are generally separate
+things from the items "in" the list.
+
+</P>
+<P>
+A major advantage of this is that you don't have to modify an object to
+put it on a list--an object can easily be in many lists at once, because
+a list is really just a spine of pairs that holds <EM>pointers to</EM> the
+items in the list.  This is much cleaner than the way people are typically
+taught to create simple lists in most beginning programming classes.
+(It's also very natural in a language where all values are pointers---<EM>of
+course</EM> lists of objects are really just lists of pointers to objects.)
+
+</P>
+<P>
+For example, you can have two lists with the same elements, or some
+of the same elements, but perhaps in a different order.
+
+</P>
+
+<PRE>
+     +---+    +---+---+      +---+---+      +---+---+
+ bar | *-+---&#62;| * | *-+-----&#62;| * | *-+-----&#62;| * | * |
+     +---+    +-+-+---+      +-+-+---+      +-+-+---+
+                |              |              |
+               \|/            \|/            \|/
+               22             15              6       
+               /|\                           /|\
+                |                             |
+     +---+    +-|-+---+                     +-+-+---+
+ baz | *-+---&#62;| * | *-+--------------------&#62;| * | * |
+     +---+    +---+---+                     +---+---+ 
+</PRE>
+
+<P>
+Here I've drawn two lists, <CODE>bar</CODE> and <CODE>baz</CODE>---that is, lists
+that are the values of the variables <CODE>bar</CODE> and <CODE>baz</CODE>.
+<CODE>bar</CODE> holds the elements <CODE>22</CODE>, <CODE>15</CODE>, and <CODE>6</CODE>,
+while <CODE>baz</CODE> just holds the elements <CODE>22</CODE> and <CODE>6</CODE>.
+
+</P>
+<P>
+Since these two lists are really just made up of pairs, and they're
+<EM>different</EM> pairs, we can modify one list without modifying
+the other, and without modifying the objects "in" the lists.
+For example, we can reverse the order of one of the lists without
+affecting the other.
+
+</P>
+<P>
+(We also don't have to create a special kind of list node that has
+two next fields, so that something can be in two lists at a time.
+We can just have two separate lists of pairs, or three or four.)
+
+</P>
+<P>
+Scheme has a standard way of writing a textual representation of
+a list.  Given the pictured situation, evaluating the expression
+<CODE>(display bar)</CODE> will print <CODE>(22 15 6)</CODE>.  Evaluating
+the expression <CODE>(display baz)</CODE> will print <CODE>(22 6)</CODE>.
+Notice that Scheme just writes out a pair of parentheses around
+the items in the list--it doesn't represent the individual
+pairs, but just their <CODE>car</CODE> values.
+
+</P>
+<P>
+Dynamic typing also helps make lists useful.  A list of pairs
+can hold any type of object, or even a mixed bag of different 
+types of objects.  So, for example, a pair list can be a list 
+of integers, a list of lists, a list of text characters, or a 
+list of any of the kinds of objects we haven't gotten to yet.  It
+can also be a mixed list of integers, other lists, and whatnot.
+A few list routines can therefore be useful in a variety of
+situations--a single list search routine can search any kind of
+list for a particular target object, for example.
+
+</P>
+<P>
+This picture shows two variable bindings, for the variables <CODE>bar</CODE>
+and <CODE>foo</CODE>.  <CODE>bar</CODE>'s binding holds a list <CODE>(10 15 6)</CODE>,
+while <CODE>foo</CODE>'s holds a list <CODE>(22 15 6)</CODE>.  We say that these
+lists <EM>share structure</EM>, i.e., part of one list is also part of
+the other.
+
+</P>
+
+<PRE>
+                    +-------- + 
+     +---------+    | &#60;PAIR&#62;  |
+ bar |    *----+---&#62;+=========+
+     +---------+    |       10| 
+                    +---------+ 
+                    |    *----+-+ 
+                    +---------+  \
+                                  \
+                    +---------+    \     +---------+        +---------+
+     +---------+    | &#60;PAIR&#62;  |     \    | &#60;PAIR&#62;  |        | &#60;PAIR&#62;  |
+ foo |    *----+---&#62;+=========+      +--&#62;+=========+    +--&#62;+=========+
+     +---------+    |       22|     /    |       15|   /    |        6|
+                    +---------+    /     +---------+  /     +---------+
+                    |    *----+---+      |    *----+-+      |    *    |
+                    +---------+          +---------+        +---------+
+</PRE>
+
+<P>
+This picture may correspond well to how things are represented in
+memory, but it's a little confusing.
+
+</P>
+<P>
+The more common way of drawing this data structure is
+
+</P>
+
+<PRE>
+     +---+    +---+---+ 
+ bar | *-+---&#62;| * | *-+------+
+     +---+    +-+-+---+      |
+                |            |
+               \|/           |
+               10            |
+                            \|/
+     +---+    +---+---+      +---+---+      +---+---+
+ foo | *-+---&#62;| * | *-+-----&#62;| * | *-+-----&#62;| * | * |
+     +---+    +-+-+---+      +-+-+---+      +-+-+---+
+                |              |              |
+               \|/            \|/            \|/
+               22             15              6       
+</PRE>
+
+<P>
+Again, this emphasizes the idea that everything's a pointer--conceptually,
+the pairs hold pointers to the integers.
+
+</P>
+<P>
+Generally, pairs are drawn as pairs of little boxes, and they're typically
+drawn with the boxes side by side--that's just handy because pairs are
+often used for linear lists, which you want to display horizontally--it's
+easy to draw the spine of the list horizontally if the <CODE>cdr</CODE> field
+(used as a "next" pointer) is on the right.  (Of course, when there's
+shared structure, as in the above picture, you can't draw all cdrs going
+directly to the right.)
+
+</P>
+<P>
+We leave off the headers because they're a low-level detail anyway, because
+they're a hidden implementation detail that may vary from system
+to system, and because Scheme programmers immediately recognize this kind of
+two-box drawing of a pair.
+
+</P>
+<P>
+In the above picture, we can talk about "the car of <CODE>foo</CODE>", which
+really means the value in the <CODE>car</CODE> field of the pair pointed
+at by the value stored in (the binding of) <CODE>foo</CODE>.  It's (a pointer
+to) <CODE>10</CODE>.  We would often call this "the car of the list <CODE>foo</CODE>."
+
+</P>
+<P>
+Notice that the cdr of <CODE>foo</CODE> is also a list, and it's <EM>the
+same list</EM> as the cdr of <CODE>bar</CODE>---the cdrs of the first pairs in
+each list point to the same list.
+
+</P>
+<P>
+We can say that the cdr of foo and the cdr of bar "are <CODE>eq?</CODE>,"
+because the expression <CODE>(eq? (cdr foo) (cdr bar))</CODE> returns
+true.  That is, <CODE>(car foo)</CODE> and <CODE>(cdr foo)</CODE> return
+(pointers to) exactly the same object.
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_36.html">previous</A>, <A HREF="schintro_38.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

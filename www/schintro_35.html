@@ -1,0 +1,83 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - The Empty List</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_34.html">previous</A>, <A HREF="schintro_36.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC36" HREF="schintro_toc.html#SEC36">The Empty List (Hunk E)</A></H3>
+
+
+<PRE>
+==================================================================
+Hunk E starts here:
+==================================================================
+</PRE>
+
+<P>
+<A NAME="IDX24"></A>
+<A NAME="IDX25"></A>
+<A NAME="IDX26"></A>
+<A NAME="IDX27"></A>
+
+</P>
+<P>
+In Scheme, there is one null pointer value, called "the empty list,"
+which prints as <CODE>()</CODE>.  (Later, we'll see why it's written that
+way, and why it's called "the empty list.")
+
+</P>
+<P>
+Conceptually, the empty list is a special object, and a "null" pointer
+is a pointer to this special end-of-list object.  You can ignore that
+fact and think of it as just a null pointer, because there's nothing
+interesting you can do with the object it points to.
+
+</P>
+<P>
+(In some implementations, the empty list object <CODE>'()</CODE> is actually an
+object referred to via a pointer, and null pointers are really pointers
+to it.  In others, an empty list is an immediate value, a specially tagged
+null pointer.  At the level of the Scheme language, it doesn't matter which
+way it's implemented in a particular Scheme system.  All you can really do
+with the null pointer is compare it against other pointers, to see if
+they're null pointers, too.)
+
+</P>
+<P>
+The empty list object acts as a null pointer for any purpose--there's
+only one kind of pointer (pointer to anything), so there's only one
+kind of null pointer (pointer to nothing).
+
+</P>
+<P>
+Scheme provides a procedure, <CODE>null?</CODE> to check whether a value
+is (a pointer to) the empty list, i.e., a null pointer.  For example,
+<CODE>(null? foo)</CODE> returns <CODE>#t</CODE> if the value of the variable
+<CODE>foo</CODE> is the empty list, and <CODE>#f</CODE> otherwise.
+
+</P>
+<P>
+You might be wondering why the null pointer object is called "the
+empty list";  I'll explain that later.  Given the way lists are usually
+used in Scheme, it turns out to make perfect sense.
+
+</P>
+<P>
+You can write the empty list as a literal in your programs as <CODE>'()</CODE>.
+That is, the expression <CODE>'()</CODE> returns the empty list (null pointer),
+<CODE>()</CODE>.  Later I'll explain why you have to put the single quote mark
+in front of the empty set of parentheses when writing the empty list as 
+a literal.
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_34.html">previous</A>, <A HREF="schintro_36.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

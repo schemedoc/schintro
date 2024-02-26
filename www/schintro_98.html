@@ -1,0 +1,253 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Using Procedures</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_97.html">previous</A>, <A HREF="schintro_99.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H2><A NAME="SEC103" HREF="schintro_toc.html#SEC103">Using First-Class, Higher-Order, and Anonymous Procedures (Hunk L)</A></H2>
+
+
+<PRE>
+==================================================================
+Hunk L starts here:
+==================================================================
+</PRE>
+
+<P>
+In this section, we'll play with Scheme's procedures, to illustrate
+
+</P>
+
+<UL>
+<LI>
+
+  <EM>first class procedures</EM>, which are normal data objects in the language,
+<LI>
+
+  <EM>higher order procedures</EM>, which can take procedures as arguments and return
+    them as values, and
+<LI>
+
+  <EM>anonymous procedures</EM>, which can be created and referred to via
+     pointers, without giving them names.
+</UL>
+
+<P>
+I'll just briefly demonstrate those ideas for now;  later programming
+examples will show how they're really useful.
+
+</P>
+
+
+<H3><A NAME="SEC104" HREF="schintro_toc.html#SEC104">First-Class Procedures</A></H3>
+
+<P>
+Scheme procedures are first-class objects in the language;  you refer
+to a procedure in the same way you refer to any other object, via a
+pointer.  A "procedure name" is really just a variable name, and
+you can do the same things with "procedure" variables as with any
+other variable.  There's really only one kind of variable in Scheme,
+and it's type is "pointer to anything."
+
+</P>
+<P>
+When we "define a procedure" in Scheme, we're really just defining
+a variable and giving it an initial value that's (a pointer to) a
+procedure object.
+
+</P>
+<P>
+The procedure defining syntax with parentheses around the procedure
+name (and argument names) is really just syntactic sugar, i.e.,
+a convenient way of writing something that you could do in another
+way. 
+
+</P>
+<P>
+For example, 
+
+<PRE>
+Scheme&#62;(define (double x)
+          (+ x x))
+#void
+</PRE>
+
+<P>
+is <EM>exactly</EM> equivalent to
+
+</P>
+
+<PRE>
+Scheme&#62;(define double
+               (lambda (x)
+                  (+ x x))
+#void
+</PRE>
+
+<P>
+Try this latter version in your system.  Notice that what you're doing
+is just defining a variable named <CODE>double</CODE> and initializing it
+with the result of the second expression, a <EM>lambda</EM> expression.
+
+</P>
+<P>
+<CODE>lambda</CODE> is the real procedure-creating operation.  It's a special
+form, because it lets you define a new procedure rather than calling
+an existing procedure in the normal way.  <CODE>lambda</CODE> creates a
+procedure object and returns a pointer to it.
+
+</P>
+<P>
+(The predicate <CODE>procedure?</CODE> can be used to tell if an object is a
+procedure.)
+
+</P>
+<P>
+You can call the <CODE>double</CODE> procedure created this way in exactly the
+same way as one created with the sugared procedure-definition syntax.
+
+</P>
+
+<PRE>
+Scheme&#62;(double 3)
+6
+</PRE>
+
+<P>
+Recall how procedure calls really work.  When you call a
+named procedure, e.g., <CODE>(double 3)</CODE>, the procedure name is really
+just a reference to a variable.  The first position in the procedure
+call form is just an expression that's evaluated like any other.  In
+this case, we're using the name <CODE>double</CODE> as an expression,
+effectively saying "look up the value of <CODE>double</CODE>."
+
+</P>
+<P>
+Try this
+
+</P>
+
+<PRE>
+Scheme&#62;double
+#&#60;procedure&#62;
+</PRE>
+
+<P>
+Notice that we didn't put parentheses around <CODE>double</CODE>, so we're
+not calling it--we're fetching the value of the variable <CODE>double</CODE>.
+What you see on your screen may vary, but it's your system's printed
+representation of a procedure object.  Take a look at it, because
+you'll want to be able to recognize procedure objects in data
+structures.
+
+</P>
+<P>
+(The printed representation may include the name of the procedure;
+don't be misled by this.  Procedures don't really have names--they're
+just data objects you can have pointers to, as I'll explain shortly.
+Your system your system may put a name inside the procedure when you
+use the procedure definition syntax, but it's just an annotation
+saying what the procedure's <EM>original</EM> name was--i.e., when
+it was first defined.)
+
+</P>
+<P>
+We can call a procedure in other ways, though--the first subexpression
+of a procedure call can be any expression we want, as long as it
+returns a procedure.  That expression is evaluated just like the
+argument expressions--after it and the argument expresssions
+are evalutated, the resulting procedure is called with those argument
+values.
+
+</P>
+
+<PRE>
+Scheme&#62;(define list-holding-double (list double))
+#void
+
+Scheme&#62;list-holding-double
+(#&#60;procedure&#62;)
+
+Scheme&#62;((car list-holding-double) 5)
+10
+</PRE>
+
+<P>
+What we did here was to create a list holding the procedure formerly
+known as <CODE>double</CODE>, and looked at that list.  Then we called
+that procedure by using the expression <CODE>(car list-holding-double)</CODE>
+as its "name."
+
+</P>
+<P>
+What this shows is that procedures are really <EM>anonymous</EM>, that
+is, a procedure doesn't have a name in a direct sense.  There are
+just expressions we can refer to it by, if those expressions result
+in pointers to the procedure.
+
+</P>
+<P>
+We can create procedures without normal names at all, by just using
+<CODE>lambda</CODE>.  Let's create another doubling procedure by just
+evaluating a <CODE>lambda</CODE> expression:
+
+</P>
+
+<PRE>
+Scheme&#62;(lambda (x) (+ x x))
+#&#60;procedure&#62;
+</PRE>
+
+<P>
+The <CODE>lambda</CODE> expression just created a procedure and returned
+a pointer to it, and Scheme displayed it however your system does it.
+We didn't keep a pointer to the procedure, so we can't call it
+now.  The procedure is gone and the garbage collector will clean
+it up.
+
+</P>
+<P>
+We could try again, creating a procedure and keeping a pointer to
+it in a named variable.  More interestingly, we can just hand the
+pointer to a procedure call, and call it without ever giving it
+a name.
+
+</P>
+
+<PRE>
+Scheme&#62;((lambda (x) (+ x x)) 6)
+12
+</PRE>
+
+<P>
+It may not look like it, but this is just a procedure call expression,
+where the "name" of the procedure is a <CODE>lambda</CODE> expression to
+create the procedure we need, and its argument is 6.  Note the nesting
+of parentheses--this is just like <CODE>(double 6)</CODE>, except that we
+give the "definition" of the procedure to call, instead of its name.
+
+</P>
+<P>
+Later we'll show why using <CODE>lambda</CODE> directly is often much more
+convenient than having to name all of our procedures.  I'll also
+explain why <CODE>lambda</CODE> is the most important special form in
+Scheme--it is so powerful that most of the special forms can easily
+be translated into it.
+
+</P>
+<P>
+(You might be concerned that creating a procedure and just using it
+once is very expensive, but it turns out not to be--I'll explain that
+later, too.  For now, don't worry about it.)
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_97.html">previous</A>, <A HREF="schintro_99.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

@@ -1,0 +1,291 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Interpreting lambda</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_124.html">previous</A>, <A HREF="schintro_126.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC157" HREF="schintro_toc.html#SEC157">Interpreting <CODE>lambda</CODE> and Procedure Calling</A></H3>
+
+<P>
+Our new interpreter will handle defining and calling new procedures.  This
+is not difficult, because all of the major mechanisms are already in
+place.  We need the ability to define local variables (e.g., arguments),
+which we already implemented for <CODE>let</CODE>.  We also need the ability
+to interpret the procedure bodies, but the interpreter we've got is
+just fine for that.  We'll simply store the procedure bodies as s-expressions,
+and interpret them like any other expressions when the procedure is
+called.
+
+</P>
+<P>
+Our representation of closures will be very simple.  A closure mainly
+pairs an environment with a procedure body, but we also need to specify
+a list of argument the procedure will accept.
+
+</P>
+<P>
+We'll define a procedure <CODE>make-closure</CODE> to construct a closure,
+given a pointer to an environment, a pointer to a list of argument
+names (symbols), and pointer to a procedure body (a list of expressions).
+
+</P>
+<P>
+We'll also define the procedures <CODE>closure-envt</CODE>, <CODE>closure-args</CODE>,
+and <CODE>closure-body</CODE> to extract those parts when we call the procedure.
+
+</P>
+<P>
+As a slight complication, we'd like to start out with some predefined
+procedures, and the easiest way to do that is simply to snarf the
+corresponding procedures from the underlying Scheme system, i.e.,
+the language we're using to implement our interpreter.  (If we were
+writing our interpreter in C or assembly language, we might write
+the code bodies of built-in procedures in that language.)
+
+</P>
+<P>
+These snarfed procedures will be the built-in "primitive" operations
+in our language, which can be "glued together" by the interpreter to
+build new procedures, which may be arbitrarily complicated.
+
+</P>
+<P>
+In the simple interpreter in the last chapter, we snarfed procedures
+directly--we just used closures in the underlying Scheme as procedures
+in our language.  In the new interpreter, we need to distinguish
+between snarfed procedures (which we can simply call from inside
+the interpreter) and user-defined procedures, which we must interpret
+via recursive calls to <CODE>eval</CODE>.
+
+</P>
+<P>
+Our representation of closures will therefore support two predicates.
+<CODE>closure?</CODE> will test an object to see if it is a closure of
+either sort.  <CODE>primitive-closure?</CODE> will test whether a closure
+represents a snarfed procedure from the underlying Scheme system.
+
+</P>
+<P>
+In the case of a primitive closure, calling the closure just consists
+of extracting the underlying Scheme closure, and calling it with
+the given argument values.  (We don't snarf any procedures that depend
+on what environment they execute in.  We only snarf functions like
+<CODE>+</CODE> and <CODE>cons</CODE>, which depend only on their arguments.)
+
+</P>
+<P>
+A closure therefore has three important fields: a pointer to an environment,
+a pointer to a list of argument names, and a pointer to a code body.
+It also has a "hidden" type field, saying that what kind of object it
+is.
+
+</P>
+<P>
+[ I'm glossing over the actual representation in the underlying Scheme
+  system, because it really doesn't matter.  It could be an association
+  list, a vector, or whatever. ]
+
+</P>
+<P>
+<CODE>eval-lambda</CODE> is the procedure called from <CODE>eval-list</CODE> to handle
+<CODE>lambda</CODE> expressions.  It will be stored in binding of <CODE>lambda</CODE>
+of the name <CODE>lambda</CODE> (with binding type <CODE>&#60;special-form&#62;</CODE>, and
+extracted and called to actually interpret <CODE>lambda</CODE>'s.
+ 
+
+<PRE>
+(define (eval-lambda lambda-form envt)
+   (let ((formals (cadr lambda-form))
+         (body (cddr lambda-form)))
+      (make-closure envt formals body)))
+</PRE>
+
+<P>
+<CODE>eval-lambda</CODE> simply extracts the argument list and body expression
+list from the <CODE>lambda</CODE> expression, and calls <CODE>make-closure</CODE>
+with them (and the current environment) to create the closure object.
+Storing the current environment in the closure ensures that when the
+closure is interpreted later, it will still be able to refer to the
+same bindings that were visible when it was created.
+
+</P>
+<P>
+<CODE>eval-combo</CODE> is called from <CODE>eval-list</CODE> to evaluation combinations
+(procedure call expressions).
+
+</P>
+<P>
+(Note that <CODE>eval-list</CODE> evaluates the operator
+expression before calling <CODE>eval-combo</CODE>, and hands it the closure
+plus a list of unevaluated argument expressions.  This is not particularly
+significant--we could have passed the operator expression to
+<CODE>eval-combo</CODE> unevaluated, like the argument expressions, and
+have <CODE>eval-combo</CODE> evaluate it instead.  As
+we've written it, we ensure that the operator expression is evaluated
+before the arguments.  We could change it to get the opposite effect.
+This would still be legal--the Scheme standard does not specify
+the order of evaluation, and an implementation may even use different
+orders at different call sites.)
+
+</P>
+<P>
+[ DONOVAN--maybe we should change it.  RScheme evaluates the operator
+  expression last, so maybe the interpreter should, too. ]
+
+</P>
+<P>
+<CODE>eval-combo</CODE> evaluates the argument expressions in the given environment
+to get the argument values, using <CODE>eval-multi</CODE>, and calls
+<CODE>eval-apply</CODE> to call the given closure with those values.
+
+</P>
+
+<PRE>
+(define (eval-combo proc arg-expr-list envt)
+   ; use our own kind of apply to run our own kind of closures
+   (eval-apply proc
+               ; evaluate the arguments, collecting the results into a list
+               (eval-multi arg-expr-list
+                          envt)))
+</PRE>
+
+<P>
+<CODE>eval-apply</CODE> does the actual procedure call, after the arguments
+have been evaluated.  That is, it <EM>applies</EM> the given procedure
+(closure) to the given arguments.
+
+</P>
+<P>
+If the closure we're calling is a primitive closure, we simply extract
+the underlying Scheme procedure and call that, using the standard
+Scheme procedure <CODE>apply</CODE>.  Scheme's <CODE>apply</CODE> takes a list
+of any number of values, and calls the procedure as though the arguments 
+had been passed to it in the normal way.
+
+</P>
+<P>
+(To make sure that you understand that, here's a simple usage of
+Scheme's <CODE>apply</CODE>:  <CODE>(apply + '(1 2))</CODE>.  This call
+to apply will take the procedure <CODE>+</CODE> and call it with the
+values <CODE>1</CODE> and <CODE>2</CODE>, just as if we had written <CODE>(+ 1 2)</CODE>.
+Likewise, <CODE>(apply list '(1 2 3 4))</CODE> returns the same thing as
+<CODE>(list 1 2 3 4)</CODE>.)
+
+</P>
+
+<PRE>
+(define (eval-apply proc arg-list)
+   (if (primitive-closure? proc)
+    
+       ; it's a primitive, so extract the underlying language's
+       ; closure for the primitive, and do a real (underlying Scheme)
+       ; apply to call it
+       (apply (closure-primitive proc) arg-list)
+       
+       ; it's not a primitive closure, so it must be something
+       ; we created with make-closure
+       ;
+       ; first, bind the actuals into a new environment, which
+       ; is scoped inside the environment in which the closure
+       ; was closed
+       (let ((new-envt (make-envt (closure-args proc) 
+                                  arg-list
+                                  (closure-envt proc))))
+          ; then, evaluate the body forms, returning the 
+          ; value of the last of them.
+          (eval-sequence (closure-body proc)
+                         new-envt))))
+</PRE>
+
+<P>
+In the case of a user-defined (interpreted) closure, <CODE>eval-combo</CODE>
+creates a new environment to bind the arguments values, much as it does
+to bind the local variables of a <CODE>let</CODE>;  it calls <CODE>make-envt</CODE>
+with the name list, the corresponding value list, and the old environment,
+and gets back a pointer to the new environment frame, scoped inside
+the old one.
+
+</P>
+<P>
+There's a big difference here, though.  The "old" environment that's
+used in creating the new one is <EM>not</EM> the environment that
+was passed to <EM>eval-combo</EM>.  (Notice that <EM>eval-combo</EM> did
+not even pass that environment to <CODE>eval-apply</CODE>.) 
+
+</P>
+<P>
+When we call the closure, we extract the environment stored in the
+closure, and use that as the "old" environment.  This ensures
+that the closure body will evaluate in the environment where it
+was defined, augmented with the bindings of its arguments.  This
+is the crucial step in preserving lexical scope--the meanings of
+identifiers in the procedure body are fixed at the moment the
+closure is created, because it captures the current environment
+at that point.
+
+</P>
+<P>
+Once the new environment is created, <CODE>eval-combo</CODE> simply calls
+<CODE>eval-sequence</CODE> to evaluate the sequence of body expressions and
+return the value of the last one.  <CODE>eval-combo</CODE> simply returns
+this value as the return value of the procedure call.  (Notice that
+the call to <CODE>eval-sequence</CODE> is a tail call, preserving the tail
+recursion of the program we're interpreting.)
+
+</P>
+
+
+<H4><A NAME="SEC158" HREF="schintro_toc.html#SEC158">Mutual Recursion Between Eval and Apply</A></H4>
+
+<P>
+It is important to understand the relationship between <CODE>eval</CODE> and
+<CODE>eval-apply</CODE> in the interpreter.  This will help you understand how
+scoping is implemented, and will also help you understand the
+relationship between an interpreter and a compiler.
+
+</P>
+<P>
+<CODE>eval</CODE> calls <EM>itself</EM>
+to evaluate normal nested expressions.  It may do this indirectly,
+by using helper procedures that discriminate different kinds of
+expressions, but in general recursive calls to eval correspond to the
+nested structure of a procedure.
+
+</P>
+<P>
+<CODE>eval-apply</CODE> is very different.  When the interpreter gets to a procedure
+call, it calls <CODE>eval-apply</CODE> to jump to a <EM>different</EM> procedure,
+not a nested expression of the same procedure.  (Note
+that the arguments to a procedure call are evaluated like any other nested
+expressions, by calling <CODE>eval</CODE>, but the call itself is done by
+<CODE>eval-apply</CODE>.)  
+
+</P>
+<P>
+Normal recursive calls to <CODE>eval</CODE> therefore correspond to the local
+nesting structure of the code, but calls to <CODE>apply</CODE> correspond
+to transfers of control to different procedures. 
+
+</P>
+<P>
+[ Any other miscellaneous stuff I should explain?  Should have a pointer
+  to the source file for the whole interpreter... ]
+
+</P>
+<P>
+[ Say that's it for the interpreter for now... we'll come back to it
+  when we talk about macros, and we'll talk about a compiler with very
+  similar structure later... ]
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_124.html">previous</A>, <A HREF="schintro_126.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

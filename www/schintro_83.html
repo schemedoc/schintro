@@ -1,0 +1,48 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Returns and Parentheses</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_82.html">previous</A>, <A HREF="schintro_84.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC88" HREF="schintro_toc.html#SEC88">Returns and Parentheses</A></H3>
+
+<P>
+A common mistake in Scheme is to forget the closing parentheses of
+expressions.  If you forget a closing parentheses--usually because
+you need several to close nested expressions--most systems will just
+hang, waiting you to finish typing the expression.
+
+</P>
+<P>
+This is a feature, not a bug.  It lets you put <CODE>&#60;RETURN&#62;</CODE>s (line
+breaks) in your input, to format the code on the screen as you type it in.
+When you type in the last closing expression and hit <CODE>&#60;RETURN&#62;</CODE> again,
+Scheme recognizes that you've typed in a whole expression, and evaluates
+it and prints the result.
+
+</P>
+<P>
+So if you type in an expression and hit <CODE>&#60;RETURN&#62;</CODE>, and Scheme doesn't
+do anything, check to see if you closed all of the parentheses you opened.
+If not, just type in the missing parenthesis and hit <CODE>&#60;RETURN&#62;</CODE> again.
+
+</P>
+<P>
+(It's also possible that in your system, you have to do something
+special to get Scheme to evaluate an expression--like hitting a
+different key, or clicking on a button or a menu item.  In such
+systems, <CODE>&#60;return&#62;</CODE> may be only for formatting the text you're
+inputting, and another key tells Scheme to go ahead and evaluate
+what you've typed.)
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_82.html">previous</A>, <A HREF="schintro_84.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

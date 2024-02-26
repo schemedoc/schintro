@@ -1,0 +1,57 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Iteration Constructs</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_75.html">previous</A>, <A HREF="schintro_77.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H2><A NAME="SEC82" HREF="schintro_toc.html#SEC82">Iteration Constructs</A></H2>
+
+<P>
+You may have noticed that we haven't discussed iteration constructs
+much.  Scheme does include iteration constructs like <CODE>do</CODE>,
+which we'll describe later, but you'll use them less than in most other
+languages.  It's usually easier to use recursion, once you get the 
+hang of it.  When you do use iteration constructs, you should also
+understand that they're really syntactic sugar for recursion.
+
+</P>
+<P>
+For most purposes, you can use Scheme's iteration constructs as you
+would in other languages, but they're actually interestingly different. 
+Scheme's iteration constructs are really syntactic sugar for tail recursion.
+Anything you can do iteratively, you can do with recursion, and recursion
+lets you do other things that normal iteration doesn't.
+
+</P>
+<P>
+The main difference between Scheme's iteration constructs and the ones
+you may be used to is that loop variables aren't updated at each iteration.
+This doesn't mean you don't have loop variables--the difference is
+that loop variables are <EM>rebound</EM> at each iteration (tail call),
+rather than being bound once on entry to the loop, and updated (assigned
+to) at each iteration.
+
+</P>
+<P>
+(Don't worry if this doesn't make sense yet--it will later.)
+
+</P>
+<P>
+It turns out that having a new binding of the loop variable at each
+iteration is very convenient when using first-class procedures and
+continuations.  For example, if you create a first-class procedure
+in a loop body, it can continue to refer to the variable binding for
+the iteration of the loop that created it.
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_75.html">previous</A>, <A HREF="schintro_77.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

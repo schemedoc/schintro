@@ -1,0 +1,140 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Who is this Book For?</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_3.html">previous</A>, <A HREF="schintro_5.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H2><A NAME="SEC3" HREF="schintro_toc.html#SEC3">Who Is this Book For?</A></H2>
+
+<P>
+This book is for people who are interested in how Scheme works, or people
+who are interested in Scheme in terms of programming language design--as
+well as people who are just interested in using Scheme.
+
+</P>
+<P>
+There's not much conflict between these goals, since one of the
+best ways to learn Scheme--and important principles of language design--is
+to see how to implement Scheme, in Scheme.  I'll illustrate the power of
+Scheme by showing a couple of simple interpreters for subsets of Scheme, and
+a simple compiler.  A compiler for Scheme can be surprisingly simple and
+understandable.
+
+</P>
+<P>
+This is a fairly traditional approach, pioneered by Abelson and Sussman in
+<EM>Structure and Interpretation of Computer Programs</EM>, which is a widely
+used and excellent introductory programming text.  This approach has been
+followed, more or less, in several other introductory books on Scheme
+programming.  Most of those books, though, are for beginning programmers.
+While I think Scheme is a great first language, there are many people out
+there who've had to suffer through C or Pascal or whatever, and don't
+want to wade through an introductory programming book just to learn Scheme.
+
+</P>
+<P>
+My approach is different from most of the current books on Scheme, in
+several ways.  <EM>[When it's finished, this book will be hypertext,
+and can be kept online in online for handy reference in any of several
+cross-indexed formats...]</EM> 
+
+</P>
+<P>
+I will breeze through basic programming ideas--for example, 
+I assume you have some idea what a variable is, and what recursion is.
+
+</P>
+<P>
+I take a more concrete approach than many Scheme writers do,
+because I've found many students find it easier to understand.  Every
+now and then I'll dip below the language level, and tell you
+how most actual implementations of the language work.  I find that
+this concreteness helps disambiguate things in many students' minds--as
+well as in my own.
+
+</P>
+<P>
+I do not start from a functional programming perspective that pretends
+that Scheme executes by rewriting expressions.  (If that doesn't mean
+anything to you, definitely don't worry about it!)
+
+</P>
+<P>
+I take Scheme to be a special case of a <EM>weakly object-oriented</EM>
+procedural language.  By weakly object oriented, I don't mean that it's
+object-oriented in the sense of having inheritance and so on--though
+several extended versions of Scheme do.  I just mean that the values in
+the language are data objects (records, etc.) whose <EM>identities</EM> may
+be significant--that is, you can compare pointers to two objects to
+see whether they are the <EM>very same</EM> object, not just and whether
+they have the same state--and objects may have mutable (changable) state.
+(This view is developed further in RScheme, which is a fully object-oriented
+language that happens also to be Scheme.  But that's a different book,
+not yet written.)
+
+</P>
+<P>
+Some people may not like this approach, since I start talking about
+state and assignment very early.  It is generally considered bad
+style in Scheme to use assignments freely, and good style to write
+mostly "functional" or "applicative" programs.  While I agree
+that mostly-functional programming is usually the right thing for Scheme,
+my intent is to make the semantics of the language clear early on,
+and to make it clear to new Schemers that Scheme is a fairly
+normal programming language, even if it is unusually clean and
+expressive.  My experience in teaching Scheme has
+convinced me that many people benefit from an early exposure to
+the use of assignment;  it clarifies fundamental issues about variables
+and variable binding.  Style is discussed later, when alternatives
+are clearer.
+
+</P>
+<P>
+If you've ever tried to learn Lisp or Scheme before, but not gotten very
+far, this book may be for you.  Many people take to Lisp or Scheme
+like ducks to water.  Some people don't, however, and I think that's often
+because of the way that the material is presented--there's nothing hard
+about learning Lisp or Scheme.  In this book, I try to explain things
+a little differently than they're usually explained, to avoid the problems
+that some people have learning from most of the existing books.  The
+concreteness of the explanations here may help overcome the unfamiliarity
+of these languages.  Scheme is really just a normal programming language, 
+but one with powerful features that can be used in special ways, too.
+
+</P>
+<P>
+If you're a programming language designer, but not fluent in Scheme or
+Lisp, this book may help clarify what these languages are all about.
+It's my belief that there has been a damaging split between the Lisp
+world and the "conventional" imperative programming language world,
+largely due to the different vocabularies of the different communities.
+Recent developments in Scheme have not been widely appreciated by
+designers of other languages.  (This theme will be developed further
+in the other documents in this series.)  Even old features of Lisp,
+such as macros, have not been properly understood by language designers
+in general, and their problems have been substantially solved in Scheme.
+
+</P>
+<P>
+If you're a programming language implementor, or teaching programming
+language implementation, this book may be of use.  (I use it in
+a course on languages and implementation.)  I'll present interpreters
+and a compiler for Scheme.  Scheme an excellent vehicle for teaching
+principles of language implementation, because its syntax is simple,
+and there is a straightforward evolution from simple interpreters
+to more complex ones, and another straightforward move from a simple
+interpreter to a compiler.  This supports teaching the principles of
+language implementation with a minimum of irrelevant detail.
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_3.html">previous</A>, <A HREF="schintro_5.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

@@ -1,0 +1,100 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Tail Recursion</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_72.html">previous</A>, <A HREF="schintro_74.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H2><A NAME="SEC79" HREF="schintro_toc.html#SEC79">Tail Recursion (Hunk O)</A></H2>
+
+<P>
+<A NAME="IDX84"></A>
+<A NAME="IDX85"></A>
+
+</P>
+
+<PRE>
+==================================================================
+Hunk O starts here:
+==================================================================
+</PRE>
+
+<P>
+Many Scheme programs rely heavily on recursion, and Scheme makes it
+easy to use recursion in ways that aren't feasible in most other
+languages.  In particular, you can write <EM>recursive</EM> procedures 
+which call themselves instead of looping. 
+
+</P>
+<P>
+When a procedure calls itself in a way that is equivalent to iterating
+a loop, Scheme automatically "optimizes" it so that it doesn't need
+extra stack space.  You can use recursion anywhere you could use a
+loop in a conventional language.  Technically, loop-like recursion is
+called <EM>tail recursion</EM>, which we'll explain in detail in a
+later chapter.
+
+</P>
+<P>
+The basic idea is that you never have to return to a procedure if
+all that procedure will do is return the same value ot <EM>its</EM> caller.
+For example, consider the following procedure definition:
+
+</P>
+
+<PRE>
+(define (foo)
+   (bar)
+   (baz))
+</PRE>
+
+<P>
+When <CODE>foo</CODE> calls <CODE>baz</CODE>, it is a tail call, because on return
+from <CODE>baz</CODE>, foo will do nothing except return the returned value
+to <EM>its</EM> caller.  That is, the return to <CODE>foo</CODE> from <CODE>baz</CODE>
+will be immediately followed by a return to whatever procedure called
+<CODE>foo</CODE>.  There's really no need to do <EM>two</EM> returns, passing
+through <CODE>foo</CODE> on the way back.  Instead, Scheme avoids saving
+<CODE>foo</CODE>'s state before the call to <CODE>baz</CODE>, so that <CODE>baz</CODE>
+can return <EM>directly to <CODE>foo</CODE>'s caller</EM>, without actually
+coming back to <CODE>foo</CODE>.
+
+</P>
+<P>
+Tail-calling allows recursion to be used for looping, because a tail
+call that acts to iterates a loop doesn't save the caller's state on a
+stack.
+
+</P>
+<P>
+Scheme systems can implement such <EM>tail calls</EM> as a kind of GOTO that
+passes arguments, without saving the state of the caller.  This is not
+unsafe, like language-level GOTO's, because it's only done when the
+result would be the same as doing the extra returns.
+
+</P>
+<P>
+Some compilers for languages such as Common Lisp and C perform a limited
+form of "tail call optimization," but Scheme's treatment of tail calls,
+is more general, and standardized, so you can use recursion more
+freely in your programs, without fear of stack overflow if you code your
+routines tail-recursively.
+
+</P>
+<P>
+And of course, you can use recursion the way you would in most languages,
+as well as for loops, so recursion can do <EM>both</EM> jobs.   While
+Scheme has conventional-looking looping constructs, they're defined in
+terms of recursion.
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_72.html">previous</A>, <A HREF="schintro_74.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

@@ -1,0 +1,169 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - The Read-Eval-Print Loop</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_113.html">previous</A>, <A HREF="schintro_115.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC133" HREF="schintro_toc.html#SEC133">The Read-Eval-Print Loop</A></H3>
+
+<P>
+<A NAME="IDX123"></A>
+
+</P>
+<P>
+(This section could be skimmed if you're not interested in the
+read-eval-print-loop, which is just a simple command interpreter
+that acts as a "front end" to the evaluator.)
+
+</P>
+<P>
+When you're interacting with Scheme by typing text, you're interacting
+with a Scheme procedure called the <EM>read-eval-print</EM> loop.  This
+procedure just loops, accepting one command at a time, executing it,
+and printing the result.
+
+</P>
+<P>
+The three steps at each iteration of the loop are:
+
+</P>
+
+<OL>
+<LI>calling <CODE>read</CODE> to read the characters that make
+
+      up a textual expression expression from the keyboard
+      input buffer, and construct a data structure to represent
+      it, 
+<LI>calling <CODE>eval</CODE> to evaluate the expression--intuitively,
+
+      <CODE>eval</CODE> "figures out what the expression means," and
+      "does what it says to do," returning the value of the
+      expression--and
+<LI>calling <CODE>write</CODE> to print a textual representation
+
+      of the resulting from <CODE>eval</CODE>, so that the user can see it.
+</OL>
+
+<P>
+(More generally, we might read expressions from a file rather
+than the keyboard buffer.  We'll ignore that for now.)
+
+</P>
+<P>
+You can write your own read-eval-print loop for your own programs,
+so that users can type in expressions, and you can interpret them
+any way you want.  Later, I'll show how to write an interpreter,
+and this will come in handy.  You can start up your read-eval-print
+loop (by typing in <CODE>(rep-loop)</CODE>), and it will take over from the
+normal Scheme read-eval-print loop, interpreting expressions your
+way.
+
+</P>
+<P>
+Here's a very simple read-eval-print loop:
+
+</P>
+
+<PRE>
+(define (rep-loop)
+   (display "repl&#62;")      ; print a prompt
+   (write (eval (read)))  ; read expr., pass to eval, write result
+   (rep-loop))            ; loop (tail-recursive call) to do it again
+</PRE>
+
+<P>
+(Notice that the expression <CODE>(write (eval (read)))</CODE> does
+things in the proper read-eval-print order, because the argument
+to each procedure call is computed before the actual call.  In
+Scheme, as in most languages, nested procedure calls expressions
+are done "from the inside out.")
+
+</P>
+<P>
+I've coded the iteration recursively, rather than using a looping
+construct.  The procedure is tail-recursive, since all it does at
+the end is call itself.  Remember that Scheme is smart about this
+kind of recursion, and won't build up procedure activation information
+on the stack and cause a stack overflow.  You can do tail recursion
+all day.  Since nothing happens in a given call to the procedure after
+the tail-call, Scheme can avoid returning to it at all, and avoid saving
+any state to return to. 
+
+</P>
+<P>
+The above read-eval-print loop isn't very friendly, because it loops
+infinitely without giving you any chance to break out of it.  Let's
+modify it to allow you to stop the tail recursion by typing in the
+symbol <CODE>halt</CODE>.
+
+</P>
+
+<PRE>
+(define (rep-loop)
+   (display "repl&#62;")              ; print a prompt
+   (let ((expr (read)))           ; read an expression, save it in expr
+      (cond ((eq? expr 'halt)     ; user asked to stop?
+             (display "exiting read-eval-print loop")
+             (newline))
+            (#t                   ; otherwise,
+             (write (eval expr))  ;  evaluate and print
+             (newline)
+             (rep-loop)))))       ;  and loop to do it again
+</PRE>
+
+<P>
+Notice that this is still tail recursive, because the branch that
+does the recursive call doesn't do anything else after that.  
+
+</P>
+<P>
+This read-eval-print loop could be improved a little.  By using the
+symbol <CODE>halt</CODE> as the command to tell the loop to stop, we prevent
+people from being able to evaluate <CODE>halt</CODE> as an expression.  We
+could get around this by ensuring that the halt command doesn't have
+the syntax of any expression in the language, but we won't bother right now.
+
+</P>
+<P>
+Another improvement would be to make it possible to use different
+interpreters with the same read-eval-print loop.  The <CODE>rep-loop</CODE>
+procedure above assumes that it should call a procedure named <CODE>eval</CODE>
+to evaluate an expression.  We'd like to write a <CODE>rep-loop</CODE> that
+works with different evaluators, so instead of having it call <CODE>eval</CODE>
+by name, we'll hand it an argument saying which evaluator to use.
+Since procedures are first class, we can just hand it a pointer to
+the evaluation procedure.
+
+</P>
+
+<PRE>
+(define (rep-loop evaluator)
+   (display "repl&#62;")                 ; print a prompt
+   (let ((expr (read)))              ; read an expression, save it in expr
+      (cond ((eq? expr 'exit)        ; user asked to stop?
+             (display "exiting read-eval-print loop")
+             (newline))
+            (#t                      ; otherwise,
+             (write (evaluator expr)) ;  evaluate and print
+             (rep-loop evaluator))))) ;  and loop to do it again
+</PRE>
+
+<P>
+Here I just made three changes.  I added an argument <CODE>our-eval</CODE>,
+which is expected to be a procedure.  Then we changed the call to
+<CODE>eval</CODE> to call <CODE>our-eval</CODE>, i.e., whatever evaluator was
+given.  Then we changed the recursive call to <CODE>rep-loop</CODE> to pass
+that argument on to the next recursive call.
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_113.html">previous</A>, <A HREF="schintro_115.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

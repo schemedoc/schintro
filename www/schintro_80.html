@@ -1,0 +1,108 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Interactive Prog Envt</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_79.html">previous</A>, <A HREF="schintro_81.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H2><A NAME="SEC85" HREF="schintro_toc.html#SEC85">An Interactive Programming Environment  (Hunk B)</A></H2>
+
+
+<PRE>
+==================================================================
+This is the beginning of Hunk B.
+==================================================================
+</PRE>
+
+<P>
+<A NAME="IDX87"></A>
+
+</P>
+<P>
+Most Scheme implementations are <EM>interactive</EM>.  The Scheme system
+is just a program with a command interpreter.  When it starts up, it
+presents you with a prompt, letting you type in an expression.  The
+Scheme system "interprets" that expression, and does what it says
+to do.  Then it prints out a textual representation of the result
+of the expression.
+
+</P>
+<P>
+(Your Scheme system may have a graphical user interface, but the basic
+idea is the same--you tell Scheme what to do, and it obediently does it,
+tells you what happened, and asks for the next command.  With a GUI, 
+you may be able to tell Scheme what to do by clicking on buttons, etc.)
+
+</P>
+<P>
+This is very similar to an operating system's command interpreter or
+"shell."  A shell is just an interpreter for a language--usually
+a really ugly language.
+
+</P>
+<P>
+The nice thing about an interactive programming environment is that
+your program doesn't go away after you run it.  You're "inside"
+the program, and you can tell it what to do, but instead of just
+running to completion, it comes back and asks you what to do next.
+
+</P>
+<P>
+The values of variables are still around, and you can look at them
+if you want to.   This makes it easy to debug a program.  You can
+type in definitions of variables and procedures, and then run a
+procedure and see if it does what you expect.  If not, you can
+redefine it.  In effect, you're inside <EM>your</EM> program, and the
+Scheme system acts as a dispatcher, executing whatever part you
+want and letting you examine the results.  This makes it easy
+to build and test your program in small pieces, and gradually 
+build up larger and larger pieces that use those pieces.
+
+</P>
+<P>
+In this section, we'll go through a simple example session with Scheme,
+fairly slowly, starting with examples similar to the ones in the
+previous chapter.  I'll assume Scheme is
+already properly installed on your system.  If it's not, you need
+to get Scheme and install it, or have someone install it for you.
+
+</P>
+<P>
+(Plug: you might want to use our Scheme, RScheme, which is free.
+There are other implementations of Scheme of course, including
+commercial products and other free implementations.
+If you're using a different Scheme, its operation should be very
+similar--see the manual for your system.)
+
+</P>
+<P>
+It's a very good idea to follow along with this text in front of
+a running Scheme system, so that you get used to using it interactively.
+I'll assume you are doing this, and say "do this" and "do that."
+You don't have to do it, of course, but it's the best way to learn Scheme.
+
+</P>
+
+<UL>
+<LI><A HREF="schintro_81.html#SEC86">Starting Scheme</A>: making Scheme go
+<LI><A HREF="schintro_82.html#SEC87">Recovering from Mistakes</A>: making mistakes and recovering from them
+<LI><A HREF="schintro_83.html#SEC88">Returns and Parentheses</A>: formatting interactive input
+<LI><A HREF="schintro_84.html#SEC89">Interrupting Scheme</A>: getting a stuck Scheme system unstuck
+<LI><A HREF="schintro_86.html#SEC91">Trying More Expressions</A>: trying out more kinds of expressions
+<LI><A HREF="schintro_85.html#SEC90">Exiting Scheme</A>: making Scheme go away
+<LI><A HREF="schintro_87.html#SEC92">Booleans and Conditionals</A>: trying out basic control flow
+<LI><A HREF="schintro_88.html#SEC93">Sequencing</A>: trying out begin and procedure bodies
+<LI><A HREF="schintro_89.html#SEC94">Other Flow-of-Control Structures</A>: cond, and, and or
+<LI><A HREF="schintro_92.html#SEC97">Making Some Objects</A>: messing around with pairs
+<LI><A HREF="schintro_93.html#SEC98">Lists</A>: using lists
+</UL>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_79.html">previous</A>, <A HREF="schintro_81.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

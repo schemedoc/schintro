@@ -1,0 +1,106 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Immediate Values</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_30.html">previous</A>, <A HREF="schintro_32.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H4><A NAME="SEC31" HREF="schintro_toc.html#SEC31">Most Implementations Optimize Away Many Pointers</A></H4>
+
+<P>
+<A NAME="IDX18"></A>
+
+</P>
+<P>
+You might think that making every value a pointer to an object would
+be expensive, because you'd have to have space for all of the pointers
+as well as the things they point to, and you'd have to use extra
+instructions to access things via pointers.
+
+</P>
+<P>
+Everything's a pointer at the language level--i.e., from the programmer's
+point of view--but a Scheme system doesn't actually have to represent things
+the way they appear at the languages level.
+
+</P>
+<P>
+Most Scheme implementations optimize away a lot of pointers.  For example,
+it's inefficient to actually represent integer values as pointers to
+integer objects on the heap.  Scheme implementations therefore use tricks
+to represent integers without really using pointers.  (Again, keep in
+mind that this is just an implementation trick that's hidden from the
+programmer.  Integer values have the semantics of pointers, even if
+they're represented differently from other things.)
+
+</P>
+<P>
+Rather than putting integer values on the heap, and then passing around
+pointers to them, most implementations put the actual integer bit pattern
+directly into variables--after all, a reasonable-sized integer will fit
+in a machine word.
+
+</P>
+<P>
+A short value (like a normal integer) stored directly into a variable is 
+called an <EM>immediate value</EM>, in contrast to pointers which are used to
+refer to objects indirectly.
+
+</P>
+<P>
+The problem with putting integers or other short values into variables
+is that Scheme has to tell them apart from each other, and from pointers
+which might have the same bit patterns.
+
+</P>
+<P>
+The solution to this is <EM>tagging</EM>.  The value in each variable actually
+has a few bits devoted to a <EM>type tag</EM> which says what kind of thing
+it is--e.g., whether it's a pointer or not.  The use of a few bits
+for a tag slightly reduces the amount of storage available for the actual
+value, but as we'll see next, that usually isn't a problem.
+
+</P>
+<P>
+It might seem that storing integer bit patterns directly in variables
+would break the abstraction that Scheme is supposed to present--the
+illusion that all values are pointers to objects on the heap.  That's
+not so, though, because the language enforces restrictions that keep
+programmers from seeing the difference.
+
+</P>
+<P>
+<A NAME="IDX19"></A>
+
+</P>
+<P>
+In the case of numbers and a few other types, you can't change the
+state of the object itself.  There's no way to side-effect an integer
+object and make it behave differently.  We say that integers are
+<EM>immutable</EM>, i.e., you can't <EM>mutate</EM> (change) them.
+
+</P>
+<P>
+If integers were actually allocated on the heap and referred to
+via pointers, and if you <EM>could</EM> change the integer's value, then
+that change would be visible through other pointers to the integer.
+
+</P>
+<P>
+(That doesn't mean that a variable's value can't be one integer at
+one time, and another integer at another--the variable's value
+is really a pointer to an integer, not the integer itself, and you're
+really just replacing a pointer to one integer with a pointer to
+another integer.)
+
+</P>
+
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_30.html">previous</A>, <A HREF="schintro_32.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>

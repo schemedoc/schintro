@@ -1,0 +1,46 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.45
+     from schintro.txi on 23 January 1997 -->
+
+<TITLE>An Introduction to Scheme and its Implementation - Identifiers and Variables</TITLE>
+</HEAD>
+<BODY>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_70.html">previous</A>, <A HREF="schintro_72.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+<HR>
+
+
+<H3><A NAME="SEC77" HREF="schintro_toc.html#SEC77">Identifiers and Variables</A></H3>
+
+<P>
+In isolation, a textual identifier (name) such us as <CODE>foo</CODE> isn't even
+a variable.
+
+</P>
+<P>
+The static scoping structure of a program gives names a certain aspect
+of meaning, and the dynamic execution of the program gives them more
+meaning.
+
+</P>
+<P>
+In isolation, <CODE>foo</CODE> doesn't mean anything.  Used in a program,
+it can be the name of a <EM>variable</EM>.  At different places in
+a program, it can be the name of <EM>different</EM> variables, e.g.,
+a toplevel variable, or a local variable in one or more procedures.
+
+</P>
+<P>
+In Scheme an identifier such as <CODE>foo</CODE> may not represent a variable
+at all.  In the <CODE>quote</CODE> expressions <CODE>'foo</CODE> and <CODE>'(baz foo bar)</CODE>
+it identifies a symbol object, but in an entirely different sense
+than variable binding.  It doesn't name a variable <CODE>foo</CODE>, or a
+variable whose binding holds a pointer to <CODE>foo</CODE>---it is a literal
+representation of a pointer to the unique symbol object whose printed
+representation is <CODE>foo</CODE>.
+
+</P>
+<HR>
+Go to the <A HREF="schintro_1.html">first</A>, <A HREF="schintro_70.html">previous</A>, <A HREF="schintro_72.html">next</A>, <A HREF="schintro_143.html">last</A> section, <A HREF="schintro_toc.html">table of contents</A>.
+</BODY>
+</HTML>
